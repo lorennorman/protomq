@@ -1,0 +1,32 @@
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  display: grid;
+  margin: 0;
+  height: 100vh;
+  grid-template: auto 1fr auto / auto 1fr
+}
+
+header {
+  background: wheat;
+  padding: 0 2rem;
+  grid-column: 1 / 4;
+  border-bottom: 2px solid gray;
+}
+
+.left-sidebar {
+  grid-column: 1 / 2;
+  border-right: 2px solid gray;
+  padding: 1rem;
+}
+
+main {
+  grid-column: 2 / 3;
+}
+
+footer {
+  background: wheat;
+  padding: 0 2rem;
+  text-align: center;
+  grid-column: 1 / 4;
+  border-top: 2px solid gray;
+}

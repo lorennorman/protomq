@@ -1,0 +1,16 @@
+{
+  "name": "protomq",
+  "version": "1.0.0",
+  "description": "Dynamic MQTT broker that speaks protobufs",
+  "main": "index.js",
+  "scripts": {
+    "start": "vite dev",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Loren Norman",
+  "license": "MIT",
+  "dependencies": {
+    "aedes": "^0.48.0",
+    "vite": "^3.2.4"
+  }
+}
