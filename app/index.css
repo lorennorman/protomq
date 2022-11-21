@@ -21,6 +21,22 @@ header {
 
 main {
   grid-column: 2 / 3;
+  padding: 1em;
+  overflow-y: scroll;
+}
+
+dt {
+  font-weight: bold;
+  color: gray;
+}
+
+dd {
+  font-style: italic;
+}
+
+hr {
+  width: 80%;
+  color: lightgray;
 }
 
 footer {

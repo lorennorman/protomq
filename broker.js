@@ -1,5 +1,4 @@
 import Aedes from 'aedes'
-import { addLoggingListeners } from "./broker/listeners.js"
 
 // MQTT Setup
 import net from 'net'
@@ -28,4 +27,6 @@ httpServer.listen(wsPort, function () {
 })
 
 // App Code
+import { addLoggingListeners } from "./broker/listeners.js"
+
 addLoggingListeners(broker)
