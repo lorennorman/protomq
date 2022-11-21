@@ -8,7 +8,11 @@
 
     <title>ProtoMQ</title>
 
-    <script src="app/index.js"></script>
+    <!-- use unpkg to get a browser-built version of mqtt lib -->
+    <script src="//unpkg.com/mqtt/dist/mqtt.min.js"></script>
+
+    <!-- app -->
+    <script src="app/index.js" type="module"></script>
     <link href="app/index.css" rel="stylesheet">
   </head>
 

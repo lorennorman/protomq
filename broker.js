@@ -7,11 +7,25 @@ import net from 'net'
 const
   broker = Aedes(),
   server = net.createServer(broker.handle),
-  port = 1884
+  mqttPort = 1884
 
-server.listen(port, function () {
-  console.log('server started and listening on port ', port)
+server.listen(mqttPort, function () {
+  console.log('MQTT listening on port ', mqttPort)
 })
 
-addLoggingListeners(broker)
+// MQTT-over-Websockets Setup
+import http from 'http'
+import ws from 'websocket-stream'
 
+const
+  httpServer = http.createServer(),
+  wsPort = 8888
+
+ws.createServer({ server: httpServer }, broker.handle)
+
+httpServer.listen(wsPort, function () {
+  console.log('MQTT listening over WebSocket on port ', wsPort)
+})
+
+// App Code
+addLoggingListeners(broker)
