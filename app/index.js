@@ -1,3 +1,5 @@
+import { flatten, map, uniq } from "lodash-es"
+
 // from react
 const options = {
   clientId: `web-${Math.round(Math.random()*10000000000)}`,
@@ -22,14 +24,27 @@ client.on('connect', () => {
   })
 })
 
-const messages = []
+const
+  messages = [],
+  clients = [],
+  subscriptions = []
+
 client.on('message', (topic, message) => {
   messages.unshift({ topic, message })
   refreshMessages()
+  if(topic === "state/clients") {
+    const clientsCollection = JSON.parse(message)
+    clients.splice(0, Infinity, ...map(clientsCollection, "id"))
+    subscriptions.splice(0, Infinity, ...uniq(flatten(map(clientsCollection, "subscriptions"))))
+    console.log("Clients:", clients)
+    console.log("Subscriptions:", subscriptions)
+    refreshClients()
+    refreshSubscriptions()
+  }
 })
 
 const refreshMessages = () => {
-  document.getElementsByTagName('main')[0].innerHTML = messages.map(message => `
+  document.getElementsByClassName('messages')[0].innerHTML = messages.map(message => `
     <div>
       <dl>
         <dt>Topic:</dt> <dd title="${ message.topic }">${ parseTopic(message.topic) }</dd>
@@ -37,6 +52,18 @@ const refreshMessages = () => {
       </dl>
     </div>
   `).join("<hr />")
+}
+
+const refreshClients = () => {
+  document.getElementsByClassName("clients")[0].innerHTML = clients.map(client => `
+    <li>${ client }</li>
+  `).join('')
+}
+
+const refreshSubscriptions = () => {
+  document.getElementsByClassName("subscriptions")[0].innerHTML = subscriptions.map(subscription => `
+    <li>${ subscription }</li>
+  `).join('')
 }
 
 const parseTopic = topic => {

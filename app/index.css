@@ -17,6 +17,11 @@ header {
   grid-column: 1 / 2;
   border-right: 2px solid gray;
   padding: 1rem;
+  min-width: 0;
+}
+
+.left-sidebar ul {
+  padding-left: inherit;
 }
 
 main {
