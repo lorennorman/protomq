@@ -27,6 +27,7 @@ httpServer.listen(wsPort, function () {
 })
 
 // App Code
-import { addLoggingListeners } from "./broker/listeners.js"
+import { addLoggingListeners, addReactiveEmitters } from "./broker/listeners.js"
 
 addLoggingListeners(broker)
+addReactiveEmitters(broker)
