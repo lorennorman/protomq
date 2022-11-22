@@ -4,7 +4,7 @@
 ## Get Started
 
 1. Clone this repo
-2. run `npm i`
+2. run `npm i` (make sure NodeJS installed, i used v18 in dev)
 3. run `npm start`
 4. visit the web URL it gives you (like `http://localhost:5173/`)
 5. connect an MQTT client: `mqtt://localhost:1884`
