@@ -8,14 +8,17 @@
 </template>
 
 <script setup>
-  import PB from '/protobufs'
   import { useUIStore } from '/app/stores/ui'
+  import { useProtobufStore } from '/app/stores/protobufs'
+  import { storeToRefs } from 'pinia'
 
   const
-    store = useUIStore(),
-    protobufs = Object.keys(PB),
+    uiStore = useUIStore(),
+    protobufStore = useProtobufStore(),
+    { protobufs } = storeToRefs(protobufStore),
     protobufClicked = protobufName => {
       console.log(protobufName)
-      store.setMode('configureMessage')
+      protobufStore.setCurrentProtobuf(protobufName)
+      uiStore.setMode('configureMessage')
     }
 </script>

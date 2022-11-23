@@ -6,7 +6,6 @@ import PWM from './pwm_pb'
 import Servo from './servo_pb'
 import Signal from './signal_pb'
 
-
 export default {
   ...Description,
   ...DS18X20,
