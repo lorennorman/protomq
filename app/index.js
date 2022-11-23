@@ -70,7 +70,8 @@ client.on('connect', () => {
 const
   messages = [],
   clients = [],
-  subscriptions = []
+  subscriptions = [],
+  protobufs = sortBy(Object.keys(PB))
 
 client.on('message', (topic, message) => {
   const parsedMessage = parseMessageByTopic(topic, message)
@@ -114,6 +115,12 @@ const refreshSubscriptions = () => {
   `).join('')
 }
 
+const refreshProtobufs = () => {
+  document.getElementsByClassName("protobufs")[0].innerHTML = protobufs.map(protobuf => `
+    <li>${ protobuf }</li>
+  `).join('')
+}
+
 const renderTopic = topic => {
   if(topic.startsWith("$SYS")) {
     const action = topic.split('/').slice(2)
@@ -128,3 +135,5 @@ const renderMessage = message => {
     ? JSON.stringify(message, null, 2)
     : message)
 }
+
+refreshProtobufs()
