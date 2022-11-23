@@ -3,7 +3,9 @@
   <div class="messages"></div>
 </template>
 
-<script></script>
+<script setup>
+
+</script>
 
 <style>
   main dt {

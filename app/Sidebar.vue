@@ -3,11 +3,12 @@
   <ul class="clients"></ul>
   <h3>Subscriptions</h3>
   <ul class="subscriptions"></ul>
-  <h3>Protobufs</h3>
-  <ul class="protobufs"></ul>
+  <ProtobufsMenu/>
 </template>
 
-<script></script>
+<script setup>
+  import ProtobufsMenu from './sidebar/ProtobufsMenu.vue'
+</script>
 
 <style>
   .sidebar * {
@@ -25,5 +26,10 @@
     padding-left: initial;
     list-style-position: inside;
     font-size: .9em;
+  }
+
+  .sidebar li:hover {
+    cursor: pointer;
+    background-color: lightgray;
   }
 </style>

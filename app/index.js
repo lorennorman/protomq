@@ -124,12 +124,6 @@ app.mount('body')
 //   `).join('')
 // }
 
-// const refreshProtobufs = () => {
-//   document.getElementsByClassName("protobufs")[0].innerHTML = protobufs.map(protobuf => `
-//     <li onclick="console.log('clarked')">${ protobuf }</li>
-//   `).join('')
-// }
-
 // const renderTopic = topic => {
 //   if(topic.startsWith("$SYS")) {
 //     const action = topic.split('/').slice(2)
@@ -144,5 +138,3 @@ app.mount('body')
 //     ? JSON.stringify(message, null, 2)
 //     : message)
 // }
-
-// refreshProtobufs()
