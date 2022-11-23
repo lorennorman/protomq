@@ -1,140 +1,148 @@
-import { forEach, flatten, map, sortBy, uniq } from "lodash-es"
+import { createApp } from 'vue'
 
-// PROTOBUFS
-import PB from '../protobufs'
+import App from './App.vue'
 
-const TOPIC_PARSERS = {
-  "*/wprsnpr/info/status": PB.CreateDescriptionRequest,
-  "*/info/status/device/complete": PB.RegistrationComplete,
-  "*/signals/device": PB.CreateSignalRequest,
-  "*/signals/device/i2c": PB.I2CResponse,
-  "*/signals/device/pinConfigComplete": PB.SignalResponse,
-  "*/signals/device/servo": PB.ServoResponse,
-  "*/signals/device/ds18x20": PB.Ds18x20Response,
-  "*/signals/device/pwm": PB.PWMResponse,
-}
+const app = createApp(App)
+app.mount('body')
 
-const parseMessageByTopic = (topic, message) => {
-  let parser
+// import { forEach, flatten, map, sortBy, uniq } from "lodash-es"
 
-  forEach(TOPIC_PARSERS, (currentParser, topicSpec) => {
-    if(parser) { return }
+// // PROTOBUFS
+// import PB from '../protobufs'
 
-    if(topicSpec.startsWith('*')) {
-      const topicEndFragment = topicSpec.slice(1)
-      if(topic.endsWith(topicEndFragment)) {
-        parser = currentParser
-      }
+// const TOPIC_PARSERS = {
+//   "*/wprsnpr/info/status": PB.CreateDescriptionRequest,
+//   "*/info/status/device/complete": PB.RegistrationComplete,
+//   "*/signals/device": PB.CreateSignalRequest,
+//   "*/signals/device/i2c": PB.I2CResponse,
+//   "*/signals/device/pinConfigComplete": PB.SignalResponse,
+//   "*/signals/device/servo": PB.ServoResponse,
+//   "*/signals/device/ds18x20": PB.Ds18x20Response,
+//   "*/signals/device/pwm": PB.PWMResponse,
+// }
 
-    } else {
-      if(topic === topicSpec) {
-        parser = currentParser
-      }
-    }
-  })
+// const parseMessageByTopic = (topic, message) => {
+//   let parser
 
-  if(!parser) {
-    try{
-      return JSON.parse(message)
-    } catch(err) { return message }
-  }
+//   forEach(TOPIC_PARSERS, (currentParser, topicSpec) => {
+//     if(parser) { return }
 
-  return (parser.deserializeBinary
-    ? parser.deserializeBinary(message).toObject()
-    : parser(message))
-}
+//     if(topicSpec.startsWith('*')) {
+//       const topicEndFragment = topicSpec.slice(1)
+//       if(topic.endsWith(topicEndFragment)) {
+//         parser = currentParser
+//       }
 
-// DATA STORE
-const
-  messages = [],
-  clients = [],
-  subscriptions = [],
-  protobufs = sortBy(Object.keys(PB))
+//     } else {
+//       if(topic === topicSpec) {
+//         parser = currentParser
+//       }
+//     }
+//   })
 
-// MQTT
-const
-  mqttUrl = `ws://localhost:8888`,
-  options = {
-    clientId: `web-${Math.round(Math.random()*10000000000)}`,
-    connectTimeout: 60 * 1000,
-    keepalive: 60,
-    resubscribe: false,
-    reconnectPeriod: 6000,
-  },
-  client = mqtt.connect(mqttUrl, options)
+//   if(!parser) {
+//     try{
+//       return JSON.parse(message)
+//     } catch(err) { return message }
+//   }
 
-// SUBSCRIBE TO ALL
-client.on('connect', () => {
-  client.subscribe(["#", "$SYS/#"], err => {
-    if(err) { console.error(err) }
-  })
-})
+//   return (parser.deserializeBinary
+//     ? parser.deserializeBinary(message).toObject()
+//     : parser(message))
+// }
 
-// HANDLE INCOMING MQTT MESSAGES
-client.on('message', (topic, message) => {
-  // perform additional parsing on the message
-  const parsedMessage = parseMessageByTopic(topic, message)
-  // messages data store update and re-render
-  messages.unshift({ topic, message, parsedMessage })
-  refreshMessages()
+// // DATA STORE
+// const
+//   messages = [],
+//   clients = [],
+//   subscriptions = [],
+//   protobufs = sortBy(Object.keys(PB)),
+//   mode = "messages"
 
-  // if it's a broker introspection topic, update the data stores
-  if(topic === "state/clients") {
-    const clientsCollection = JSON.parse(message)
+// // MQTT
+// const
+//   mqttUrl = `ws://localhost:8888`,
+//   options = {
+//     clientId: `web-${Math.round(Math.random()*10000000000)}`,
+//     connectTimeout: 60 * 1000,
+//     keepalive: 60,
+//     resubscribe: false,
+//     reconnectPeriod: 6000,
+//   },
+//   client = mqtt.connect(mqttUrl, options)
 
-    // clients data store update and re-render
-    clients.splice(0, Infinity, ...map(clientsCollection, "id"))
-    refreshClients()
+// // SUBSCRIBE TO ALL
+// client.on('connect', () => {
+//   client.subscribe(["#", "$SYS/#"], err => {
+//     if(err) { console.error(err) }
+//   })
+// })
 
-    // subscriptions data store update and re-render
-    subscriptions.splice(0, Infinity, ...sortBy(uniq(flatten(map(clientsCollection, "subscriptions")))))
-    refreshSubscriptions()
-  }
-})
+// // HANDLE INCOMING MQTT MESSAGES
+// client.on('message', (topic, message) => {
+//   // perform additional parsing on the message
+//   const parsedMessage = parseMessageByTopic(topic, message)
+//   // messages data store update and re-render
+//   messages.unshift({ topic, message, parsedMessage })
+//   refreshMessages()
 
-// DOM RENDERING/UPDATING
-const refreshMessages = () => {
-  document.getElementsByClassName('messages')[0].innerHTML = messages.map(message => `
-    <div>
-      <dl>
-        <dt>Topic:</dt> <dd title="${ message.topic }">${ renderTopic(message.topic) }</dd>
-        <dt>Payload:</dt> <dd title='${ message.message }'>${ renderMessage(message.parsedMessage) }</dd>
-      </dl>
-    </div>
-  `).join("<hr />")
-}
+//   // if it's a broker introspection topic, update the data stores
+//   if(topic === "state/clients") {
+//     const clientsCollection = JSON.parse(message)
 
-const refreshClients = () => {
-  document.getElementsByClassName("clients")[0].innerHTML = clients.map(client => `
-    <li>${ client }</li>
-  `).join('')
-}
+//     // clients data store update and re-render
+//     clients.splice(0, Infinity, ...map(clientsCollection, "id"))
+//     refreshClients()
 
-const refreshSubscriptions = () => {
-  document.getElementsByClassName("subscriptions")[0].innerHTML = subscriptions.map(subscription => `
-    <li>${ subscription }</li>
-  `).join('')
-}
+//     // subscriptions data store update and re-render
+//     subscriptions.splice(0, Infinity, ...sortBy(uniq(flatten(map(clientsCollection, "subscriptions")))))
+//     refreshSubscriptions()
+//   }
+// })
 
-const refreshProtobufs = () => {
-  document.getElementsByClassName("protobufs")[0].innerHTML = protobufs.map(protobuf => `
-    <li>${ protobuf }</li>
-  `).join('')
-}
+// // DOM RENDERING/UPDATING
+// const refreshMessages = () => {
+//   document.getElementsByClassName('messages')[0].innerHTML = messages.map(message => `
+//     <div>
+//       <dl>
+//         <dt>Topic:</dt> <dd title="${ message.topic }">${ renderTopic(message.topic) }</dd>
+//         <dt>Payload:</dt> <dd title='${ message.message }'>${ renderMessage(message.parsedMessage) }</dd>
+//       </dl>
+//     </div>
+//   `).join("<hr />")
+// }
 
-const renderTopic = topic => {
-  if(topic.startsWith("$SYS")) {
-    const action = topic.split('/').slice(2)
-    return `$SYS/.../${action.join('/')}`
-  }
+// const refreshClients = () => {
+//   document.getElementsByClassName("clients")[0].innerHTML = clients.map(client => `
+//     <li>${ client }</li>
+//   `).join('')
+// }
 
-  return topic
-}
+// const refreshSubscriptions = () => {
+//   document.getElementsByClassName("subscriptions")[0].innerHTML = subscriptions.map(subscription => `
+//     <li>${ subscription }</li>
+//   `).join('')
+// }
 
-const renderMessage = message => {
-  return (message
-    ? JSON.stringify(message, null, 2)
-    : message)
-}
+// const refreshProtobufs = () => {
+//   document.getElementsByClassName("protobufs")[0].innerHTML = protobufs.map(protobuf => `
+//     <li onclick="console.log('clarked')">${ protobuf }</li>
+//   `).join('')
+// }
 
-refreshProtobufs()
+// const renderTopic = topic => {
+//   if(topic.startsWith("$SYS")) {
+//     const action = topic.split('/').slice(2)
+//     return `$SYS/.../${action.join('/')}`
+//   }
+
+//   return topic
+// }
+
+// const renderMessage = message => {
+//   return (message
+//     ? JSON.stringify(message, null, 2)
+//     : message)
+// }
+
+// refreshProtobufs()
