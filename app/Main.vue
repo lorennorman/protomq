@@ -1,24 +1,16 @@
 <template>
-  <h3>Message Log</h3>
-  <div class="messages"></div>
+  <MessageLog v-if="messagesMode"/>
+  <MessageForm v-else-if="configureMessageMode"/>
 </template>
 
 <script setup>
+  import { storeToRefs } from 'pinia'
+  import { useUIStore } from '/app/stores/ui'
+  import MessageLog from './main_panel/MessageLog.vue'
+  import MessageForm from './main_panel/MessageForm.vue'
 
+  const { messagesMode, configureMessageMode } = storeToRefs(useUIStore())
 </script>
 
 <style>
-  main dt {
-    font-weight: bold;
-    color: gray;
-  }
-
-  main dd {
-    font-style: italic;
-  }
-
-  main hr {
-    width: 80%;
-    color: lightgray;
-  }
 </style>
