@@ -1,5 +1,6 @@
 import { forEach, flatten, map, sortBy, uniq } from "lodash-es"
 
+// PROTOBUFS
 import PB from '../protobufs'
 
 const TOPIC_PARSERS = {
@@ -43,38 +44,37 @@ const parseMessageByTopic = (topic, message) => {
     : parser(message))
 }
 
-// from react
-const options = {
-  clientId: `web-${Math.round(Math.random()*10000000000)}`,
-  connectTimeout: 60 * 1000,
-  keepalive: 60,
-  resubscribe: false,
-  reconnectPeriod: 6000, // wait between connection attempts
-}
-
-const config = {
-  "mqttPort": "8888",
-  "mqttHost": "localhost",
-  "mqttProtocol": "ws",
-}
-
-const mqttUrl = `${config.mqttProtocol}://${config.mqttHost}:${config.mqttPort}`
-const client = mqtt.connect(mqttUrl, options)
-
-client.on('connect', () => {
-  client.subscribe(["#", "$SYS/#"], err => {
-    if(err) { console.error(err) }
-  })
-})
-
+// DATA STORE
 const
   messages = [],
   clients = [],
   subscriptions = [],
   protobufs = sortBy(Object.keys(PB))
 
+// MQTT
+const
+  mqttUrl = `ws://localhost:8888`,
+  options = {
+    clientId: `web-${Math.round(Math.random()*10000000000)}`,
+    connectTimeout: 60 * 1000,
+    keepalive: 60,
+    resubscribe: false,
+    reconnectPeriod: 6000,
+  },
+  client = mqtt.connect(mqttUrl, options)
+
+// SUBSCRIBE TO ALL
+client.on('connect', () => {
+  client.subscribe(["#", "$SYS/#"], err => {
+    if(err) { console.error(err) }
+  })
+})
+
+// HANDLE INCOMING MQTT MESSAGES
 client.on('message', (topic, message) => {
+  // perform additional parsing on the message
   const parsedMessage = parseMessageByTopic(topic, message)
+  // messages data store update and re-render
   messages.unshift({ topic, message, parsedMessage })
   refreshMessages()
 
@@ -82,16 +82,17 @@ client.on('message', (topic, message) => {
   if(topic === "state/clients") {
     const clientsCollection = JSON.parse(message)
 
+    // clients data store update and re-render
     clients.splice(0, Infinity, ...map(clientsCollection, "id"))
-    console.log("Clients:", clients)
     refreshClients()
 
+    // subscriptions data store update and re-render
     subscriptions.splice(0, Infinity, ...sortBy(uniq(flatten(map(clientsCollection, "subscriptions")))))
-    console.log("Subscriptions:", subscriptions)
     refreshSubscriptions()
   }
 })
 
+// DOM RENDERING/UPDATING
 const refreshMessages = () => {
   document.getElementsByClassName('messages')[0].innerHTML = messages.map(message => `
     <div>
