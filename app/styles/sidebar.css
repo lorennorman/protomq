@@ -1,0 +1,10 @@
+.sidebar * {
+  overflow-x: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.sidebar ul {
+  padding-left: initial;
+  list-style-position: inside;
+}
