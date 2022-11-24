@@ -1,0 +1,139 @@
+// SPDX-FileCopyrightText: 2020-2021 Brent Rubell for Adafruit Industries
+// SPDX-License-Identifier: MIT
+syntax = "proto3";
+
+package wippersnapper.signal.v1;
+
+// Non-WipperSnapper
+// import "nanopb\.proto";
+
+// WipperSnapper
+import "pin.proto";
+import "i2c.proto";
+import "servo.proto";
+import "pwm.proto";
+import "ds18x20.proto";
+
+/**
+* Ds18x20Request represents a Ds18x20 command sent to a device.
+*/
+message Ds18x20Request {
+  option (nanopb_msgopt).submsg_callback = true;
+  oneof payload {
+    wippersnapper.ds18x20.v1.Ds18x20InitRequest req_ds18x20_init     = 1;
+    wippersnapper.ds18x20.v1.Ds18x20DeInitRequest req_ds18x20_deinit = 2;
+  }
+}
+
+/**
+* Ds18x20Response represents a Ds18x20 message from the device.
+*/
+message Ds18x20Response {
+  option (nanopb_msgopt).submsg_callback = true;
+  oneof payload {
+    wippersnapper.ds18x20.v1.Ds18x20InitResponse resp_ds18x20_init      = 1;
+    wippersnapper.ds18x20.v1.Ds18x20DeviceEvent  resp_ds18x20_event     = 2;
+  }
+}
+
+/**
+* I2CRequest represents the broker's request for a specific i2c command to a device.
+*/
+message I2CRequest {
+  option (nanopb_msgopt).submsg_callback = true;
+  oneof payload {
+    wippersnapper.i2c.v1.I2CBusInitRequest req_i2c_init                     = 1 [deprecated = true, (nanopb).type = FT_IGNORE];
+    wippersnapper.i2c.v1.I2CBusScanRequest req_i2c_scan                     = 2;
+    wippersnapper.i2c.v1.I2CBusSetFrequency req_i2c_set_freq                = 3;
+    wippersnapper.i2c.v1.I2CDeviceInitRequest req_i2c_device_init           = 4;
+    wippersnapper.i2c.v1.I2CDeviceDeinitRequest req_i2c_device_deinit       = 5;
+    wippersnapper.i2c.v1.I2CDeviceUpdateRequest req_i2c_device_update       = 6;
+    wippersnapper.i2c.v1.I2CDeviceInitRequests req_i2c_device_init_requests = 7;
+  }
+}
+
+/**
+* I2CResponse represents the device's response to an I2C-specific message from IO.
+*/
+message I2CResponse {
+  option (nanopb_msgopt).submsg_callback = true;
+  oneof payload {
+    wippersnapper.i2c.v1.I2CBusInitResponse resp_i2c_init                  = 1 [deprecated = true, (nanopb).type = FT_IGNORE];
+    wippersnapper.i2c.v1.I2CBusScanResponse resp_i2c_scan                  = 2;
+    wippersnapper.i2c.v1.I2CDeviceInitResponse resp_i2c_device_init        = 3;
+    wippersnapper.i2c.v1.I2CDeviceDeinitResponse resp_i2c_device_deinit    = 4;
+    wippersnapper.i2c.v1.I2CDeviceUpdateResponse resp_i2c_device_update    = 5;
+    wippersnapper.i2c.v1.I2CDeviceEvent resp_i2c_device_event              = 6;
+  }
+}
+
+/**
+* ServoRequest represents the broker's request across the servo sub-topic.
+*/
+message ServoRequest {
+  option (nanopb_msgopt).submsg_callback = true;
+  oneof payload {
+    wippersnapper.servo.v1.ServoAttachRequest servo_attach = 1;
+    wippersnapper.servo.v1.ServoDetachRequest servo_detach = 2;
+    wippersnapper.servo.v1.ServoWriteRequest servo_write   = 3;
+  }
+}
+
+/**
+* ServoResponse represents the device's response across the servo sub-topic.
+*/
+message ServoResponse {
+  option (nanopb_msgopt).submsg_callback = true;
+  oneof payload {
+    wippersnapper.servo.v1.ServoAttachResponse servo_attach_resp = 1;
+  }
+}
+
+message CreateSignalRequest {
+  option (nanopb_msgopt).submsg_callback = true;
+  oneof payload {
+    // Create, update or remove a GPIO pin
+    wippersnapper.pin.v1.ConfigurePinRequests pin_configs               = 6;
+    // Update a pins state
+    wippersnapper.pin.v1.PinEvent pin_event                             = 15;
+    // Create, update or remove a PWM output pin
+    wippersnapper.pin.v1.ConfigurePWMPinRequests pwm_pin_config         = 10 [deprecated = true, (nanopb).type = FT_IGNORE];
+    // Write duty cycle to a PWM output pin
+    wippersnapper.pin.v1.PWMPinEvents pwm_pin_event                     = 12 [deprecated = true, (nanopb).type = FT_IGNORE];
+    // Update a pin's state
+    wippersnapper.pin.v1.PinEvents pin_events                           = 7;
+  }
+}
+
+/**
+* Response from a signal message payload (device->broker)
+*/
+message SignalResponse {
+  oneof payload {
+    bool configuration_complete = 1; /** True if a device successfully completed a ConfigurePinRequests message, False otherwise. */
+  }
+}
+
+/**
+* PWMRequest represents a broker's request across the PWM sub-topic.
+*/
+message PWMRequest {
+  option (nanopb_msgopt).submsg_callback = true;
+  oneof payload {
+    wippersnapper.pwm.v1.PWMAttachRequest attach_request                        = 1;
+    wippersnapper.pwm.v1.PWMDetachRequest detach_request                        = 2;
+    wippersnapper.pwm.v1.PWMWriteDutyCycleRequest write_duty_request            = 3;
+    wippersnapper.pwm.v1.PWMWriteDutyCycleMultiRequest write_duty_multi_request = 4;
+    wippersnapper.pwm.v1.PWMWriteFrequencyRequest write_freq_request            = 5;
+  }
+}
+
+/**
+* PWMRequest represents a devices's response across the PWM sub-topic.
+*/
+message PWMResponse {
+  option (nanopb_msgopt).submsg_callback = true;
+  oneof payload {
+    wippersnapper.pwm.v1.PWMAttachResponse attach_response = 1;
+  }
+}

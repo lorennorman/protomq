@@ -1,0 +1,77 @@
+// SPDX-FileCopyrightText: 2020-2021 Brent Rubell for Adafruit Industries
+// SPDX-License-Identifier: MIT
+// Messages for describing hardware over the description topic
+syntax = "proto3";
+
+package wippersnapper.description.v1;
+// import "nanopb\.proto";
+
+/**
+* CreateDescriptionRequest identifies a device with Adafruit.io WipperSnapper.
+*/
+message CreateDescriptionRequest {
+  string machine_name    = 1 [(nanopb).max_size = 64]; /** Identifies client's physical hardware */
+  int32 mac_addr         = 2; /** Client's UID, last 3 bytes of MAC address */
+  int32 usb_vid          = 3; /** Optional, USB Vendor ID */
+  int32 usb_pid          = 4; /** Optional, USB Product ID */
+  Version version        = 5 [deprecated = true, (nanopb).type = FT_IGNORE]; /** Client's library version. */
+  int32 ver_major        = 10 [deprecated = true, (nanopb).type = FT_IGNORE];
+  int32 ver_minor        = 11 [deprecated = true, (nanopb).type = FT_IGNORE];
+  int32 ver_patch        = 12 [deprecated = true, (nanopb).type = FT_IGNORE];
+  string ver_pre_release = 13 [deprecated = true, (nanopb).type = FT_IGNORE, (nanopb).max_size = 6];
+  int32 ver_build        = 14 [deprecated = true, (nanopb).type = FT_IGNORE];
+  string str_version     = 15 [(nanopb).max_size = 20]; /** Library version, as a string */
+
+
+  message Version {
+    uint64 major           = 1 [deprecated = true, (nanopb).type = FT_IGNORE];
+    uint64 minor           = 2 [deprecated = true, (nanopb).type = FT_IGNORE];
+    uint64 micro           = 3 [deprecated = true, (nanopb).type = FT_IGNORE];
+    string label           = 4 [deprecated = true, (nanopb).type = FT_IGNORE];
+    int32 ver_major        = 5 [deprecated = true, (nanopb).type = FT_IGNORE];
+    int32 ver_minor        = 6 [deprecated = true, (nanopb).type = FT_IGNORE];
+    int32 ver_patch        = 7 [deprecated = true, (nanopb).type = FT_IGNORE];
+    string ver_pre_release = 8 [deprecated = true, (nanopb).type = FT_IGNORE];
+    int32 ver_build        = 9 [deprecated = true, (nanopb).type = FT_IGNORE];
+  }
+}
+
+/**
+* CreateDescriptionResponse represents a device's specifications.
+*/
+message CreateDescriptionResponse {
+  Response response        = 1; /** Specifies if the hardware definition exists on the server. */
+  int32 total_gpio_pins    = 2; /** Specifies the number of GPIO pins on the client's physical hardware. */
+  int32 total_analog_pins  = 3; /** Specifies the number of analog pins on the client's physical hardware. */
+  float reference_voltage  = 4; /** Specifies the hardware's default reference voltage. */
+  int32 total_i2c_ports    = 5; /** Specifies the number of hardware's I2C ports (i2cPorts[]). */
+
+  /**
+   * Response. Specifies if the hardware definiton is within the database.
+   */
+  enum Response {
+    RESPONSE_UNSPECIFIED     = 0; /** Invalid response from server */
+    RESPONSE_OK              = 1; /** Board found within definition index */
+    RESPONSE_BOARD_NOT_FOUND = 2; /** Board not found in definition index */
+  }
+}
+
+/**
+* RegistrationComplete Specifies if the device finished configuring
+* its components and is ready for configuration messages.
+*/
+message RegistrationComplete {
+  bool is_complete = 1; /** True if device successfully configured its components, False otherwise. */
+}
+
+// Request the board definition JSON from a device
+// MQTT Topic: `device/ID/description/get`
+message GetDefinitionRequest {
+  string data = 1 [deprecated = true, (nanopb).type = FT_IGNORE]; // Request may be any UTF-8 string value
+}
+
+// Response from Adafruit IO with the JSON board definition as a string
+// MQTT Topic: `device/ID/description/get`
+message GetDefinitionResponse {
+  string board_definition = 1 [deprecated = true, (nanopb).type = FT_IGNORE]; // Response is JSON data encoded as a string
+}

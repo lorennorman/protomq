@@ -1,0 +1,144 @@
+// SPDX-FileCopyrightText: 2020 Brent Rubell for Adafruit Industries
+// SPDX-License-Identifier: MIT
+syntax = "proto3";
+
+package wippersnapper.pin.v1;
+// import "nanopb\.proto";
+
+/**
+* Mode. Specifies if a GPIO pin is an analog or digital pin.
+*/
+enum Mode {
+  MODE_UNSPECIFIED = 0; /** Invalid Mode from Broker. */
+  MODE_ANALOG      = 1; /** Set up an analog pin. */
+  MODE_DIGITAL     = 2; /** Set up a digital pin. */
+}
+
+/**
+* Represents a list of ConfigurePinRequest messages.
+*/
+message ConfigurePinRequests {
+  repeated ConfigurePinRequest list = 1;
+}
+
+/**
+ * Represents a request from the broker to create, update, or delete a GPIO pin.
+ */
+message ConfigurePinRequest {
+  string pin_name                  = 1 [(nanopb).max_size = 5]; /** The name of pin we are accessing. */
+  Mode mode                        = 2; /** Specifies the pin's type, analog or input. */
+  Direction direction              = 3; /** Specifies the pin's behavior. */
+  Pull pull                        = 4; /** Specifies an optional pullup resistor value. */
+  float period                     = 5; /** Specifies the time between measurements, in seconds. */
+  RequestType request_type         = 6; /** Specifies the type of ConfigurePinRequest. */
+  float aref                       = 7 [deprecated=true]; /** deprecated: Specifies the reference voltage used for analog input, defaults to 3.3v. */
+  AnalogReadMode analog_read_mode  = 8; /** ANALOG-ONLY: Specifies the read mode for an analog pin. */
+
+  /**
+   * Direction. Specifies the pin's direction, INPUT or OUTPUT.
+   */
+  enum Direction {
+    DIRECTION_UNSPECIFIED = 0; /** Invalid Direction from Broker. */
+    DIRECTION_INPUT       = 1; /** Set the pin to behave as an input. */
+    DIRECTION_OUTPUT      = 2; /** Set the pin to behave as an output. */
+  }
+
+  /**
+   * Pull. An optional pullup resistor value
+   */
+  enum Pull {
+    PULL_UNSPECIFIED = 0; /** Invalid Direction from Broker. */
+    PULL_UP          = 1; /** Set the pin to pull high. */
+    PULL_DOWN        = 2; /** Set the pin to pull low. */
+  }
+
+  /**
+   * Request Type. Describes the type of ConfigurePinRequest for the hardware to operate on.
+   */
+  enum RequestType {
+    REQUEST_TYPE_UNSPECIFIED = 0; /** Invalid request from Broker. */
+    REQUEST_TYPE_CREATE      = 1; /** The request creates a pin. */
+    REQUEST_TYPE_UPDATE      = 2; /** The request updates a previously created pin. */
+    REQUEST_TYPE_DELETE      = 3; /** The request deletes a previously created pin. */
+  }
+
+  /**
+   * Selects the type of value read by an analog pin.
+   * PIN_VALUE: Raw ADC reading.
+   * PIN_VOLTAGE: Calculated voltage reading.
+   * NOTE: This is only applicable to analog pins.
+   */
+  enum AnalogReadMode {
+    ANALOG_READ_MODE_UNSPECIFIED = 0;
+    ANALOG_READ_MODE_PIN_VALUE   = 1;
+    ANALOG_READ_MODE_PIN_VOLTAGE = 2;
+  }
+
+}
+
+
+/**
+* Pin Event. Describes a pin's value.
+*/
+message PinEvent {
+  string pin_name         = 1 [(nanopb).max_size = 5]; /** Specifies the pin's name. */
+  string pin_value        = 2 [(nanopb).max_size = 12]; /** Specifies the pin's value. */
+
+  Mode mode               = 3 [deprecated = true, (nanopb).type = FT_IGNORE]; /** DEPRECATED: Specifies the pin's mode, analog or digital. */
+  float  pin_value_volts  = 4 [deprecated = true, (nanopb).type = FT_IGNORE]; /** DEPRECATED: Specifies an anlog pin's voltage. */
+}
+
+/**
+* ConfigureReferenceVoltage - Changes the reference voltage used for analog inputs.
+* Direction: C2D
+*/
+message ConfigureReferenceVoltage {
+  float reference_voltage  = 1; /** Specifies an ADC reference voltage. */
+}
+
+/**
+* Sends a list of PinEvents
+* NOTE: Not working with nanopb decode repeated
+*/
+message PinEvents {
+  option deprecated = true;
+  repeated PinEvent list = 1;
+}
+
+/* DEPRECATED - PWM Pin API */
+
+// Configures a PWM output pin
+message ConfigurePWMPinRequest {
+  option deprecated = true;
+  // Pin to write to
+  string pin_name         = 1 [(nanopb).max_size = 5, deprecated = true, (nanopb).type = FT_IGNORE];
+
+  // Duty cycle between always off (0)
+  // and always on (255)
+  int32 duty_cycle        = 2 [deprecated = true, (nanopb).type = FT_IGNORE];
+
+  // Target frequency, in Hz
+  int32 frequency         = 3 [deprecated = true, (nanopb).type = FT_IGNORE];
+
+  // If the frequency changes over time
+  // NOTE: CIRCUITPYTHON-API ONLY
+  bool variable_frequency = 4 [deprecated = true, (nanopb).type = FT_IGNORE];
+}
+
+message ConfigurePWMPinRequests {
+  option deprecated = true;
+  repeated ConfigurePWMPinRequest list = 1 [deprecated = true, (nanopb).type = FT_IGNORE];
+}
+
+// Write duty cycle to a pin PWM output pin
+message PWMPinEvent {
+  option deprecated = true;
+  // Duty cycle between always off (0)
+  // and always on (255)
+  int32 duty_cycle        = 2 [deprecated = true, (nanopb).type = FT_IGNORE];
+}
+
+message PWMPinEvents {
+  option deprecated = true;
+  repeated PWMPinEvent list = 1 [deprecated = true, (nanopb).type = FT_IGNORE];
+}

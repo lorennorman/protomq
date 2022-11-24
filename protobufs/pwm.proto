@@ -1,0 +1,61 @@
+// SPDX-FileCopyrightText: 2022 Brent Rubell for Adafruit Industries
+// SPDX-License-Identifier: MIT
+syntax = "proto3";
+
+package wippersnapper.pwm.v1;
+// import "nanopb\.proto";
+
+/**
+* PWMAttachRequest represents a request to a device to attach/allocate a PWM pin.
+* On ESP32 Arduino, this will "attach" a pin to a LEDC channel/timer group.
+* On non-ESP32 Arduino, this does nothing.
+*/
+message PWMAttachRequest {
+  string pin       = 1 [(nanopb).max_size = 6]; /** The pin to be attached. */
+  int32 frequency  = 2; /** PWM frequency of an analog pin, in Hz. **/
+  int32 resolution = 3; /** The resolution of an analog pin, in bits. **/
+}
+
+/**
+* PWMAttachResponse represents a response from a device's execution of an
+* AttachRequest message.
+*/
+message PWMAttachResponse {
+  string pin       = 1 [(nanopb).max_size = 6]; /** The requested pin. */
+  bool did_attach = 2; /** True if AttachRequest successful, False otherwise. */
+}
+
+/**
+* PWMDetachRequest represents a request to stop PWM'ing and release the pin for re-use.
+* On ESP32, this will "detach" a pin from a LEDC channel/timer group.
+* On non-ESP32 Arduino, this calls digitalWrite(LOW) on the pin
+*/
+message PWMDetachRequest {
+  string pin       = 1 [(nanopb).max_size = 6]; /** The PWM pin to de-initialized. */
+}
+
+/**
+* WriteDutyCycleRequest represents a request to write a duty cycle to a pin with a frequency (fixed).
+* This is used for controlling LEDs.
+*/
+message PWMWriteDutyCycleRequest {
+  string pin       = 1 [(nanopb).max_size = 6]; /** The pin to write to. */
+  int32 duty_cycle = 2; /** The desired duty cycle to write. This value will be changed by the slider on Adafruit IO. **/
+}
+
+/**
+* WriteDutyCycle represents a wrapper request to write duty cycles to multiple pins.
+* This is used for controlling RGB/RGBW LEDs.
+*/
+message PWMWriteDutyCycleMultiRequest {
+  repeated PWMWriteDutyCycleRequest write_duty_cycle_req = 1 [(nanopb).max_count = 4];
+}
+
+/**
+* WriteFrequencyRequest represents a request to write a Frequency, in Hz, to a pin with a duty cycle of 50%.
+* This is used for playing tones using a piezo buzzer or speaker.
+*/
+message PWMWriteFrequencyRequest {
+  string pin       = 1 [(nanopb).max_size = 6]; /** The pin to write to. */
+  int32 frequency  = 2; /** The desired PWM frequency, in Hz. This value will be changed by the slider on Adafruit IO. **/
+}
