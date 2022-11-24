@@ -1,7 +1,8 @@
 <template>
-  <h3>Configure a {{ currentProtobuf }} Message</h3>
+  <h3>Configure a {{ currentProtobuf.name }} Message</h3>
 
-  <input v-for="field in currentProtobufFields" type="text" :value="field"/>
+  <p>{{ currentProtobuf.comment }}</p>
+  <FieldInput :field="field" v-for="field in currentProtobuf.fields"/>
 
   <button @click="setMode('messages')">Cancel</button>
   <button @click="">Submit</button>
@@ -11,6 +12,7 @@
   import { useUIStore } from '../stores/ui'
   import { useProtobufStore } from '../stores/protobufs'
   import { storeToRefs } from 'pinia'
+  import FieldInput from './FieldInput.vue';
 
   const
     { setMode } = useUIStore(),
