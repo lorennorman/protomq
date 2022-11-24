@@ -10,6 +10,7 @@
 
     <!-- use unpkg to get a browser-built version of mqtt lib -->
     <script src="//unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/protobufjs@7.1.2/dist/protobuf.min.js"></script>
 
     <!-- app -->
     <script src="app/index.js" type="module"></script>
@@ -22,16 +23,12 @@
 
     <div class="sidebar">
       <h3>Clients</h3>
-      <ul class="clients"></ul>
       <h3>Subscriptions</h3>
-      <ul class="subscriptions"></ul>
       <h3>Protobufs</h3>
-      <ul class="protobufs"></ul>
     </div>
 
     <main>
       <h3>Message Log</h3>
-      <div class="messages"></div>
     </main>
 
     <footer>

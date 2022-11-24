@@ -1,25 +1,28 @@
-import { isArray, map, filter} from 'lodash-es'
+import { flatMap, map } from 'lodash-es'
 import { ref, computed } from "vue"
 import { defineStore } from "pinia"
-import PB from '/protobufs'
 
 export const useProtobufStore = defineStore('protobufs', () => {
   const
-    protobufs = ref(Object.keys(PB)),
+    protobufs = ref([]),
     currentProtobuf = ref(null),
-    currentProtobufFields = computed(() => {
-      const pb = PB[currentProtobuf.value]
-      if(!pb) { return [] }
-
-      const proto = pb.prototype || pb
-      const setMethods = map(filter(Object.keys(proto), key => key.startsWith("set")), key => key.slice(3))
-
-      return setMethods
-    })
+    currentProtobufFields = computed(() => [])
 
   function setCurrentProtobuf(protobuf) {
     this.currentProtobuf = protobuf
   }
 
   return { protobufs, currentProtobuf, currentProtobufFields, setCurrentProtobuf }
+})
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const
+    root = await protobuf.load('/protobufs/signal.proto'),
+    modules = root.nested.wippersnapper.nested,
+    messages = flatMap(
+      map(modules, "nested.v1.nested"),
+      Object.values
+    )
+
+  useProtobufStore().protobufs = messages
 })
