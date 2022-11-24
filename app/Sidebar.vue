@@ -17,7 +17,7 @@
     text-overflow: ellipsis;
   }
 
-  .sidebar h3 {
+  .sidebar h3, .sidebar h4 {
     margin-bottom: 5px;
   }
 

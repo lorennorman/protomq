@@ -1,7 +1,7 @@
 <template>
   <h3>Configure a {{ currentProtobuf.name }} Message</h3>
 
-  <p>{{ currentProtobuf.comment }}</p>
+  <p class="description">{{ currentProtobuf.comment }}</p>
   <FieldInput :field="field" v-for="field in currentProtobuf.fields"/>
 
   <button @click="setMode('messages')">Cancel</button>
@@ -18,9 +18,9 @@
     { setMode } = useUIStore(),
     { currentProtobuf, currentProtobufFields } = storeToRefs(useProtobufStore())
 </script>
-
-<style>
-  main input {
-    display: block;
+<style scoped>
+  .description {
+    font-style: italic;
+    color: gray;
   }
 </style>

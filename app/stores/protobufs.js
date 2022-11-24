@@ -1,4 +1,4 @@
-import { flatMap, map } from 'lodash-es'
+import { flatMap, map, sortBy, uniq } from 'lodash-es'
 import { ref, computed } from "vue"
 import { defineStore } from "pinia"
 
@@ -6,13 +6,15 @@ export const useProtobufStore = defineStore('protobufs', () => {
   const
     protobufs = ref([]),
     currentProtobuf = ref(null),
-    currentProtobufFields = computed(() => [])
+    currentProtobufFields = computed(() => []),
+    protobufModules = computed(() => uniq(map(protobufs.value, "filename")))
 
   function setCurrentProtobuf(protobuf) {
+    console.log('set:', protobuf)
     this.currentProtobuf = protobuf
   }
 
-  return { protobufs, currentProtobuf, currentProtobufFields, setCurrentProtobuf }
+  return { protobufs, protobufModules, currentProtobuf, currentProtobufFields, setCurrentProtobuf }
 })
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -24,5 +26,5 @@ document.addEventListener("DOMContentLoaded", async () => {
       Object.values
     )
 
-  useProtobufStore().protobufs = messages
+  useProtobufStore().protobufs = sortBy(messages, ["filename", "name"])
 })
