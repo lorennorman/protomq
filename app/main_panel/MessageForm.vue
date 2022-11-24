@@ -18,6 +18,7 @@
     { setMode } = useUIStore(),
     { currentProtobuf, currentProtobufFields } = storeToRefs(useProtobufStore())
 </script>
+
 <style scoped>
   .description {
     font-style: italic;

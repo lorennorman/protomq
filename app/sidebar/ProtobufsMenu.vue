@@ -1,7 +1,7 @@
 <template>
   <h3>Protobufs</h3>
   <div v-for="module in reverse(protobufModules)">
-    <h4>{{ module.split('/').at(-1) }}</h4>
+    <h4>{{ module.split('/').at(-1) }} ({{ protobufsByModule(module).length }})</h4>
     <ul>
       <li v-for="protobuf in protobufsByModule(module)" @click="protobufClicked(protobuf)" :title="protobuf.comment">
         {{ protobuf.name }}

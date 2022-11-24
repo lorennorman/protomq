@@ -8,7 +8,6 @@ export const useUIStore = defineStore('ui', () => {
     configureMessageMode = computed(() => mode.value === 'configureMessage')
 
   function setMode(newMode) {
-    console.log('setMode', newMode)
     this.mode = newMode
   }
 

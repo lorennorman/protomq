@@ -14,17 +14,21 @@ export const useProtobufStore = defineStore('protobufs', () => {
     this.currentProtobuf = protobuf
   }
 
-  return { protobufs, protobufModules, currentProtobuf, currentProtobufFields, setCurrentProtobuf }
+  async function loadProtoFile(filepath) {
+    const
+      root = await protobuf.load(filepath),
+      modules = root.nested.wippersnapper.nested,
+      messages = flatMap(
+        map(modules, "nested.v1.nested"),
+        Object.values
+      )
+
+    this.protobufs = sortBy(messages, "name")
+  }
+
+  return { protobufs, protobufModules, currentProtobuf, currentProtobufFields, loadProtoFile, setCurrentProtobuf }
 })
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const
-    root = await protobuf.load('/protobufs/signal.proto'),
-    modules = root.nested.wippersnapper.nested,
-    messages = flatMap(
-      map(modules, "nested.v1.nested"),
-      Object.values
-    )
-
-  useProtobufStore().protobufs = sortBy(messages, ["filename", "name"])
+  await useProtobufStore().loadProtoFile('/protobufs/signal.proto')
 })
