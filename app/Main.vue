@@ -7,7 +7,7 @@
   import { storeToRefs } from 'pinia'
   import { useUIStore } from '/app/stores/ui'
   import MessageLog from './main_panel/MessageLog.vue'
-  import MessageForm from './main_panel/MessageForm.vue'
+  import MessageForm from './main_panel/message_form/MessageForm.vue'
 
   const { messagesMode, configureMessageMode } = storeToRefs(useUIStore())
 </script>
