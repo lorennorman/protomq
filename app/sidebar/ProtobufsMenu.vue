@@ -12,17 +12,16 @@
 
 <script setup>
   import { filter, reverse } from 'lodash-es'
-  import { useUIStore } from '/app/stores/ui'
   import { useProtobufStore } from '/app/stores/protobufs'
+  import { useMessageStore } from '/app/stores/message'
   import { storeToRefs } from 'pinia'
 
   const
-    uiStore = useUIStore(),
     protobufStore = useProtobufStore(),
+    messageStore = useMessageStore(),
     { protobufs, protobufModules } = storeToRefs(protobufStore),
     protobufClicked = protobuf => {
-      protobufStore.setCurrentProtobuf(protobuf)
-      uiStore.setMode('configureMessage')
+      messageStore.newMessage(protobuf)
     },
     protobufsByModule = module => filter(protobufs.value, { filename: module })
 </script>

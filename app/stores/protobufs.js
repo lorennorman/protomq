@@ -7,7 +7,7 @@ export const useProtobufStore = defineStore('protobufs', () => {
     protobufs = ref([]),
     currentProtobuf = ref(null),
     currentProtobufFields = computed(() => []),
-    protobufModules = computed(() => uniq(map(protobufs.value, "filename")))
+    protobufModules = computed(() => sortBy(uniq(map(protobufs.value, "filename"))))
 
   function setCurrentProtobuf(protobuf) {
     console.log('set:', protobuf)

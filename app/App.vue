@@ -32,7 +32,7 @@
 
   header {
     grid-column: 1 / 4;
-    background: wheat;
+    background: #f5deb3;
     padding: 0 2rem;
     border-bottom: 2px solid gray;
   }
