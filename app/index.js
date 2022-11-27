@@ -8,6 +8,14 @@ const app = createApp(App)
 app.use(pinia)
 app.mount('body')
 
+// initialize protobuf wrapping
+import { allProtos, loadProtoFile } from './protobuf_service'
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadProtoFile('/protobufs/signal.proto')
+  console.log(allProtos.value)
+})
+
+
 // import { forEach, flatten, map, sortBy, uniq } from "lodash-es"
 
 // // PROTOBUFS
