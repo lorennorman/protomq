@@ -26,8 +26,8 @@ export const
         map(modules, "nested.v1.nested"),
         Object.values
       ),
-      // reject deprecated messages
-      liveMessages = reject(messages, "options.deprecated"),
+      // reject deprecated messages and enums
+      liveMessages = reject(reject(messages, "options.deprecated"), "values"),
       sortedMessages = sortBy(liveMessages, "name")
 
     return sortedMessages
