@@ -1,6 +1,6 @@
 <template>
   <label class="label">
-    <p>e: {{ enumer.fieldName }}:</p>
+    <p>{{ enumer.fieldName }}:</p>
 
     <select>
       <option v-for="option in options" :id="option.id">

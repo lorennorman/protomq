@@ -1,6 +1,6 @@
 <template>
   <label class="label">
-    <p>m: {{ message.fieldName }}:</p>
+    <p>{{ message.fieldName }}:</p>
     <p>{{ message.name }}</p>
   </label>
 

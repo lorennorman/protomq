@@ -1,6 +1,7 @@
 <template>
   <label class="label">
     <p>{{ primitive.name }}:</p>
+
     <input :type="inputType(primitive.type)"/>
   </label>
 </template>
