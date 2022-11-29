@@ -1,9 +1,11 @@
 <template>
   <label class="label">
-    <p>{{ oneof.name }}:</p>
+    <p>{{ oneof.fieldName }}:</p>
 
-    <select>
-      <option v-for="field in oneof.oneof" :id="field.type">
+
+    <select v-model="selectedType">
+      <option :value="null">Select One:</option>
+      <option v-for="field in oneof.oneof" :value="field.type">
         {{ field.fieldName }} ({{ field.type?.split('.').at(-1) }})
       </option>
     </select>
@@ -11,5 +13,11 @@
 </template>
 
 <script setup>
+  import { ref } from 'vue'
+
   defineProps(["oneof"])
+
+  const
+    selectedType = ref(null)
+
 </script>

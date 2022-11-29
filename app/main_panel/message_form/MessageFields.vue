@@ -1,18 +1,18 @@
 <template>
   <div class="oneofs">
-    <OneofInput v-for="oneof in oneofs" :oneof="oneof"/>
+    <OneofInput v-for="oneof in oneofs" :oneof="oneof" :key="oneof.oneof[0]?.fieldName"/>
   </div>
 
   <div class="messages">
-    <MessageInput v-for="message in messages" :message="message"/>
+    <MessageInput v-for="message in messages" :message="message" :key="message.fieldName"/>
   </div>
 
   <div class="enums">
-    <EnumInput v-for="enumer in enums" :enumer="enumer"/>
+    <EnumInput v-for="enumer in enums" :enumer="enumer" :key="enumer.fieldName"/>
   </div>
 
   <div class="primitives">
-    <PrimitiveInput v-for="primitive in primitives" :primitive="primitive"/>
+    <PrimitiveInput v-for="primitive in primitives" :primitive="primitive" :key="primitive.fieldName"/>
   </div>
 </template>
 
