@@ -1,4 +1,4 @@
-import { filter, flatMap, groupBy, includes, map, reduce, reject, sortBy } from 'lodash-es'
+import { find, forEach, groupBy, includes, isString, map, omitBy, reject, sortBy, without } from 'lodash-es'
 import { ref, computed } from 'vue'
 
 // make sure we have the global protobufjs object
@@ -6,57 +6,109 @@ if(!window.protobuf) {
   throw new Error("protobufjs library not loaded")
 }
 
-// track whether we've loaded proto files
-const protobufRoot = ref(null)
 // extract primitive types
 const PRIMITIVE_TYPES = Object.keys(protobuf.types.basic)
 
+const
+  messages = ref([]),
+  enums = ref([])
+
+const extractTypes = root => {
+  traverseNested(root.toJSON())
+}
+
+const traverseNested = (node, path='') => {
+  if(node.options?.deprecated) { return }
+
+  const name = path.split(['/']).at(-1)
+
+  // process Message type
+  if(node.fields) {
+    messages.value.push({
+      name, path,
+      message: {
+        ...node,
+        // reject deprecated options
+        fields: omitBy(node.fields, "options.deprecated")
+      }
+    })
+  }
+
+  if(node.values) {
+    enums.value.push({
+      name, path, enum: node
+    })
+  }
+
+  node.nested && forEach(node.nested, (items, pathSegment) => (
+    traverseNested(items, `${path}/${pathSegment}`)
+  ))
+}
+
 export const
   loadProtoFile = async filePath => {
-    protobufRoot.value = await protobuf.load(filePath)
+    extractTypes(await protobuf.load(filePath))
   },
 
   allProtos = computed(() => {
-    if(!protobufRoot.value) { return [] }
-
-    const
-      // dig out the leaf nodes of the wippersnapper protos
-      modules = protobufRoot.value.nested.wippersnapper.nested,
-      messages = flatMap(
-        map(modules, "nested.v1.nested"),
-        Object.values
-      ),
-      // reject deprecated messages and enums
-      liveMessages = reject(reject(messages, "options.deprecated"), "values"),
-      sortedMessages = sortBy(liveMessages, "name")
-
-    return sortedMessages
+    return sortBy(messages.value, "name")
   }),
 
-  protosByModule = computed(() => groupBy(allProtos.value, "filename")),
+  protosByModule = computed(() => {
+    return groupBy(allProtos.value, ({ path }) => path.split('/').slice(2, -1).join('/'))
+  }),
 
-  fields = messageToQuery => {
-    // look at its fields
+  fields = protobufType => {
+    // auto-lookup things passed with a "type" property
+    const { message } = protobufType.type
+      ? find(messages.value, { name: protobufType.type.split('.').at(-1) }) || {}
+      : protobufType
+
+    if(!message) {
+      console.error(`Failed lookup for protobuf type: ${protobufType.type}`)
+      return { oneofs: [], messages: [], enums: [], primitives: [] }
+    }
+
     const
-      fields = Object.values(messageToQuery.fields),
-      // pull out all primitives
-      primitives = filter(fields, ({ type }) => includes(PRIMITIVE_TYPES, type)),
-      // pull out oneofs
-      { oneofs } = messageToQuery,
-      { messages, enums } = reduce(fields, ({ messages, enums }, field) => {
-        const oneofNames = map(flatMap(oneofs, "fieldsArray"), "name")
-        if(includes(oneofNames, field.name) || includes(PRIMITIVE_TYPES, field.type)) {
-          return { messages, enums }
-        }
+      namedFields = map(message.fields, (field, fieldName) => ({ ...field, fieldName })),
+      oneofFields = map(message.oneofs, ({ oneof }, fieldName) => ({ fieldName, type: 'oneof', oneof: [ ...oneof ] })),
+      messageFields = [],
+      enumFields = [],
+      primitiveFields = []
 
-        const typeOrEnum = protobufRoot.value.lookup(field.type)
-        typeOrEnum.fieldName = field.name
+    forEach(namedFields, field => {
+      // detect oneofs first
+      const foundOneof = find(oneofFields, ({ oneof }) => includes(oneof, field.fieldName))
+      if(foundOneof) {
+        foundOneof.oneof = without(foundOneof.oneof, field.fieldName)
+        return foundOneof.oneof.push(field)
+      }
 
-        return typeOrEnum.values
-          ? { messages, enums: enums.concat(typeOrEnum) }
-          : { messages: messages.concat(typeOrEnum), enums }
-      }, { messages: [], enums: [] })
+      // detect primitive fields
+      if(includes(PRIMITIVE_TYPES, field.type)) {
+        return primitiveFields.push(field)
+      }
 
-    // lookup the remainder and sort enums and messages
-    return { oneofs, messages, enums, primitives }
+      // detect enums
+      const foundEnum = find(enums.value, { name: field.type })
+      if(foundEnum) {
+        // add enum values to the field
+        return enumFields.push({ ...field, values: foundEnum.enum.values })
+      }
+
+      // default must be messages
+      messageFields.push(field)
+    })
+
+    // clear the unmatched oneofs (referring to deprecated messages)
+    forEach(oneofFields, oneofField => {
+      oneofField.oneof = reject(oneofField.oneof, isString)
+    })
+
+    return {
+      oneofs: oneofFields,
+      messages: messageFields,
+      enums: enumFields,
+      primitives: primitiveFields
+    }
   }

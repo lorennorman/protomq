@@ -2,7 +2,7 @@
   <h3>Protobufs</h3>
 
   <div v-for="(protos, module) in protosByModule">
-    <h4>{{ module.split('/').at(-1) }} ({{ protos.length }})</h4>
+    <h4>{{ module }} ({{ protos.length }})</h4>
 
     <ul>
       <li v-for="protobuf in protos" @click="protobufClicked(protobuf)" :title="protobuf.comment">
