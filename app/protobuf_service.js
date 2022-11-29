@@ -20,7 +20,7 @@ const extractTypes = root => {
 const traverseNested = (node, path='') => {
   if(node.options?.deprecated) { return }
 
-  const name = path.split(['/']).at(-1)
+  const name = path.split(['.']).at(-1)
 
   // process Message type
   if(node.fields) {
@@ -41,7 +41,7 @@ const traverseNested = (node, path='') => {
   }
 
   node.nested && forEach(node.nested, (items, pathSegment) => (
-    traverseNested(items, `${path}/${pathSegment}`)
+    traverseNested(items, `${path}.${pathSegment}`)
   ))
 }
 
@@ -54,14 +54,24 @@ export const
     return sortBy(messages.value, "name")
   }),
 
+  findProtoBy = findCriteria => {
+    return find(messages.value, findCriteria)
+  },
+
+  findProtoFor = typeToFind => {
+    console.log('searching for:', typeToFind)
+    return findProtoBy({ type: typeToFind.type })
+      || findProtoBy({ name: typeToFind.type.split('.').at(-1) })
+  },
+
   protosByModule = computed(() => {
-    return groupBy(allProtos.value, ({ path }) => path.split('/').slice(2, -1).join('/'))
+    return groupBy(allProtos.value, ({ path }) => path.split('.').slice(2, -1).join('.'))
   }),
 
   fields = protobufType => {
     // auto-lookup things passed with a "type" property
     const { message } = protobufType.type
-      ? find(messages.value, { name: protobufType.type.split('.').at(-1) }) || {}
+      ? findProtoFor(protobufType) || {}
       : protobufType
 
     if(!message) {
@@ -103,7 +113,7 @@ export const
     // clear the unmatched oneofs (referring to deprecated messages)
     forEach(oneofFields, oneofField => {
       oneofField.oneof = reject(oneofField.oneof, isString)
-      oneofField.oneof = filter(oneofField.oneof, ({ type }) => find(messages.value, { name: type.split('.').at(-1) }))
+      oneofField.oneof = filter(oneofField.oneof, findProtoFor)
     })
 
     return {
