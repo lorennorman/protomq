@@ -1,4 +1,4 @@
-import { find, forEach, groupBy, includes, isString, map, omitBy, reject, sortBy, without } from 'lodash-es'
+import { filter, find, forEach, groupBy, includes, isString, map, omitBy, reject, sortBy, without } from 'lodash-es'
 import { ref, computed } from 'vue'
 
 // make sure we have the global protobufjs object
@@ -103,6 +103,7 @@ export const
     // clear the unmatched oneofs (referring to deprecated messages)
     forEach(oneofFields, oneofField => {
       oneofField.oneof = reject(oneofField.oneof, isString)
+      oneofField.oneof = filter(oneofField.oneof, ({ type }) => find(messages.value, { name: type.split('.').at(-1) }))
     })
 
     return {
