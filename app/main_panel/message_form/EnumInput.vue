@@ -3,8 +3,8 @@
     <p>{{ enumer.fieldName }}:</p>
 
     <select>
-      <option v-for="option in options" :id="option.id">
-        {{ option.value }}
+      <option v-for="option in options" :value="option.value">
+        {{ option.key }}
       </option>
     </select>
   </label>
@@ -12,11 +12,13 @@
 
 <script setup>
   import { map } from 'lodash-es'
+  import { findProtoFor } from '../../protobuf_service'
 
   const
     props = defineProps(["enumer"]),
+    enumeration = findProtoFor(props.enumer),
     options = map(
-      props.enumer?.values || [],
-      (value, key) => ({ id: value, value: key })
+      enumeration?.values || [],
+      (value, key) => ({ key, value })
     )
 </script>

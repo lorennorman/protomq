@@ -1,6 +1,6 @@
 <template>
   <div class="oneofs">
-    <OneofInput v-for="oneof in oneofs" :oneof="oneof" :key="oneof.oneof[0]?.fieldName"/>
+    <OneofInput v-for="oneof in oneofs" :oneof="oneof" :key="message.name + '-' + oneof.fieldName"/>
   </div>
 
   <div class="messages">
@@ -17,6 +17,7 @@
 </template>
 
 <script setup>
+  import { filter } from 'lodash-es'
   import { ref, watchEffect } from 'vue'
   import { fields } from '/app/protobuf_service.js'
   import OneofInput from './OneofInput.vue'
@@ -32,10 +33,10 @@
     primitives = ref([])
 
   watchEffect(() => {
-    const messageField = fields(props.message)
-    oneofs.value = messageField.oneofs
-    messages.value = messageField.messages
-    enums.value = messageField.enums
-    primitives.value = messageField.primitives
+    // const messageField = fields(props.message)
+    oneofs.value = filter(props.message.fields, { fieldType: 'oneof' })
+    messages.value = filter(props.message.fields, { fieldType: 'message' })
+    enums.value = filter(props.message.fields, { fieldType: 'enum' })
+    primitives.value = filter(props.message.fields, { fieldType: 'primitive' })
   })
 </script>
