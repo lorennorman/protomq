@@ -1,4 +1,5 @@
-import { filter, find, forEach, groupBy, includes, isString, map, omitBy, reject, sortBy, without } from 'lodash-es'
+import { Message } from 'google-protobuf'
+import { chain, filter, find, forEach, groupBy, includes, isEmpty, isString, map, omitBy, pick, reject, sortBy, without } from 'lodash-es'
 import { ref, computed } from 'vue'
 
 // make sure we have the global protobufjs object
@@ -6,67 +7,148 @@ if(!window.protobuf) {
   throw new Error("protobufjs library not loaded")
 }
 
-// extract primitive types
+const
+  DEBUG = true,
+  debug = (...args) => DEBUG && console.log(...args),
+  debugNodeType = node => (
+      node.values ? 'enum'
+    : node.fields ? 'message'
+    : node.nested ? 'namespace'
+    : 'unknown'
+  )
+
+  // extract primitive types
 const PRIMITIVE_TYPES = Object.keys(protobuf.types.basic)
 
 const
+  protobufTypes = ref([]),
   messages = ref([]),
   enums = ref([])
 
 const extractTypes = root => {
   traverseNested(root.toJSON())
+  sanitizeMessageFields()
+  debug("Protobuf Types:", JSON.stringify(protobufTypes.value, null, 2))
 }
 
 const traverseNested = (node, path='') => {
-  if(node.options?.deprecated) { return }
+  debug(`Processing:`, path || 'root', debugNodeType(node))
+  if(node.options?.deprecated) {
+    debug('DEPRECATED')
+    return
+  }
 
   const name = path.split(['.']).at(-1)
 
   // process Message type
   if(node.fields) {
-    messages.value.push({
-      name, path,
-      message: {
-        ...node,
-        // reject deprecated options
-        fields: omitBy(node.fields, "options.deprecated")
-      }
+    protobufTypes.value.push({
+      name,
+      type: path,
+      fieldType: 'message',
+      ...pick(node, ['fields', 'oneofs'])
     })
   }
 
   if(node.values) {
-    enums.value.push({
-      name, path, enum: node
+    protobufTypes.value.push({
+      name,
+      type: path,
+      fieldType: 'enum',
+      ...node
     })
   }
 
   node.nested && forEach(node.nested, (items, pathSegment) => (
-    traverseNested(items, `${path}.${pathSegment}`)
+    traverseNested(items, isEmpty(path) ? pathSegment : `${path}.${pathSegment}`)
   ))
+}
+
+const sanitizeMessageFields = () => {
+  chain(protobufTypes.value)
+    .filter({ fieldType: 'message' })
+    .forEach(message => {
+      message.fields = chain(message.fields)
+        // convert fields into array
+        .map((field, fieldName) => ({
+          fieldName, fieldType: detectFieldType(field), ...field
+        }))
+        // drop deprecated fields
+        .reject(option => {
+          if(option.options?.deprecated) {
+            debug(`- rejecting deprecated option: ${option.fieldName}`)
+            return true
+          }
+        })
+        // drop fields where the type lookup failed
+        .reject(option => {
+          if(option.fieldType === 'unknown') {
+            debug(`- rejecting unknown option: ${option.fieldName}`)
+            return true
+          }
+        })
+      .value()
+
+      // iterate oneofs
+      forEach(message.oneofs, ({ oneof }, fieldName) => {
+        // hoist an entry into outer fields
+        message.fields.push({
+          fieldName,
+          fieldType: 'oneof',
+          type: 'oneof',
+          // each listed field becomes an outer field
+          options: chain(oneof)
+            .map(fieldName => find(message.fields, { fieldName }))
+            .compact()
+          .value()
+        })
+
+        // delete the outer fields that became oneof options
+        message.fields = reject(message.fields, field => includes(oneof, field.fieldName))
+
+      })
+      // delete oneofs
+      delete message.oneofs
+    }).value()
+}
+
+const detectFieldType = ({ type, name }) => {
+  if(isPrimitive({ type })) {
+    return 'primitive'
+  } else if(type === 'oneof') {
+    return 'oneof'
+  } else {
+    return findProtoFor({ type, name })?.fieldType || 'unknown'
+  }
 }
 
 export const
   loadProtoFile = async filePath => {
+    debug(`Loading .proto file:`, filePath)
     extractTypes(await protobuf.load(filePath))
   },
 
   allProtos = computed(() => {
-    return sortBy(messages.value, "name")
+    return sortBy(protobufTypes.value, "name")
+  }),
+
+  protosByModule = computed(() => {
+    return chain(allProtos.value)
+      .filter({ fieldType: 'message' })
+      .groupBy(({ type }) => type.split('.').slice(1, -1).join('.'))
+    .value()
   }),
 
   findProtoBy = findCriteria => {
-    return find(messages.value, findCriteria)
+    return find(protobufTypes.value, findCriteria)
   },
 
   findProtoFor = typeToFind => {
-    console.log('searching for:', typeToFind)
     return findProtoBy({ type: typeToFind.type })
       || findProtoBy({ name: typeToFind.type.split('.').at(-1) })
   },
 
-  protosByModule = computed(() => {
-    return groupBy(allProtos.value, ({ path }) => path.split('.').slice(2, -1).join('.'))
-  }),
+  isPrimitive = typeToCheck => includes(PRIMITIVE_TYPES, typeToCheck.type),
 
   fields = protobufType => {
     // auto-lookup things passed with a "type" property
@@ -95,7 +177,7 @@ export const
       }
 
       // detect primitive fields
-      if(includes(PRIMITIVE_TYPES, field.type)) {
+      if(isPrimitive(field)) {
         return primitiveFields.push(field)
       }
 
@@ -113,7 +195,7 @@ export const
     // clear the unmatched oneofs (referring to deprecated messages)
     forEach(oneofFields, oneofField => {
       oneofField.oneof = reject(oneofField.oneof, isString)
-      oneofField.oneof = filter(oneofField.oneof, findProtoFor)
+      oneofField.oneof = filter(oneofField.oneof, oneof => isPrimitive(oneof) || findProtoFor(oneof))
     })
 
     return {
