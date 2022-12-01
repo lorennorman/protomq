@@ -47,6 +47,7 @@ const traverseNested = (node, path='') => {
       fieldType: 'message',
       ...pick(node, ['fields', 'oneofs'])
     })
+    debug('- message:', protobufTypes.value.at(-1))
   }
 
   if(node.values) {
@@ -56,6 +57,7 @@ const traverseNested = (node, path='') => {
       fieldType: 'enum',
       ...node
     })
+    debug('- enum:', protobufTypes.value.at(-1))
   }
 
   node.nested && forEach(node.nested, (items, pathSegment) => (
@@ -143,6 +145,7 @@ export const
   },
 
   findProtoFor = typeToFind => {
+    debug('searching protos for', typeToFind)
     return findProtoBy({ type: typeToFind.type })
       || findProtoBy({ name: typeToFind.type.split('.').at(-1) })
   },
