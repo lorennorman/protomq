@@ -7,7 +7,7 @@ if(!window.protobuf) {
 }
 
 const
-  DEBUG = false,
+  DEBUG = true,
   debug = (...args) => DEBUG && console.log(...args),
   debugNodeType = node => (
       node.values ? 'enum'
@@ -88,6 +88,7 @@ const sanitizeMessageFields = () => {
             return true
           }
         })
+        .sortBy(({ fieldType }) => ['enum', 'primitive', 'message', 'oneof'].indexOf(fieldType))
       .value()
 
       // iterate oneofs
@@ -150,60 +151,4 @@ export const
       || findProtoBy({ name: typeToFind.type.split('.').at(-1) })
   },
 
-  isPrimitive = typeToCheck => includes(PRIMITIVE_TYPES, typeToCheck.type),
-
-  fields = protobufType => {
-    // auto-lookup things passed with a "type" property
-    const { message } = protobufType.type
-      ? findProtoFor(protobufType) || {}
-      : protobufType
-
-    if(!message) {
-      console.error(`Failed lookup for protobuf type: ${protobufType.type}`)
-      return { oneofs: [], messages: [], enums: [], primitives: [] }
-    }
-
-    const
-      namedFields = map(message.fields, (field, fieldName) => ({ ...field, fieldName })),
-      oneofFields = map(message.oneofs, ({ oneof }, fieldName) => ({ fieldName, type: 'oneof', oneof: [ ...oneof ] })),
-      messageFields = [],
-      enumFields = [],
-      primitiveFields = []
-
-    forEach(namedFields, field => {
-      // detect oneofs first
-      const foundOneof = find(oneofFields, ({ oneof }) => includes(oneof, field.fieldName))
-      if(foundOneof) {
-        foundOneof.oneof = without(foundOneof.oneof, field.fieldName)
-        return foundOneof.oneof.push(field)
-      }
-
-      // detect primitive fields
-      if(isPrimitive(field)) {
-        return primitiveFields.push(field)
-      }
-
-      // detect enums
-      const foundEnum = find(enums.value, { name: field.type })
-      if(foundEnum) {
-        // add enum values to the field
-        return enumFields.push({ ...field, values: foundEnum.enum.values })
-      }
-
-      // default must be messages
-      messageFields.push(field)
-    })
-
-    // clear the unmatched oneofs (referring to deprecated messages)
-    forEach(oneofFields, oneofField => {
-      oneofField.oneof = reject(oneofField.oneof, isString)
-      oneofField.oneof = filter(oneofField.oneof, oneof => isPrimitive(oneof) || findProtoFor(oneof))
-    })
-
-    return {
-      oneofs: oneofFields,
-      messages: messageFields,
-      enums: enumFields,
-      primitives: primitiveFields
-    }
-  }
+  isPrimitive = typeToCheck => includes(PRIMITIVE_TYPES, typeToCheck.type)

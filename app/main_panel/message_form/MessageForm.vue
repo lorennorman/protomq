@@ -1,17 +1,19 @@
 <template>
-  <h3>{{ message.name }}</h3>
+  <div class="message-form">
+    <h3>{{ message.name }}</h3>
 
-  <blockquote class="description">
-    {{ message.comment }}
-  </blockquote>
+    <blockquote class="description">
+      {{ message.comment }}
+    </blockquote>
 
-  <!-- TODO: repeated -->
+    <!-- TODO: repeated -->
 
-  <MessageFields :message="message"/>
+    <FieldInput v-for="field in message.fields" :field="field" :key="message.name + field.fieldName"/>
 
-  <div class="action-bar">
-    <button @click="setMode('messages')">Cancel</button>
-    <button @click="">Submit</button>
+    <div class="action-bar">
+      <button @click="setMode('messages')">Cancel</button>
+      <button @click="">Submit</button>
+    </div>
   </div>
 </template>
 
@@ -19,7 +21,7 @@
   import { useUIStore } from '/app/stores/ui'
   import { useMessageStore } from '/app/stores/message'
   import { storeToRefs } from 'pinia'
-  import MessageFields from './MessageFields.vue'
+  import FieldInput from './FieldInput.vue'
 
   const
     messageStore = useMessageStore(),
@@ -28,6 +30,10 @@
 </script>
 
 <style>
+  .message-form {
+    max-width: 500px;
+  }
+
   .description {
     font-style: italic;
     color: gray;
