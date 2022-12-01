@@ -7,7 +7,7 @@ if(!window.protobuf) {
 }
 
 const
-  DEBUG = true,
+  DEBUG = false,
   debug = (...args) => DEBUG && console.log(...args),
   debugNodeType = node => (
       node.values ? 'enum'

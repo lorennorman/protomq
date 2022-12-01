@@ -1,13 +1,15 @@
 <template>
-  <h3>Clients</h3>
-  <ul class="clients"></ul>
-  <h3>Subscriptions</h3>
-  <ul class="subscriptions"></ul>
+  <ClientsMenu/>
+  <hr/>
+  <SubscriptionsMenu/>
+  <hr/>
   <ProtobufsMenu/>
 </template>
 
 <script setup>
   import ProtobufsMenu from './sidebar/ProtobufsMenu.vue'
+  import ClientsMenu from './sidebar/ClientsMenu.vue'
+  import SubscriptionsMenu from './sidebar/SubscriptionsMenu.vue'
 </script>
 
 <style>
