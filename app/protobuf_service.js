@@ -1,5 +1,4 @@
-import { Message } from 'google-protobuf'
-import { chain, filter, find, forEach, groupBy, includes, isEmpty, isString, map, omitBy, pick, reject, sortBy, without } from 'lodash-es'
+import { chain, filter, find, forEach, includes, isEmpty, isString, map, pick, reject, sortBy, without } from 'lodash-es'
 import { ref, computed } from 'vue'
 
 // make sure we have the global protobufjs object
@@ -8,7 +7,7 @@ if(!window.protobuf) {
 }
 
 const
-  DEBUG = true,
+  DEBUG = false,
   debug = (...args) => DEBUG && console.log(...args),
   debugNodeType = node => (
       node.values ? 'enum'

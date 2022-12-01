@@ -5,7 +5,7 @@
     <h4>{{ module }} ({{ protos.length }})</h4>
 
     <ul>
-      <li v-for="protobuf in protos" @click="protobufClicked(protobuf)" :title="protobuf.comment">
+      <li v-for="protobuf in protos" @click="protobufClicked(protobuf)">
         {{ protobuf.name }}
       </li>
     </ul>
