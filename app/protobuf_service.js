@@ -20,12 +20,11 @@ const
 const PRIMITIVE_TYPES = Object.keys(protobuf.types.basic)
 
 const
-  protobufTypes = ref([]),
-  messages = ref([]),
-  enums = ref([])
+  protobufRoot = ref(null),
+  protobufTypes = ref([])
 
-const extractTypes = root => {
-  traverseNested(root.toJSON())
+const extractTypes = () => {
+  traverseNested(protobufRoot.value.toJSON())
   sanitizeMessageFields()
   debug("Protobuf Types:", JSON.stringify(protobufTypes.value, null, 2))
 }
@@ -127,7 +126,8 @@ const detectFieldType = ({ type, name }) => {
 export const
   loadProtoFile = async filePath => {
     debug(`Loading .proto file:`, filePath)
-    extractTypes(await protobuf.load(filePath))
+    protobufRoot.value = await protobuf.load(filePath)
+    extractTypes()
   },
 
   allProtos = computed(() => {
@@ -151,4 +151,26 @@ export const
       || findProtoBy({ name: typeToFind.type.split('.').at(-1) })
   },
 
-  isPrimitive = typeToCheck => includes(PRIMITIVE_TYPES, typeToCheck.type)
+  isPrimitive = typeToCheck => includes(PRIMITIVE_TYPES, typeToCheck.type),
+
+  encodeByName = (name, object) => {
+    const message = protobufRoot.value.lookup(name)
+
+    if(!message) {
+      console.error(`Protobuf lookup failed for ${name}`)
+      return
+    }
+
+    return message.encode(object)
+  },
+
+  decodeByName = (name, binaryMessage) => {
+    const message = protobufRoot.value.lookup(name)
+
+    if(!message) {
+      console.error(`Protobuf lookup failed for ${name}`)
+      return
+    }
+
+    return message.decode(binaryMessage)
+  }
