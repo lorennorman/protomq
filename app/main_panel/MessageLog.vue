@@ -11,11 +11,14 @@
 </template>
 
 <script setup>
+  import { reject, some } from 'lodash-es'
+  import { computed } from 'vue'
   import { useMQTTStore } from '../stores/mqtt'
   import { parseMessage } from '../message_parser'
 
   const
-    messages = useMQTTStore().messages,
+    hideTopics = ["$SYS/", "state/clients"],
+    messages = computed(() => reject(useMQTTStore().messages, ({ topic }) => some(hideTopics, topicSpec => topic.startsWith(topicSpec)))),
     renderTopic = ({ topic }) => topic.startsWith("$SYS")
       ? `$SYS/.../${topic.split('/').slice(2).join('/')}`
       : topic,
