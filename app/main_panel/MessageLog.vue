@@ -11,14 +11,15 @@
 </template>
 
 <script setup>
-  import { useMQTTStore } from '../stores/mqtt';
+  import { useMQTTStore } from '../stores/mqtt'
+  import { parseMessage } from '../message_parser'
 
   const
     messages = useMQTTStore().messages,
     renderTopic = ({ topic }) => topic.startsWith("$SYS")
       ? `$SYS/.../${topic.split('/').slice(2).join('/')}`
       : topic,
-    renderMessage = ({ message }) => JSON.stringify(message, null, 2)
+    renderMessage = (message) => parseMessage(message)
 </script>
 
 <style>
