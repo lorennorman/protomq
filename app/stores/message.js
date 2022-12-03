@@ -4,9 +4,11 @@ import { useUIStore } from './ui'
 
 export const useMessageStore = defineStore('message', () => {
   return {
-    message: ref(null),
-    newMessage: function(message) {
-      this.message = message
+    messageObject: ref(null),
+    messageType: ref(null),
+    newMessage: function(messageType) {
+      this.messageType = messageType
+      this.messageObject = {}
       useUIStore().setMode('configureMessage')
     }
   }

@@ -3,6 +3,7 @@ import { defineStore } from "pinia"
 
 export const useMQTTStore = defineStore('mqtt', () => {
   const
+    client = ref(null),
     messages = ref([]),
     clients = ref([]),
     subscriptions = ref([])
@@ -11,5 +12,11 @@ export const useMQTTStore = defineStore('mqtt', () => {
     this.messages.unshift(newMessage)
   }
 
-  return { messages, addMessage, clients, subscriptions }
+  function publishMessage(topic, message) {
+    if(!this.client) { throw new Error("MQTT Client not Connected!") }
+
+    this.client.publish(topic, message)
+  }
+
+  return { messages, addMessage, publishMessage, clients, subscriptions }
 })

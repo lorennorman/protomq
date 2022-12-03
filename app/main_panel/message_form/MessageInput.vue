@@ -1,21 +1,26 @@
 <template>
   <label class="label">
-    <p>{{ message.fieldName }}:</p>
+    <p>{{ field.fieldName }}:</p>
     <p>{{ foundMessage?.name }}</p>
   </label>
 
   <div class="nested-message">
-    <FieldInput v-for="field in foundMessage.fields" :field="field"/>
+    <FieldInput v-for="messageField in foundMessage.fields" :field="messageField" :fieldPath="nextFieldPath" :key="messageField.fieldName"/>
   </div>
 </template>
 
 <script setup>
-  import { findProtoFor } from '../../protobuf_service';
-  import FieldInput from './FieldInput.vue';
+  import { findProtoFor } from '../../protobuf_service'
+  import FieldInput from './FieldInput.vue'
+  import { useFieldPath } from './use_field_path';
 
   const
-    props = defineProps(["message"]),
-    foundMessage = findProtoFor(props.message)
+    props = defineProps({
+      field: Object,
+      fieldPath: String
+    }),
+    { nextFieldPath } = useFieldPath(props),
+    foundMessage = findProtoFor(props.field)
 </script>
 
 <style>

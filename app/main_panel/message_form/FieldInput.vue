@@ -1,12 +1,9 @@
 <template>
-  <OneofInput v-if="fieldType === 'oneof'" :oneof="field"/>
-  <MessageInput v-else-if="fieldType === 'message'" :message="field"/>
-  <EnumInput v-else-if="fieldType === 'enum'" :enumer="field"/>
-  <PrimitiveInput v-else-if="fieldType === 'primitive'" :primitive="field"/>
+  <InputComponent :field="field"/>
 </template>
 
 <script setup>
-  import { ref, watchEffect } from 'vue'
+  import { computed } from 'vue'
   import OneofInput from './OneofInput.vue'
   import EnumInput from './EnumInput.vue'
   import MessageInput from './MessageInput.vue'
@@ -14,5 +11,13 @@
 
   const
     props = defineProps(["field"]),
-    fieldType = ref(props.field.fieldType)
+    fieldTypeComponentMap = {
+      oneof: OneofInput,
+      message: MessageInput,
+      enum: EnumInput,
+      primitive: PrimitiveInput,
+    },
+    InputComponent = computed(() =>
+      fieldTypeComponentMap[props.field.fieldType]
+    )
 </script>

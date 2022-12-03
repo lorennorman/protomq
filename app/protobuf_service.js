@@ -161,7 +161,7 @@ export const
       return
     }
 
-    return message.encode(object)
+    return message.encode(object).finish()
   },
 
   decodeByName = (name, binaryMessage) => {

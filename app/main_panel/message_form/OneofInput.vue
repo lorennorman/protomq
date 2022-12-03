@@ -1,10 +1,10 @@
 <template>
   <label v-if="!selection" class="label">
-    <p>{{ oneof.fieldName }}:</p>
+    <p>{{ field.fieldName }}:</p>
 
     <select v-model="selection">
       <option :value="null">Select One:</option>
-      <option v-for="option in oneof.options" :value="option">
+      <option v-for="option in field.options" :value="option">
         {{ option.fieldName }} ({{ option.type?.split('.').at(-1) }})
       </option>
     </select>
@@ -14,10 +14,10 @@
 </template>
 
 <script setup>
+  import { ref } from 'vue'
   import FieldInput from './FieldInput.vue'
-  import { ref, watchEffect } from 'vue'
-  defineProps(["oneof"])
 
   const
+    props = defineProps(["field"]),
     selection = ref(null)
 </script>

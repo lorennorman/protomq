@@ -16,6 +16,8 @@ export const connect = () => {
     mqttStore = useMQTTStore(),
     client = mqtt.connect(mqttUrl, options)
 
+  mqttStore.client = client
+
   // Subscribe to all messages
   client.on('connect', () => {
     client.subscribe(["#", "$SYS/#"], err => {
