@@ -17,8 +17,8 @@
 </template>
 
 <script setup>
-   import Sidebar from './Sidebar.vue'
-   import MainPanel from './Main.vue'
+   import Sidebar from './sidebar/Sidebar.vue'
+   import MainPanel from './main_panel/Main.vue'
 </script>
 
 <style>

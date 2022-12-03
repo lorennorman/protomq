@@ -7,9 +7,9 @@
 </template>
 
 <script setup>
-  import ProtobufsMenu from './sidebar/ProtobufsMenu.vue'
-  import ClientsMenu from './sidebar/ClientsMenu.vue'
-  import SubscriptionsMenu from './sidebar/SubscriptionsMenu.vue'
+  import ProtobufsMenu from './ProtobufsMenu.vue'
+  import ClientsMenu from './ClientsMenu.vue'
+  import SubscriptionsMenu from './SubscriptionsMenu.vue'
 </script>
 
 <style>
