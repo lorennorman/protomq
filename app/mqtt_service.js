@@ -38,7 +38,7 @@ export const connect = () => {
       mqttStore.clients = map(clientsCollection, "id")
 
       // subscriptions data store update
-      mqttStore.subscriptions =  sortBy(uniq(flatten(map(clientsCollection, "subscriptions"))))
+      mqttStore.subscriptions = sortBy(uniq(flatten(map(clientsCollection, "subscriptions"))))
     }
   })
 }
