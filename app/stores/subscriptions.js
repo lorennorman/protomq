@@ -1,6 +1,7 @@
 import { includes, map, reject, some, without } from 'lodash-es'
 import { ref, computed } from "vue"
 import { defineStore } from "pinia"
+import { get, set } from 'idb-keyval'
 
 export const useSubscriptionStore = defineStore('subscriptions', () => {
   const
@@ -27,6 +28,7 @@ export const useSubscriptionStore = defineStore('subscriptions', () => {
         this.recentSubscriptions.push(sub)
       }
     })
+    saveData()
   }
 
   function toggleFilter(filterToToggle) {
@@ -39,6 +41,7 @@ export const useSubscriptionStore = defineStore('subscriptions', () => {
     if(!includes(this.filters, newFilter)) {
       this.filters.push(newFilter)
     }
+    saveData()
   }
 
   function topicIsFiltered(topic) {
@@ -50,6 +53,20 @@ export const useSubscriptionStore = defineStore('subscriptions', () => {
       // check exact match
       || (filter === topic)
     )
+  }
+
+  async function loadSavedData() {
+    try {
+      const data = JSON.parse(await get('subscriptions'))
+      this.recentSubscriptions = data.recentSubscriptions
+      this.filters = data.filters
+    } catch(jsonError) {
+      console.error(jsonError)
+    }
+  }
+
+  function saveData() {
+    set('subscriptions', JSON.stringify({ recentSubscriptions: recentSubscriptions.value, filters: filters.value }))
   }
 
   return {
@@ -64,6 +81,7 @@ export const useSubscriptionStore = defineStore('subscriptions', () => {
     activeFilters,
     addFilter,
     toggleFilter,
-    topicIsFiltered
+    topicIsFiltered,
+    loadSavedData
   }
 })

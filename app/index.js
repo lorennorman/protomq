@@ -9,10 +9,12 @@ app.use(pinia)
 app.mount('body')
 
 
+import { loadStoreData } from './stores/data_loader'
 import { loadProtoFile } from './protobuf_service'
 import { connect } from './mqtt_service'
 // once page is loaded...
 document.addEventListener("DOMContentLoaded", async () => {
+  await loadStoreData()
   // load the proto files
   await loadProtoFile('/protobufs/signal.proto')
   // and connect to mqtt
