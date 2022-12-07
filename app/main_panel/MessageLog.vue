@@ -1,7 +1,8 @@
 <template>
   <h3>Message Log </h3>
   <div class="messages">
-    <div v-for="message in messages">
+    <p class="hidden-label">{{ rejectedCount }} hidden</p>
+    <div v-for="message in filteredMessages">
       <dl>
         <dt>Topic:</dt> <dd :title="message.topic">{{ renderTopic(message) }}</dd>
         <dt>Payload:</dt> <dd :title='message.message'>{{ renderMessage(message) }}</dd>
@@ -11,14 +12,15 @@
 </template>
 
 <script setup>
-  import { reject, some } from 'lodash-es'
   import { computed } from 'vue'
   import { useMQTTStore } from '../stores/mqtt'
   import { parseMessage } from '../message_parser'
+  import { storeToRefs } from 'pinia'
 
   const
-    hideTopics = ["$SYS/", "state/clients"],
-    messages = computed(() => reject(useMQTTStore().messages, ({ topic }) => some(hideTopics, topicSpec => topic.startsWith(topicSpec)))),
+    mqttStore = useMQTTStore(),
+    { filteredMessages, rejectedMessages } = storeToRefs(mqttStore),
+    rejectedCount = computed(() => rejectedMessages.value.length),
     renderTopic = ({ topic }) => topic.startsWith("$SYS")
       ? `$SYS/.../${topic.split('/').slice(2).join('/')}`
       : topic,

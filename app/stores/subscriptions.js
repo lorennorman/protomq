@@ -6,41 +6,51 @@ export const useSubscriptionStore = defineStore('subscriptions', () => {
   const
     liveSubscriptions = ref([]),
     recentSubscriptions = ref([]),
-    filters = ref(["#", "$SYS/*"]),
+    filters = ref(["#", "$SYS/*", "state/clients"]),
     disabledFilters = ref([]),
     activeFilters = computed(() => without(filters.value, ...disabledFilters.value)),
-    setLiveSubscriptions = function(newSubs) {
-      this.liveSubscriptions = newSubs
-      newSubs.forEach(sub => {
-        if(!includes(this.recentSubscriptions, sub)) {
-          this.recentSubscriptions.push(sub)
-        }
-      })
-    },
     filteredSubscriptions = computed(() => reject(recentSubscriptions.value, sub =>
-      some(activeFilters.value, filter =>
-        (filter.endsWith('*') && sub.startsWith(filter.slice(0, -1)))
-          || (filter.startsWith('*') && sub.endsWith(filter.slice(1)))
-          || (filter === sub)
-      )
+      topicIsFiltered(sub)
     )),
     rejectedSubscriptions = computed(() => without(recentSubscriptions.value, ...filteredSubscriptions.value)),
-    toggleFilter = function(filterToToggle) {
-      includes(this.disabledFilters, filterToToggle)
-        ? this.disabledFilters = without(this.disabledFilters, filterToToggle)
-        : this.disabledFilters.push(filterToToggle)
-    },
-    addFilter = function(newFilter) {
-      if(!includes(this.filters, newFilter)) {
-        this.filters.push(newFilter)
-      }
-    },
     subscriptionsWithStatus = computed(() => map(filteredSubscriptions.value, sub => {
       return {
         topic: sub,
         status: includes(liveSubscriptions.value, sub) ? 'live' : 'recent'
       }
     }))
+
+  function setLiveSubscriptions(newSubs) {
+    this.liveSubscriptions = newSubs
+    newSubs.forEach(sub => {
+      if(!includes(this.recentSubscriptions, sub)) {
+        this.recentSubscriptions.push(sub)
+      }
+    })
+  }
+
+  function toggleFilter(filterToToggle) {
+    includes(this.disabledFilters, filterToToggle)
+      ? this.disabledFilters = without(this.disabledFilters, filterToToggle)
+      : this.disabledFilters.push(filterToToggle)
+  }
+
+  function addFilter(newFilter) {
+    if(!includes(this.filters, newFilter)) {
+      this.filters.push(newFilter)
+    }
+  }
+
+  function topicIsFiltered(topic) {
+    return some(activeFilters.value, filter =>
+      // check trailing wildcards
+      (filter.endsWith('*') && topic.startsWith(filter.slice(0, -1)))
+      // check leading wildcards
+      || (filter.startsWith('*') && topic.endsWith(filter.slice(1)))
+      // check exact match
+      || (filter === topic)
+    )
+  }
 
   return {
     liveSubscriptions,
@@ -53,6 +63,7 @@ export const useSubscriptionStore = defineStore('subscriptions', () => {
     disabledFilters,
     activeFilters,
     addFilter,
-    toggleFilter
+    toggleFilter,
+    topicIsFiltered
   }
 })
