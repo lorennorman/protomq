@@ -1,8 +1,10 @@
 <template>
   <h3>Subscriptions</h3>
   <ul class="subscriptions">
-    <li v-if="filteredSubscriptions.length <= 0">None</li>
-    <li v-for="subscription in filteredSubscriptions">{{ subscription }}</li>
+    <li v-if="subscriptionsWithStatus.length <= 0">None</li>
+    <li v-for="subscription in subscriptionsWithStatus" :title="subscriptionTitle(subscription)">
+      {{ liveStatus(subscription.status) }} {{ subscription.topic }}
+    </li>
   </ul>
 
   <div class="filter-panel">
@@ -41,13 +43,15 @@
   import { useSubscriptionStore } from '../stores/subscriptions'
 
   const
-  subscriptionStore = useSubscriptionStore(),
-    { filteredSubscriptions, rejectedSubscriptions, filters, disabledFilters } = storeToRefs(subscriptionStore),
+    subscriptionStore = useSubscriptionStore(),
+    { subscriptionsWithStatus, rejectedSubscriptions, filters, disabledFilters } = storeToRefs(subscriptionStore),
     { addFilter, toggleFilter } = subscriptionStore,
     hiddenCount = computed(() => rejectedSubscriptions.value.length),
     hideFiltered = ref(true),
     toggleFilterControls = () => hideFiltered.value = !hideFiltered.value,
     filterStatus = filter => includes(disabledFilters.value, filter) ? "❌" : "✅",
+    liveStatus = status => status === 'live' ? "⚡" : "🕓",
+    subscriptionTitle = sub => `(${sub.status}) ${sub.topic}`,
     newFilter = ref(''),
     submitFilter = () => {
       const filterVal = newFilter.value
