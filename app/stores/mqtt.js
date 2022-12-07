@@ -7,6 +7,7 @@ export const useMQTTStore = defineStore('mqtt', () => {
   const
     subStore = useSubscriptionStore(),
     client = ref(null),
+    clientId = computed(() => client.value?.options.clientId),
     messages = ref([]),
     clients = ref([]),
     filteredMessages = computed(() => {
@@ -25,5 +26,5 @@ export const useMQTTStore = defineStore('mqtt', () => {
     this.client.publish(topic, message)
   }
 
-  return { messages, filteredMessages, rejectedMessages, addMessage, publishMessage, clients }
+  return { messages, filteredMessages, rejectedMessages, addMessage, publishMessage, client, clients, clientId }
 })
