@@ -17,10 +17,10 @@
         <span class="close-controls" @click="toggleFilterControls">X</span>
         <p class="list-label">Filters:</p>
         <ul>
-          <li v-for="filter in filterList" @click="toggleFilter(filter)">
+          <li v-for="filter in filters" @click="toggleFilter(filter)">
              {{ filterStatus(filter) }} {{ filter }}
           </li>
-          <li><input type="text" v-model="newFilter" @keyup.enter="addFilter" placeholder="New Filter..."/></li>
+          <li><input type="text" v-model="newFilter" @keyup.enter="submitFilter" placeholder="New Filter..."/></li>
         </ul>
 
         <p class="list-label">Filtered Subscriptions:</p>
@@ -35,37 +35,24 @@
 </template>
 
 <script setup>
-  import { filter, includes, reject, some, without } from 'lodash-es'
+  import { includes } from 'lodash-es'
   import { ref, computed } from 'vue'
   import { storeToRefs } from 'pinia'
-  import { useMQTTStore } from '../stores/mqtt'
+  import { useSubscriptionStore } from '../stores/subscriptions'
 
   const
-    { subscriptions } = storeToRefs(useMQTTStore()),
-    filterList = ref(["#", "$SYS/*"]),
-    disabledFilters = ref(["#"]),
-    activeFilters = computed(() => without(filterList.value, ...disabledFilters.value)),
-    filteredSubscriptions = computed(() => reject(subscriptions.value, sub =>
-      some(activeFilters.value, filter =>
-        (filter.endsWith('*') && sub.startsWith(filter.slice(0, -1)))
-          || (filter === sub)
-      )
-    )),
-    rejectedSubscriptions = computed(() => without(subscriptions.value, ...filteredSubscriptions.value)),
+  subscriptionStore = useSubscriptionStore(),
+    { filteredSubscriptions, rejectedSubscriptions, filters, disabledFilters } = storeToRefs(subscriptionStore),
+    { addFilter, toggleFilter } = subscriptionStore,
     hiddenCount = computed(() => rejectedSubscriptions.value.length),
     hideFiltered = ref(true),
     toggleFilterControls = () => hideFiltered.value = !hideFiltered.value,
-    toggleFilter = filter => {
-      includes(disabledFilters.value, filter)
-        ? disabledFilters.value = without(disabledFilters.value, filter)
-        : disabledFilters.value.push(filter)
-    },
     filterStatus = filter => includes(disabledFilters.value, filter) ? "❌" : "✅",
     newFilter = ref(''),
-    addFilter = () => {
+    submitFilter = () => {
       const filterVal = newFilter.value
       if(filterVal.length > 0) {
-        filterList.value.push(filterVal)
+        addFilter(filterVal)
         newFilter.value = ''
       }
     }

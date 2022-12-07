@@ -5,8 +5,7 @@ export const useMQTTStore = defineStore('mqtt', () => {
   const
     client = ref(null),
     messages = ref([]),
-    clients = ref([]),
-    subscriptions = ref([])
+    clients = ref([])
 
   function addMessage(newMessage) {
     this.messages.unshift(newMessage)
@@ -18,5 +17,5 @@ export const useMQTTStore = defineStore('mqtt', () => {
     this.client.publish(topic, message)
   }
 
-  return { messages, addMessage, publishMessage, clients, subscriptions }
+  return { messages, addMessage, publishMessage, clients }
 })

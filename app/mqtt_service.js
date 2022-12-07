@@ -1,5 +1,6 @@
 import { flatten, map, sortBy, uniq } from "lodash-es"
 import { useMQTTStore } from './stores/mqtt'
+import { useSubscriptionStore } from './stores/subscriptions'
 
 const
   mqttUrl = `ws://localhost:8888`,
@@ -14,6 +15,7 @@ const
 export const connect = () => {
   const
     mqttStore = useMQTTStore(),
+    subscriptionStore = useSubscriptionStore(),
     client = mqtt.connect(mqttUrl, options)
 
   mqttStore.client = client
@@ -38,7 +40,7 @@ export const connect = () => {
       mqttStore.clients = map(clientsCollection, "id")
 
       // subscriptions data store update
-      mqttStore.subscriptions = sortBy(uniq(flatten(map(clientsCollection, "subscriptions"))))
+      subscriptionStore.setLiveSubscriptions(sortBy(uniq(flatten(map(clientsCollection, "subscriptions")))))
     }
   })
 }
