@@ -24,7 +24,7 @@
 <style>
   body {
     display: grid;
-    grid-template: auto 1fr auto / 250px 1fr;
+    grid-template: auto 1fr auto / 550px 1fr;
     height: 100vh;
     margin: 0;
     font-family: Arial, Helvetica, sans-serif;
