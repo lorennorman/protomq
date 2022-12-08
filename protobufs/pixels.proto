@@ -1,0 +1,71 @@
+// SPDX-FileCopyrightText: 2022 Brent Rubell for Adafruit Industries
+// SPDX-License-Identifier: MIT
+// Addressable Pixels API for Adafruit WipperSnapper
+
+syntax = "proto3";
+
+package wippersnapper.pixels.v1;
+// import "nanopb/nanopb.proto";
+
+/**
+* PixelsType defines the type/model of pixel strand.
+*/
+enum PixelsType {
+  PIXELS_TYPE_UNSPECIFIED = 0;
+  PIXELS_TYPE_NEOPIXEL    = 1;
+  PIXELS_TYPE_DOTSTAR     = 2;
+}
+
+/**
+* PixelsOrder defines the color ordering.
+*/
+enum PixelsOrder {
+  PIXELS_ORDER_UNSPECIFIED  = 0; /** Unspecified color ordering, error. */
+  PIXELS_ORDER_GRB          = 1; /** DEFAULT for NeoPixels - Green, Red, Blue */
+  PIXELS_ORDER_GRBW         = 2; /** Green, Red, Blue, White */
+  PIXELS_ORDER_RGB          = 3; /** Red, Green, Blue */
+  PIXELS_ORDER_RGBW         = 4; /** Red, Green, Blue, White */
+  PIXELS_ORDER_BRG          = 5; /** DEFAULT for DotStars - Blue, Red, Green */
+}
+
+/**
+* PixelsCreateRequest represents a call from IO to a device.
+* Creates a strand of addressable pixels.
+* Initial brightness is always 128.
+*/
+message PixelsCreateRequest {
+  PixelsType pixels_type          = 1; /** Defines the model/type of pixel strand */
+  uint32 pixels_num               = 2; /** Number of pixels attached to strand. */
+  PixelsOrder pixels_ordering     = 3; /** Defines the pixel strand's color ordering. */
+  uint32 pixels_brightness        = 4; /** Strand brightness, 0 to 255 */
+  string pixels_pin_neopixel      = 5 [(nanopb).max_size = 6]; /** Generic pin a NeoPixel strand is connected to. */
+  string pixels_pin_dotstar_data  = 6 [(nanopb).max_size = 6]; /** Data pin a DotStar strand is connected to. */
+  string pixels_pin_dotstar_clock = 7 [(nanopb).max_size = 6]; /** Clock pin a DotStar strand is connected to. */
+}
+
+/**
+* PixelsCreateResponse represents response from a WipperSnapper
+* device to IO after a PixelsCreateRequest call
+*/
+message PixelsCreateResponse {
+  bool is_success = 1; /** True if the strand initialized successfully, False otherwise. */
+}
+
+/**
+* PixelCreateRequest represents a call from IO to a device
+* Deletes a strand of addressable pixels and release the resources and pin.
+*/
+message PixelsDeleteRequest {
+  PixelsType pixels_type = 1; /** Defines the model/type of pixel strand */
+  string pixels_pin_data = 2 [(nanopb).max_size = 6]; /** Data pin a strand is connected to. */
+}
+
+/**
+* PixelsWriteRequest represents a call from IO to a device.
+* Writes to a strand of pixels.
+*/
+message PixelsWriteRequest {
+  PixelsType pixels_type   = 1; /** Defines the model/type of pixel strand */
+  string pixels_pin_data   = 2 [(nanopb).max_size = 6]; /** Data pin a strand is connected to. */
+  uint32 pixels_color      = 3; /* 32-bit color value. Most significant byte is white (for RGBW pixels) or ignored (for RGB pixels), next is red, then green, and least significant byte is blue. */
+}
