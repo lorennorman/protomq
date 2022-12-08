@@ -1,48 +1,33 @@
 <template>
-  <h3>Message Log </h3>
-  <div class="messages">
-    <p class="hidden-label">{{ rejectedCount }} hidden</p>
+  <div class="message-log">
+    <h3>Message Log </h3>
 
-    <TransitionGroup name="message-list">
-      <dl v-for="message in filteredMessages" :key="message.id">
-        <dt>Topic:</dt> <dd :title="message.topic">{{ renderTopic(message) }}</dd>
-        <dt>Payload:</dt> <dd :title='message.message'>{{ renderMessage(message) }}</dd>
-      </dl>
-    </TransitionGroup>
+    <div class="messages">
+      <p class="hidden-label">{{ rejectedCount }} hidden</p>
+
+      <TransitionGroup name="message-list">
+        <Message v-for="message in filteredMessages" :message="message" :key="message.id"/>
+      </TransitionGroup>
+    </div>
   </div>
 </template>
 
 <script setup>
   import { computed } from 'vue'
   import { useMQTTStore } from '../stores/mqtt'
-  import { parseMessage } from '../message_parser'
   import { storeToRefs } from 'pinia'
+  import Message from './Message.vue'
 
   const
     mqttStore = useMQTTStore(),
     { filteredMessages, rejectedMessages } = storeToRefs(mqttStore),
-    rejectedCount = computed(() => rejectedMessages.value.length),
-    renderTopic = ({ topic }) => topic.startsWith("$SYS")
-      ? `$SYS/.../${topic.split('/').slice(2).join('/')}`
-      : topic,
-    renderMessage = message => parseMessage(message)
+    rejectedCount = computed(() => rejectedMessages.value.length)
 </script>
 
 <style>
-  main dt {
-    font-weight: bold;
-    color: gray;
+  .message-log {
+    max-width: 550px;
   }
-
-  main dd {
-    font-style: italic;
-  }
-
-  main hr {
-    width: 80%;
-    color: lightgray;
-  }
-
   .message-list-move,
   .message-list-enter-active,
   .message-list-leave-active {
