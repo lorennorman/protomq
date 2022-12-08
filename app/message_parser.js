@@ -10,7 +10,7 @@ const TOPIC_PARSERS = {
   "*/signals/device/servo": "ServoResponse",
   "*/signals/device/ds18x20": "Ds18x20Response",
   "*/signals/device/pwm": "PWMResponse",
-  "*/signals/device/pixel": "PixelResponse",
+  "*/signals/device/pixel": "PixelsResponse",
 }
 
 const parseMessageByTopic = (topic, message) => {
