@@ -8,6 +8,7 @@ package wippersnapper.signal.v1;
 // import "nanopb\.proto";
 
 // WipperSnapper
+import "description.proto";
 import "pin.proto";
 import "i2c.proto";
 import "servo.proto";
