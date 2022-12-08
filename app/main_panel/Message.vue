@@ -34,6 +34,7 @@
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     padding: 5px 15px;
+    border-bottom: 1px solid gray;
   }
 
   .message-payload {
