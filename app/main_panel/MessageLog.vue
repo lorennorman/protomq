@@ -2,6 +2,7 @@
   <h3>Message Log </h3>
   <div class="messages">
     <p class="hidden-label">{{ rejectedCount }} hidden</p>
+
     <div v-for="message in filteredMessages">
       <dl>
         <dt>Topic:</dt> <dd :title="message.topic">{{ renderTopic(message) }}</dd>
