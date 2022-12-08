@@ -3,12 +3,12 @@
   <div class="messages">
     <p class="hidden-label">{{ rejectedCount }} hidden</p>
 
-    <div v-for="message in filteredMessages">
-      <dl>
+    <TransitionGroup name="message-list">
+      <dl v-for="message in filteredMessages" :key="message.id">
         <dt>Topic:</dt> <dd :title="message.topic">{{ renderTopic(message) }}</dd>
         <dt>Payload:</dt> <dd :title='message.message'>{{ renderMessage(message) }}</dd>
       </dl>
-    </div>
+    </TransitionGroup>
   </div>
 </template>
 
@@ -42,4 +42,19 @@
     width: 80%;
     color: lightgray;
   }
+
+  .message-list-move,
+  .message-list-enter-active,
+  .message-list-leave-active {
+    transition: all 0.5s ease;
+  }
+
+  .message-list-enter-from,
+  .message-list-leave-to {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  .message-list-leave-active {
+    position: absolute;
+}
 </style>

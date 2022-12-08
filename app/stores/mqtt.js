@@ -17,7 +17,10 @@ export const useMQTTStore = defineStore('mqtt', () => {
     rejectedMessages = computed(() => without(messages.value, ...filteredMessages.value))
 
   function addMessage(newMessage) {
-    this.messages.unshift(newMessage)
+    this.messages.unshift({
+      ...newMessage,
+      id: `message-${Math.round(Math.random()*10000000000)}`
+    })
   }
 
   function publishMessage(topic, message) {
