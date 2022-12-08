@@ -41,6 +41,7 @@
       // protobuf form encode and send PoC working right here
       const encodedMessage = encodeByName(messageType.value.name, messageObject.value)
       mqttStore.publishMessage(topicValue.value, encodedMessage)
+      setMode('messages')
     }
 </script>
 

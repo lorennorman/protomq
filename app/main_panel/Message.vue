@@ -1,24 +1,29 @@
 <template>
   <div class="message-container">
     <div class="message-topic" :title="message.topic">
-      {{ renderTopic(message) }}
+      {{ prettyTopic }}
     </div>
 
     <div class="message-payload" :title='message.message'>
-      <pre>{{ renderMessage(message) }}</pre>
+      <pre>{{ prettyMessage }}</pre>
     </div>
   </div>
 </template>
 
 <script setup>
+  import { computed } from 'vue'
   import { parseMessage } from '../message_parser'
-  defineProps(["message"])
 
   const
-    renderTopic = ({ topic }) => topic.startsWith("$SYS")
-      ? `$SYS/.../${topic.split('/').slice(2).join('/')}`
-      : topic,
-    renderMessage = message => parseMessage(message)
+    props = defineProps(["message"]),
+    prettyTopic = computed(() => {
+      const topic = props.message.topic
+
+      return topic.startsWith("$SYS")
+        ? `$SYS/.../${topic.split('/').slice(2).join('/')}`
+        : topic
+    }),
+    prettyMessage = computed(() => parseMessage(props.message))
 
 </script>
 
