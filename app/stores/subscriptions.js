@@ -35,6 +35,7 @@ export const useSubscriptionStore = defineStore('subscriptions', () => {
     includes(this.disabledFilters, filterToToggle)
       ? this.disabledFilters = without(this.disabledFilters, filterToToggle)
       : this.disabledFilters.push(filterToToggle)
+    saveData()
   }
 
   function addFilter(newFilter) {
@@ -56,17 +57,26 @@ export const useSubscriptionStore = defineStore('subscriptions', () => {
   }
 
   async function loadSavedData() {
+    let data
     try {
-      const data = JSON.parse(await get('subscriptions'))
-      this.recentSubscriptions = data.recentSubscriptions
-      this.filters = data.filters
+      data = JSON.parse(await get('subscriptions'))
     } catch(jsonError) {
-      console.error(jsonError)
+      console.warn("Error parsing JSON from IndexedDB: ignore this on first run.")
+      console.warn(jsonError)
+      return
     }
+
+    this.recentSubscriptions = data.recentSubscriptions
+    this.filters = data.filters
+    this.disabledFilters = data.disabledFilters || []
   }
 
   function saveData() {
-    set('subscriptions', JSON.stringify({ recentSubscriptions: recentSubscriptions.value, filters: filters.value }))
+    set('subscriptions', JSON.stringify({
+      recentSubscriptions: recentSubscriptions.value,
+      filters: filters.value,
+      disabledFilters: disabledFilters.value
+    }))
   }
 
   return {
