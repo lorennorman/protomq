@@ -25,7 +25,7 @@
     renderTopic = ({ topic }) => topic.startsWith("$SYS")
       ? `$SYS/.../${topic.split('/').slice(2).join('/')}`
       : topic,
-    renderMessage = (message) => parseMessage(message)
+    renderMessage = message => parseMessage(message)
 </script>
 
 <style>

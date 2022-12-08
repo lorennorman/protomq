@@ -29,7 +29,7 @@ const parseMessageByTopic = (topic, message) => {
 export const parseMessage = ({ topic, message }) => {
   // check topic-based parsers
   const parsedMessage = parseMessageByTopic(topic, message)
-  if(parseMessage) { return parsedMessage }
+  if(parsedMessage) { return parsedMessage }
 
   // try json
   try{
