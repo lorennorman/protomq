@@ -15,6 +15,29 @@ import "servo.proto";
 import "pwm.proto";
 import "ds18x20.proto";
 import "pixels.proto";
+import "uart.proto";
+
+/**
+* UARTRequest represents a UART command sent to a device.
+*/
+message UARTRequest {
+  option (nanopb_msgopt).submsg_callback = true;
+  oneof payload {
+    wippersnapper.uart.v1.UARTDeviceAttachRequest req_uart_device_attach = 1;
+    wippersnapper.uart.v1.UARTDeviceDetachRequest req_uart_device_detach = 2;
+  }
+}
+
+/**
+* UARTResponse represents a UART command from a device.
+*/
+message UARTResponse {
+  option (nanopb_msgopt).submsg_callback = true;
+  oneof payload {
+    wippersnapper.uart.v1.UARTDeviceAttachResponse resp_uart_device_attach = 1;
+    wippersnapper.uart.v1.UARTDeviceEvent resp_uart_device_event           = 2;
+  }
+}
 
 /**
 * Ds18x20Request represents a Ds18x20 command sent to a device.

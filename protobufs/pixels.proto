@@ -26,6 +26,9 @@ enum PixelsOrder {
   PIXELS_ORDER_RGB          = 3; /** Red, Green, Blue */
   PIXELS_ORDER_RGBW         = 4; /** Red, Green, Blue, White */
   PIXELS_ORDER_BRG          = 5; /** DEFAULT for DotStars - Blue, Red, Green */
+  PIXELS_ORDER_RBG          = 6; /** Red, Blue Green */
+  PIXELS_ORDER_GBR          = 7; /** Green, Blue, Red */
+  PIXELS_ORDER_BGR          = 8; /** Blue, Green, Red */
 }
 
 /**
@@ -49,6 +52,7 @@ message PixelsCreateRequest {
 */
 message PixelsCreateResponse {
   bool is_success = 1; /** True if the strand initialized successfully, False otherwise. */
+  string pixels_pin_data = 2 [(nanopb).max_size = 6]; /** Data pin the responding strand is connected to. */
 }
 
 /**
