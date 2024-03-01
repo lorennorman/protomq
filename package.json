@@ -5,6 +5,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
+    "import-protos": "node script/copy_and_transform_protobufs.js",
     "start": "(trap 'kill 0' SIGINT; npm run web & npm run broker)",
     "web": "vite dev --clearScreen=false",
     "broker": "node broker.js",
