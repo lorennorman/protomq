@@ -1,4 +1,5 @@
 .ds_store
+.env.json
 
 # Logs
 logs
