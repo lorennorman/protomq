@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 syntax = "proto3";
 package wippersnapper.signal;
-// import "nanopb/nanopb.proto";
+// nanopb import removed
 
 // TODO: Shorten all of these files to:
 // wippersnapper/*.proto

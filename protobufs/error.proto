@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 syntax = "proto3";
 package wippersnapper.error;
-// import "nanopb/nanopb.proto";
+// nanopb import removed
 
 // TODO: Add error handling on the device-side to parse error
 // message and either delay on throttle, or disconnect + exponential retry+jitter
