@@ -1,5 +1,6 @@
 .ds_store
 .env.json
+protobufs/*
 
 # Logs
 logs
