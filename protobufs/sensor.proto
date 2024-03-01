@@ -1,0 +1,97 @@
+// SPDX-FileCopyrightText: 2023 Brent Rubell, Loren Norman for Adafruit Industries
+// SPDX-License-Identifier: MIT
+syntax = "proto3";
+package wippersnapper.sensor;
+
+/**
+* SensorType allows us determine what types of units the sensor uses, etc.
+*/
+enum SensorType {
+  SENSOR_TYPE_UNSPECIFIED                    = 0;  /** Sensor value type which is not defined by this list, "Raw Value: {value}". */
+  SENSOR_TYPE_ACCELEROMETER                  = 1;  /** Acceleration, in meter per second per second, "{value}m/s/s". */
+  SENSOR_TYPE_MAGNETIC_FIELD                 = 2;  /** Magnetic field strength, in micro-Tesla, "{value}µT". */
+  SENSOR_TYPE_ORIENTATION                    = 3;  /** Orientation angle, in degrees, "{value}°". */
+  SENSOR_TYPE_GYROSCOPE                      = 4;  /** Angular rate, in radians per second, "{value}rad/s". */
+  SENSOR_TYPE_LIGHT                          = 5;  /** Light-level, non-unit-specific (For a unit-specific measurement, see: Lux),
+                                                       "Raw Value: {value}". */
+  SENSOR_TYPE_PRESSURE                       = 6;  /** Pressure, in hectopascal, , "{value}hPa". */
+  SENSOR_TYPE_PROXIMITY                      = 8;  /** Distance from an object to a sensor, non-unit-specific, "Raw Value: {value}". */
+  SENSOR_TYPE_GRAVITY                        = 9;  /** Metres per second squared, "{value}m/s^2". */
+  SENSOR_TYPE_LINEAR_ACCELERATION            = 10; /** Acceleration not including gravity, in meter per second squared, "{value}m/s^2". */
+  SENSOR_TYPE_ROTATION_VECTOR                = 11; /** An angle in radians, "{value} rad".*/
+  SENSOR_TYPE_RELATIVE_HUMIDITY              = 12; /** in percent (%), "{value}%". */
+  SENSOR_TYPE_AMBIENT_TEMPERATURE            = 13; /** Temperature of the air around a sensor, in degrees Celsius, "{value}°C". */
+  SENSOR_TYPE_OBJECT_TEMPERATURE             = 14; /** Temperature of the object a sensor is touching/pointed at, in degrees Celsius, "{value}°C".*/
+  SENSOR_TYPE_VOLTAGE                        = 15; /** Volts, "{value}V". */
+  SENSOR_TYPE_CURRENT                        = 16; /** Milliamps, "{value}mA". */
+  SENSOR_TYPE_COLOR                          = 17; /** Values are in 0..1.0 RGB channel luminosity and 32-bit RGBA format. "Color: {value}".*/
+  SENSOR_TYPE_RAW                            = 18; /** Sensor reads a value which is not defined by this list, "Raw Value: {value}".*/
+  SENSOR_TYPE_PM10_STD                       = 19; /** Standard Particulate Matter 1.0, in ppm, "{value}ppm". */
+  SENSOR_TYPE_PM25_STD                       = 20; /** Standard Particulate Matter 2.5, in ppm, "{value}ppm". */
+  SENSOR_TYPE_PM100_STD                      = 21; /** Standard Particulate Matter 100, in ppm, "{value}ppm". */
+  SENSOR_TYPE_PM10_ENV                       = 22; /** Environmental Particulate Matter 1.0, in ppm, "{value}ppm". */
+  SENSOR_TYPE_PM25_ENV                       = 23; /** Environmental Particulate Matter 2.5, in ppm, "{value}ppm". */
+  SENSOR_TYPE_PM100_ENV                      = 24; /** Environmental Particulate Matter 100, in ppm, "{value}ppm".*/
+  SENSOR_TYPE_CO2                            = 25; /** Measured CO2, in ppm, "{value}ppm". */
+  SENSOR_TYPE_GAS_RESISTANCE                 = 26; /** Proportional to the amount of VOC particles in the air, in Ohms, "{value}Ω". */
+  SENSOR_TYPE_ALTITUDE                       = 27; /** Values are in meters (m), "${$v} m". */
+  SENSOR_TYPE_LUX                            = 28; /** Light level, in lux, "Lux: {value}". */
+  SENSOR_TYPE_ECO2                           = 29; /** equivalent/estimated CO2 in ppm (estimated from some other measurement), "{value}ppm". */
+  SENSOR_TYPE_UNITLESS_PERCENT               = 30; /** Percentage, unit-less, "{value}%". */
+  SENSOR_TYPE_AMBIENT_TEMPERATURE_FAHRENHEIT = 31; /** Temperature of the air around a sensor, in degrees Fahrenheit, "{value}°F". */
+  SENSOR_TYPE_OBJECT_TEMPERATURE_FAHRENHEIT  = 32; /** Temperature of the object a sensor is touching/pointed at, in Fahrenheit, "{value}°F".*/
+  SENSOR_TYPE_VOC_INDEX                      = 33; /** Values are an index from 1-500 with 100 being normal, "${$v} VOC".*/
+  SENSOR_TYPE_NOX_INDEX                      = 34; /** Values are an index from 1-500 with 100 being normal, "${$v} NOx".*/
+  SENSOR_TYPE_TVOC                           = 35; /** Values are in parts per billion (ppb), "${$v} ppb". */
+  SENSOR_TYPE_BYTES                          = 36; /** Values are in bytes, "${$v} bytes". */
+}
+
+/**
+* SensorProperties is used to define the sensor's type and period.
+*/
+message SensorProperties {
+  SensorType sensor_type = 1; /** The sensor's type. */
+  uint32 sensor_period   = 2; /** The sensor's period, in milliseconds. */
+}
+
+/**
+* SensorEvent  is used to return the sensor's value and type.
+*/
+message SensorEvent {
+  SensorType type                            = 1; /** The sensor's type and corresponding SI unit */
+  oneof value {
+    float float_value                        = 2; /** The sensor's value as a float. */
+    bytes bytes_value                        = 3; /** The sensor's value as a byte array. */
+    SensorEvent3DVector vector_value         = 4; /** The sensor's 3D vector values, as floats. */
+    SensorEventOrientation orientation_value = 5; /** The sensor's orientation values, as floats. */
+    SensorEventColor color_value             = 6; /** The sensor's color values, as floats. */
+  }
+
+  /**
+  * SensorEventColor is used to return a sensor's color values in RGB colorspace.
+  */
+  message SensorEventColor {
+    float r = 1; /** The sensor's red channel value as a float. */
+    float g = 2; /** The sensor's green channel value as a float. */
+    float b = 3; /** The sensor's blue channel value as a float. */
+    float a = 4; /** The sensor's (optional) alpha channel value as a float. */
+  }
+
+  /**
+  * SensorEvent3DVector is used to return a sensor's 3D vector values.
+  */
+  message SensorEvent3DVector {
+    float x = 1; /** The sensor's x-axis value as a float. */
+    float y = 2; /** The sensor's y-axis value as a float. */
+    float z = 3; /** The sensor's z-axis value as a float. */
+  }
+
+  /**
+  * SensorEventOrientation is used to return an orientation sensor's values.
+  */
+  message SensorEventOrientation {
+    float roll    = 1; /** The sensor's roll value as a float. */
+    float pitch   = 2; /** The sensor's pitch value as a float. */
+    float heading = 3; /** The sensor's heading value as a float. */
+  }
+}

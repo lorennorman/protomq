@@ -1,9 +1,8 @@
-// SPDX-FileCopyrightText: 2021 Brent Rubell for Adafruit Industries
+// SPDX-FileCopyrightText: 2021-2023 Brent Rubell for Adafruit Industries
 // SPDX-License-Identifier: MIT
 syntax = "proto3";
-
-package wippersnapper.i2c.v1;
-// import "nanopb\.proto";
+package wippersnapper.i2c;
+import "sensor.proto";
 
 /**
 * BusResponse represents the state of the I2C bus, from a device.
@@ -14,16 +13,17 @@ enum BusResponse {
   BUS_RESPONSE_ERROR_HANG          = 2; /** I2C Bus hang, user should reset their board if this persists. **/
   BUS_RESPONSE_ERROR_PULLUPS       = 3; /** I2C bus failed to initialize - SDA or SCL needs a pull up. **/
   BUS_RESPONSE_ERROR_WIRING        = 4; /** I2C bus failed to communicate - Please check your wiring. **/
-  BUS_RESPONSE_UNSUPPORTED_SENSOR  = 5; /** WipperSnapper firmware is outdated and does not include the sensor type - Please update your WipperSnapper firmware. **/
+  BUS_RESPONSE_UNSUPPORTED_SENSOR  = 5; /** WipperSnapper firmware is outdated and does not include
+                                            the sensor type - Please update your WipperSnapper firmware. **/
   BUS_RESPONSE_DEVICE_INIT_FAIL    = 6; /** I2C device failed to initialize. **/
   BUS_RESPONSE_DEVICE_DEINIT_FAIL  = 7; /** I2C device failed to de-initialize. **/
 }
 
 /**
-* I2CBusInitRequest represents a request to
+* I2CBusInit represents a  to
 * initialize the I2C bus from the broker.
 */
-message I2CBusInitRequest {
+message I2CBusInit {
   int32  i2c_pin_scl     = 1; /** The desired I2C SCL pin. */
   int32  i2c_pin_sda     = 2; /** The desired I2C SDA pin. */
   uint32 i2c_frequency   = 3; /** The desired I2C SCL frequency, in Hz. Default is 100000Hz. */
@@ -31,177 +31,97 @@ message I2CBusInitRequest {
 }
 
 /**
-* I2CBusInitResponse represents a response to I2CBusInitRequest
+* I2CBusInitResponse represents a response to I2CBusInit
 */
 message I2CBusInitResponse {
-  bool is_initialized  = 1 [deprecated = true, (nanopb).type = FT_IGNORE]; /** True if the I2C port has been initialized successfully, False otherwise. */
-  BusResponse bus_response = 2; /** Whether the I2C bus initialized properly or failed. **/
+  BusResponse bus_response = 1; /** Whether the I2C bus initialized properly or failed. **/
 }
 
-/**
-* I2CBusSetFrequency represents a request to change the
-* I2C clock speed to a desired frequency, in Hz.
-*/
-message I2CBusSetFrequency {
-  uint32 frequency = 1; /** The desired I2C SCL frequency, in Hz. */
-  int32 bus_id     = 2; /** An optional I2C bus identifier, if multiple exist. */
-}
 
 /**
-* I2CBusScanRequest represents the parameters required to execute
+* I2CScan represents the parameters required to execute
 * a device's I2C scan.
 */
-message I2CBusScanRequest {
-  int32 i2c_port_number              = 1; /** The desired I2C port to scan. */
-  I2CBusInitRequest bus_init_request = 2; /** The I2C bus initialization request. */
+message I2CScan {
+  int32 i2c_port_number  = 1; /** The desired I2C port to scan. */
+  I2CBusInit bus_init    = 2; /** The I2C bus initialization . */
 }
 
 /**
-* I2CBusScanResponse represents a list of I2C addresses
-* found on the bus after I2CBusScanRequest has executed.
+* I2CScanResponse represents a list of I2C addresses
+* found on the bus after I2CScan has executed.
 */
-message I2CBusScanResponse {
-  repeated uint32 addresses_found  = 1 [packed=true, (nanopb).max_count = 120]; /** The 7-bit addresses of the I2C devices found on the bus, empty if not found. */
+message I2CScanResponse {
+  repeated uint32 found_addresses  = 1 [packed=true]; /** The 7-bit addresses of the I2C devices found on the bus, empty if not found. */
   BusResponse bus_response         = 2; /** The I2C bus' status. **/
 }
 
 /**
-* I2CDeviceSensorProperties contains
+* I2CSensorProperties contains
 * the properties of an I2C device's sensor such as
 * its type and period.
 */
-message I2CDeviceSensorProperties {
-  SensorType sensor_type = 1;
-  uint32 sensor_period   = 2;
+message I2CSensorProperties {
+  wippersnapper.sensor.SensorType sensor_type = 1; /** The type of I2C sensor. **/
 }
 
-
 /**
-* Represents a list of I2CDeviceInitRequest messages.
+* I2CInit is a wrapper message for
+* an I2C device initialization .
 */
-message I2CDeviceInitRequests {
-  repeated I2CDeviceInitRequest list = 1;
+message I2CInit {
+  int32  i2c_port_number                                            = 1; /** The desired I2C port to initialize an I2C device on. */
+  I2CBusInit i2c_bus_init_req                                       = 2; /** An I2C bus initialization . */
+  uint32 i2c_device_address                                         = 3; /** The 7-bit I2C address of the device on the bus. */
+  string i2c_device_name                                            = 4; /** The I2C device's name, MUST MATCH the name on the JSON definition file on
+                                                                     https://github.com/adafruit/Wippersnapper_Components. */
+  repeated wippersnapper.sensor.SensorProperties sensor_properties  = 5; /** Properties of each sensor on the I2C device. */
 }
 
 /**
-* I2CDeviceInitRequest is a wrapper message for
-* an I2C device initialization request.
+* I2CAdded contains the response from a
+* device after processing a I2CInit message.
 */
-message I2CDeviceInitRequest {
-  int32  i2c_port_number                                    = 1; /** The desired I2C port to initialize an I2C device on. */
-  I2CBusInitRequest i2c_bus_init_req                        = 2; /** An I2C bus initialization request. */
-  uint32 i2c_device_address                                 = 3; /** The 7-bit I2C address of the device on the bus. */
-  string i2c_device_name                                    = 4[(nanopb).max_size = 15]; /** The I2C device's name, MUST MATCH the name on the JSON definition file on https://github.com/adafruit/Wippersnapper_Components. */
-  repeated I2CDeviceSensorProperties i2c_device_properties  = 5[(nanopb).max_count = 15]; /** Properties of each sensor on the I2C device. */
+message I2CAdded {
+  uint32 i2c_device_address   = 1; /** The 7-bit I2C address of the device on the bus. */
+  BusResponse bus_response    = 2; /** The I2C bus' status. **/
 }
 
-/**
-* I2CDeviceInitResponse contains the response from a
-* device after processing a I2CDeviceInitRequest message.
-*/
-message I2CDeviceInitResponse {
-  bool is_success             = 1 [deprecated = true, (nanopb).type = FT_IGNORE]; /** !!DEPRECATED!! True if i2c device initialized successfully, false otherwise. */
-  uint32 i2c_device_address   = 2; /** The 7-bit I2C address of the device on the bus. */
-  BusResponse bus_response    = 3; /** The I2C bus' status. **/
-}
 
 /**
-* I2CDeviceUpdateRequest is a wrapper message which
-* contains a message to update a specific device's properties.
-*/
-message I2CDeviceUpdateRequest {
-  int32  i2c_port_number                                    = 1; /** The desired I2C port. */
-  uint32 i2c_device_address                                 = 2; /** The 7-bit I2C address of the device on the bus. */
-  string i2c_device_name                                    = 3[(nanopb).max_size = 15]; /** The I2C device's name, MUST MATCH the name on the JSON file. */
-  repeated I2CDeviceSensorProperties i2c_device_properties  = 4[(nanopb).max_count = 15]; /** Properties for the I2C device's sensors. */
-}
-
-/**
-* I2CDeviceUpdateResponse represents if an I2C device's
+* I2CUpdateResponse represents if an I2C device's
 * sensor(s) is/are successfully updated.
 */
-message I2CDeviceUpdateResponse {
+message I2CUpdateResponse {
   uint32 i2c_device_address   = 1; /** The 7-bit I2C address of the device which was updated. */
-  bool is_success             = 2 [deprecated = true, (nanopb).type = FT_IGNORE]; /** !!DEPRECATED!! True if the update request succeeded, False otherwise. */
-  BusResponse bus_response    = 3; /** The I2C bus' status. **/
+  BusResponse bus_response    = 2; /** The I2C bus' status. **/
 }
 
 /**
-* I2CDeviceDeinitRequest is a wrapper message containing
-* a deinitialization request for a specific i2c device.
+* I2CRemove is a wrapper message containing
+* a deinitialization  for a specific i2c device.
 */
-message I2CDeviceDeinitRequest {
+message I2CRemove {
   int32  i2c_port_number        = 1; /** The desired I2C port to de-initialize an I2C device on. */
   uint32 i2c_device_address     = 2; /** The 7-bit I2C address of the device on the bus. */
 }
 
 /**
-* I2CDeviceDeinitResponse represents if an I2C device's
+* I2CRemoved represents if an I2C device's
 * sensor(s) is/are successfully de-initialized.
 */
-message I2CDeviceDeinitResponse {
-  bool is_success           = 1 [deprecated = true, (nanopb).type = FT_IGNORE]; /** True if the deinitialization request succeeded, False otherwise. */
-  uint32 i2c_device_address = 2; /** The 7-bit I2C address of the device which was initialized. */
-  BusResponse bus_response  = 3; /** The I2C bus' status. **/
+message I2CRemoved {
+  uint32 i2c_device_address = 1; /** The 7-bit I2C address of the device which was initialized. */
+  BusResponse bus_response  = 2; /** The I2C bus' status. **/
 }
 
-/** Adafruit Unified Sensor Library Messages. */
 
 /**
-* SensorType allows us determine what types of units the sensor uses, etc.
-*/
-enum SensorType {
-  SENSOR_TYPE_UNSPECIFIED                    = 0;  /** Sensor value type which is not defined by this list, "Raw Value: {value}". */
-  SENSOR_TYPE_ACCELEROMETER                  = 1;  /** Acceleration, in meter per second per second, "{value}m/s/s". */
-  SENSOR_TYPE_MAGNETIC_FIELD                 = 2;  /** Magnetic field strength, in micro-Tesla, "{value}µT". */
-  SENSOR_TYPE_ORIENTATION                    = 3;  /** Orientation angle, in degrees, "{value}°". */
-  SENSOR_TYPE_GYROSCOPE                      = 4;  /** Angular rate, in radians per second, "{value}rad/s". */
-  SENSOR_TYPE_LIGHT                          = 5;  /** Light-level, non-unit-specific (For a unit-specific measurement, see: Lux), , "Raw Value: {value}". */
-  SENSOR_TYPE_PRESSURE                       = 6;  /** Pressure, in hectopascal, , "{value}hPa". */
-  SENSOR_TYPE_PROXIMITY                      = 8;  /** Distance from an object to a sensor, non-unit-specific, "Raw Value: {value}". */
-  SENSOR_TYPE_GRAVITY                        = 9;  /** Metres per second squared, "{value}m/s^2". */
-  SENSOR_TYPE_LINEAR_ACCELERATION            = 10; /** Acceleration not including gravity, in meter per second squared, "{value}m/s^2". */
-  SENSOR_TYPE_ROTATION_VECTOR                = 11; /** An angle in radians, "{value} rad".*/
-  SENSOR_TYPE_RELATIVE_HUMIDITY              = 12; /** in percent (%), "{value}%". */
-  SENSOR_TYPE_AMBIENT_TEMPERATURE            = 13; /** Temperature of the air around a sensor, in degrees Celsius, "{value}°C". */
-  SENSOR_TYPE_OBJECT_TEMPERATURE             = 14; /** Temperature of the object a sensor is touching/pointed at, in degrees Celsius, "{value}°C".*/
-  SENSOR_TYPE_VOLTAGE                        = 15; /** Volts, "{value}V". */
-  SENSOR_TYPE_CURRENT                        = 16; /** Milliamps, "{value}mA". */
-  SENSOR_TYPE_COLOR                          = 17; /** Values are in 0..1.0 RGB channel luminosity and 32-bit RGBA format. "Color: {value}".*/
-  SENSOR_TYPE_RAW                            = 18; /** Sensor reads a value which is not defined by this list, "Raw Value: {value}".*/
-  SENSOR_TYPE_PM10_STD                       = 19; /** Standard Particulate Matter 1.0, in ppm, "{value}ppm". */
-  SENSOR_TYPE_PM25_STD                       = 20; /** Standard Particulate Matter 2.5, in ppm, "{value}ppm". */
-  SENSOR_TYPE_PM100_STD                      = 21; /** Standard Particulate Matter 100, in ppm, "{value}ppm". */
-  SENSOR_TYPE_PM10_ENV                       = 22; /** Environmental Particulate Matter 1.0, in ppm, "{value}ppm". */
-  SENSOR_TYPE_PM25_ENV                       = 23; /** Environmental Particulate Matter 2.5, in ppm, "{value}ppm". */
-  SENSOR_TYPE_PM100_ENV                      = 24; /** Environmental Particulate Matter 100, in ppm, "{value}ppm".*/
-  SENSOR_TYPE_CO2                            = 25; /** Measured CO2, in ppm, "{value}ppm". */
-  SENSOR_TYPE_GAS_RESISTANCE                 = 26; /** Proportional to the amount of VOC particles in the air, in Ohms, "{value}Ω". */
-  SENSOR_TYPE_ALTITUDE                       = 27; /** Values are in meters (m), "${$v} m". */
-  SENSOR_TYPE_LUX                            = 28; /** Light level, in lux, "Lux: {value}". */
-  SENSOR_TYPE_ECO2                           = 29; /** equivalent/estimated CO2 in ppm (estimated from some other measurement), "{value}ppm". */
-  SENSOR_TYPE_UNITLESS_PERCENT               = 30; /** Percentage, unit-less, "{value}%". */
-  SENSOR_TYPE_AMBIENT_TEMPERATURE_FAHRENHEIT = 31; /** Temperature of the air around a sensor, in degrees Fahrenheit, "{value}°F". */
-  SENSOR_TYPE_OBJECT_TEMPERATURE_FAHRENHEIT  = 32; /** Temperature of the object a sensor is touching/pointed at, in degrees Fahrenheit, "{value}°F".*/
-  SENSOR_TYPE_VOC_INDEX                      = 33; /** Values are an index from 1-500 with 100 being normal, "${$v} VOC".*/
-  SENSOR_TYPE_NOX_INDEX                      = 34; /** Values are an index from 1-500 with 100 being normal, "${$v} NOx".*/
-  SENSOR_TYPE_TVOC                           = 35; /** Values are in parts per billion (ppb), "${$v} ppb". */
-}
-
-/**
-* SensorEvent  is used to return the sensor's value and type.
-*/
-message SensorEvent {
-  SensorType type = 1; /** The sensor's type and corresponding SI unit */
-  float value     = 2; /** The sensor's value */
-}
-
-/**
-* Each I2CDeviceEvent represents data from **one** I2C sensor.
-* NOTE: An I2CDeviceEvent can have multiple sensor events if
+* Each I2CEvent represents data from **one** I2C sensor.
+* NOTE: An I2CEvent can have multiple sensor events if
 * the I2C device contains > 1 sensor.
 */
-message I2CDeviceEvent {
-  uint32 sensor_address              = 1; /** The 7-bit I2C address of the I2C device. */
-  repeated SensorEvent sensor_event  = 2[(nanopb).max_count = 15]; /** A, optionally repeated, SensorEvent from a sensor. */
+message I2CEvent {
+  uint32 sensor_address                                       = 1; /** The 7-bit I2C address of the I2C device. */
+  repeated wippersnapper.sensor.SensorEvent sensor_events     = 2; /** A, optionally repeated, SensorEvent from a sensor. */
 }

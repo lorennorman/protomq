@@ -1,19 +1,16 @@
-// SPDX-FileCopyrightText: 2022 Brent Rubell for Adafruit Industries
+// SPDX-FileCopyrightText: 2022-2023 Brent Rubell for Adafruit Industries
 // SPDX-License-Identifier: MIT
 // Addressable Pixels API for Adafruit WipperSnapper
-
 syntax = "proto3";
-
-package wippersnapper.pixels.v1;
-// import "nanopb/nanopb.proto";
+package wippersnapper.pixels;
 
 /**
 * PixelsType defines the type/model of pixel strand.
 */
 enum PixelsType {
-  PIXELS_TYPE_UNSPECIFIED = 0;
-  PIXELS_TYPE_NEOPIXEL    = 1;
-  PIXELS_TYPE_DOTSTAR     = 2;
+  PIXELS_TYPE_UNSPECIFIED = 0; /** Unspecified pixel type, error. */
+  PIXELS_TYPE_NEOPIXEL    = 1; /** NeoPixel pixel strand. */
+  PIXELS_TYPE_DOTSTAR     = 2; /** DotStar pixel strand. */
 }
 
 /**
@@ -32,44 +29,45 @@ enum PixelsOrder {
 }
 
 /**
-* PixelsCreateRequest represents a call from IO to a device.
-* Creates a strand of addressable pixels.
+* PixelsAdd represents a call from IO to a device.
+* Adds a strand of addressable pixels.
 * Initial brightness is always 128.
 */
-message PixelsCreateRequest {
+message PixelsAdd {
   PixelsType pixels_type          = 1; /** Defines the model/type of pixel strand */
   uint32 pixels_num               = 2; /** Number of pixels attached to strand. */
   PixelsOrder pixels_ordering     = 3; /** Defines the pixel strand's color ordering. */
   uint32 pixels_brightness        = 4; /** Strand brightness, 0 to 255 */
-  string pixels_pin_neopixel      = 5 [(nanopb).max_size = 6]; /** Generic pin a NeoPixel strand is connected to. */
-  string pixels_pin_dotstar_data  = 6 [(nanopb).max_size = 6]; /** Data pin a DotStar strand is connected to. */
-  string pixels_pin_dotstar_clock = 7 [(nanopb).max_size = 6]; /** Clock pin a DotStar strand is connected to. */
+  string pixels_pin_neopixel      = 5; /** Generic pin a NeoPixel strand is connected to. */
+  string pixels_pin_dotstar_data  = 6; /** Data pin a DotStar strand is connected to. */
+  string pixels_pin_dotstar_clock = 7; /** Clock pin a DotStar strand is connected to. */
 }
 
 /**
-* PixelsCreateResponse represents response from a WipperSnapper
-* device to IO after a PixelsCreateRequest call
+* PixelsAdded represents response from a WipperSnapper
+* device to IO after a PixelsAdd call
 */
-message PixelsCreateResponse {
+message PixelsAdded {
   bool is_success = 1; /** True if the strand initialized successfully, False otherwise. */
-  string pixels_pin_data = 2 [(nanopb).max_size = 6]; /** Data pin the responding strand is connected to. */
+  string pixels_pin_data = 2; /** Data pin the responding strand is connected to. */
 }
 
 /**
-* PixelCreateRequest represents a call from IO to a device
-* Deletes a strand of addressable pixels and release the resources and pin.
+* PixelAdd represents a call from IO to a device
+* Removes a strand of addressable pixels and release the resources and pin.
 */
-message PixelsDeleteRequest {
+message PixelsRemove {
   PixelsType pixels_type = 1; /** Defines the model/type of pixel strand */
-  string pixels_pin_data = 2 [(nanopb).max_size = 6]; /** Data pin a strand is connected to. */
+  string pixels_pin_data = 2; /** Data pin a strand is connected to. */
 }
 
 /**
-* PixelsWriteRequest represents a call from IO to a device.
+* PixelsWrite represents a call from IO to a device.
 * Writes to a strand of pixels.
 */
-message PixelsWriteRequest {
+message PixelsWrite {
   PixelsType pixels_type   = 1; /** Defines the model/type of pixel strand */
-  string pixels_pin_data   = 2 [(nanopb).max_size = 6]; /** Data pin a strand is connected to. */
-  uint32 pixels_color      = 3; /* 32-bit color value. Most significant byte is white (for RGBW pixels) or ignored (for RGB pixels), next is red, then green, and least significant byte is blue. */
+  string pixels_pin_data   = 2; /** Data pin a strand is connected to. */
+  uint32 pixels_color      = 3; /* 32-bit color value. Most significant byte is white (for RGBW pixels) or ignored (for RGB pixels),
+                                   next is red, then green, and least significant byte is blue. */
 }

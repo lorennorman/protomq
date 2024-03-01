@@ -1,0 +1,50 @@
+// SPDX-FileCopyrightText: 2023 Brent Rubell, Loren Norman, Tyeth Gundry for Adafruit Industries
+// SPDX-License-Identifier: MIT
+syntax = "proto3";
+package wippersnapper.digitalio;
+
+/**
+* DigitalIOSampleMode specifies the pin's sample mode.
+*/
+enum DigitalIOSampleMode {
+  DIGITAL_IO_SAMPLE_MODE_UNSPECIFIED = 0; /** Invalid Sample Mode from Broker. */
+  DIGITAL_IO_SAMPLE_MODE_TIMER       = 1; /** Periodically sample the pin's value. */
+  DIGITAL_IO_SAMPLE_MODE_EVENT       = 2; /** Sample the pin's value when an event occurs. */
+}
+
+/**
+* DigitalIODirection specifies the pin's direction, INPUT/INPUT_PULL_UP/OUTPUT.
+*/
+enum DigitalIODirection {
+  DIGITAL_IO_DIRECTION_UNSPECIFIED = 0; /** Invalid Direction from Broker. */
+  DIGITAL_IO_DIRECTION_INPUT       = 1; /** Set the pin to behave as an input. */
+  DIGITAL_IO_DIRECTION_INPUT_PULL_UP = 2; /** Set the pin to behave as an input. */
+  DIGITAL_IO_DIRECTION_OUTPUT      = 3; /** Set the pin to behave as an output. */
+}
+
+/**
+* DigitalIOAdd adds a digital pin to the device.
+*/
+message DigitalIOAdd {
+  int32 gpio_num                    = 1; /** The pin's GPIO number. */
+  DigitalIODirection gpio_direction = 2; /** The pin's direction. */
+  DigitalIOSampleMode sample_mode   = 3; /** Specifies the pin's sample mode. */
+  float period                      = 4; /** Time between measurements in seconds, if MODE_TIMER. */
+  bool value                        = 5; /** Re-sync only - send the pin's value. */
+}
+
+/**
+* DigitalIORemove removes a digital pin from the device.
+*/
+message DigitalIORemove {
+  int32 gpio_num = 1; // correlates with `name` in the JSON
+}
+
+/**
+* DigitalIOEvent is sent from the device to the broker when a digital pin's value changes.
+*/
+message DigitalIOEvent {
+  int32 gpio_num = 1; // correlates with `name` in the JSON
+  bool value = 2;     // correlates with `value` in the JSON
+}
+
