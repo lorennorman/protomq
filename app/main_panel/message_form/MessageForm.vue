@@ -10,7 +10,11 @@
 
     <label class="label">
       <p>Topic:</p>
-      <input class="topic-input" type="text" v-model="topicValue"/>
+      <button @click="toggleManualTopic">x</button>
+      <input v-if="manualTopic" class="topic-input" type="text" v-model="topicValue"/>
+      <select v-else v-model="topicValue">
+        <option v-for="subscription in filteredSubscriptions" :value="subscription">{{ subscription }}</option>
+      </select>
     </label>
 
     <FieldInput v-for="field in messageType.fields" :field="field" :key="messageType.name + field.fieldName"/>
@@ -26,6 +30,7 @@
   import { ref } from 'vue'
   import { useUIStore } from '/app/stores/ui'
   import { useMessageStore } from '/app/stores/message'
+  import { useSubscriptionStore } from '/app/stores/subscriptions'
   import { storeToRefs } from 'pinia'
   import FieldInput from './FieldInput.vue'
   import { encodeByName } from '/app/protobuf_service'
@@ -35,8 +40,11 @@
     messageStore = useMessageStore(),
     mqttStore = useMQTTStore(),
     { setMode } = useUIStore(),
-    { messageObject, messageType, messageEncoded } = storeToRefs(messageStore),
-    topicValue = ref(''),
+    { messageObject, messageType } = storeToRefs(messageStore),
+    { filteredSubscriptions } = storeToRefs(useSubscriptionStore()),
+    topicValue = ref(filteredSubscriptions.value[0]),
+    manualTopic = ref(!topicValue.value),
+    toggleManualTopic = () => manualTopic.value = !manualTopic.value,
     submitMessage = () => {
       // protobuf form encode and send PoC working right here
       const encodedMessage = encodeByName(messageType.value.name, messageObject.value)
