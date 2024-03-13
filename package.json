@@ -14,16 +14,16 @@
   "author": "Loren Norman",
   "license": "MIT",
   "dependencies": {
-    "@vitejs/plugin-vue": "^3.2.0",
+    "@vitejs/plugin-vue": "^5.0",
     "aedes": "^0.48.0",
     "google-protobuf": "^3.21.2",
     "idb-keyval": "^6.2.0",
     "lodash-es": "^4.17.21",
-    "pinia": "^2.0.26",
-    "vue": "^3.2.45",
+    "pinia": "^2.1",
+    "vue": "^3.4",
     "websocket-stream": "^5.5.2"
   },
   "devDependencies": {
-    "vite": "^3.2.4"
+    "vite": "^5.0"
   }
 }
