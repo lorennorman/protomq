@@ -2,22 +2,31 @@
   <label v-if="!selection" class="label">
     <p>{{ field.fieldName }}:</p>
 
-    <select v-model="selection">
+    <select v-model="selectedIndex">
       <option :value="null">Select One:</option>
-      <option v-for="option in field.options" :value="option">
+      <option v-for="(option, index) in field.options" :value="index">
         {{ option.fieldName }} ({{ option.type?.split('.').at(-1) }})
       </option>
     </select>
   </label>
 
-  <FieldInput v-else :field="selection" />
+  <template v-else>
+    <button @click="clearSelection">x</button>
+    <FieldInput :field="selection" />
+  </template>
 </template>
 
 <script setup>
-  import { ref } from 'vue'
+  import { computed } from 'vue'
   import FieldInput from './FieldInput.vue'
 
   const
-    props = defineProps(["field"]),
-    selection = ref(null)
+    props = defineProps(["field", "fieldPath"]),
+    selectedIndex = defineModel({ default: 0 }),
+    selection = computed(() => props.field.options[selectedIndex.value]),
+    clearSelection = () => selectedIndex.value = null
 </script>
+
+<style scoped>
+ button { cursor: pointer; }
+</style>
