@@ -10,6 +10,7 @@
 </template>
 
 <script setup>
+  import { computed } from 'vue'
   import { findProtoFor } from '../../protobuf_service'
   import FieldInput from './FieldInput.vue'
   import { useFieldPath } from './use_field_path';
@@ -20,7 +21,7 @@
       fieldPath: String
     }),
     { nextFieldPath } = useFieldPath(props),
-    foundMessage = findProtoFor(props.field)
+    foundMessage = computed(() => findProtoFor(props.field))
 </script>
 
 <style>

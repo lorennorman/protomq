@@ -17,7 +17,7 @@
       </select>
     </label>
 
-    <FieldInput v-for="field in messageType.fields" :field="field" :key="messageType.name + field.fieldName"/>
+    <FieldInput v-for="field in messageType.fields" :field="field" :key="messageType.name + '.' + field.fieldName"/>
 
     <div class="action-bar">
       <button @click="setMode('messages')">Cancel</button>

@@ -1,19 +1,19 @@
 <template>
-  <label v-if="!selection" class="label">
+  <label class="label">
     <p>{{ field.fieldName }}:</p>
 
+    <button v-if="selection" @click="clearSelection">x</button>
+
     <select v-model="selectedIndex">
-      <option :value="null">Select One:</option>
+      <option :value="null">One Of:</option>
       <option v-for="(option, index) in field.options" :value="index">
         {{ option.fieldName }} ({{ option.type?.split('.').at(-1) }})
       </option>
     </select>
   </label>
 
-  <template v-else>
-    <button @click="clearSelection">x</button>
-    <FieldInput :field="selection" />
-  </template>
+  <FieldInput v-if="selection" :field="selection" />
+
 </template>
 
 <script setup>
@@ -22,7 +22,7 @@
 
   const
     props = defineProps(["field", "fieldPath"]),
-    selectedIndex = defineModel({ default: 0 }),
+    selectedIndex = defineModel({ default: null }),
     selection = computed(() => props.field.options[selectedIndex.value]),
     clearSelection = () => selectedIndex.value = null
 </script>
