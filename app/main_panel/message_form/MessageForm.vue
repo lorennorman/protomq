@@ -21,7 +21,7 @@
 
     <div class="action-bar">
       <button @click="setMode('messages')">Cancel</button>
-      <button @click="submitMessage()">Submit</button>
+      <button @click="publishMessage">Publish</button>
     </div>
   </div>
 </template>
@@ -33,8 +33,9 @@
   import { useSubscriptionStore } from '/app/stores/subscriptions'
   import { storeToRefs } from 'pinia'
   import FieldInput from './FieldInput.vue'
-  import { encodeByName } from '/app/protobuf_service'
+  import { encodeByName, envelopeLookup } from '/app/protobuf_service'
   import { useMQTTStore } from '/app/stores/mqtt'
+  import { topicToMessageName } from '/app/util'
 
   const
     messageStore = useMessageStore(),
@@ -45,9 +46,21 @@
     topicValue = ref(filteredSubscriptions.value[0]),
     manualTopic = ref(!topicValue.value),
     toggleManualTopic = () => manualTopic.value = !manualTopic.value,
-    submitMessage = () => {
+    publishMessage = () => {
+      const
+        topic = topicValue.value,
+        messageName = messageType.value.name,
+        messagePayload = messageObject.value,
+        { envelopeMessage } = envelopeLookup(messageName, messagePayload),
+        messageNameByTopic = topicToMessageName(topic)
+
+      if(messageNameByTopic !== envelopeMessage.name) {
+        alert(`Message envelope mismatch!\nTopic expected: ${messageNameByTopic}\nMessage expected: ${envelopeMessage.name}`)
+        return
+      }
+
       // protobuf form encode and send PoC working right here
-      const encodedMessage = encodeByName(messageType.value.name, messageObject.value)
+      const encodedMessage = encodeByName(messageName, messagePayload)
       mqttStore.publishMessage(topicValue.value, encodedMessage)
       setMode('messages')
     }

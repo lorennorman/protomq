@@ -16,10 +16,11 @@ const
     : 'unknown'
   )
 
-  // extract primitive types
-const PRIMITIVE_TYPES = Object.keys(protobuf.types.basic)
-
 const
+  ENVELOPE_MESSAGE_NAMES = ["BrokerToDevice", "DeviceToBroker"],
+  // extract primitive types
+  PRIMITIVE_TYPES = Object.keys(protobuf.types.basic),
+  // state
   protobufRoot = ref(null),
   protobufTypes = ref([])
 
@@ -153,15 +154,43 @@ export const
 
   isPrimitive = typeToCheck => includes(PRIMITIVE_TYPES, typeToCheck.type),
 
-  encodeByName = (name, object) => {
-    const message = protobufRoot.value.lookup(name)
+  envelopeLookup = (name, object) => {
+    if(includes(ENVELOPE_MESSAGE_NAMES, name)) {
+      return {
+        envelopeMessage: protobufRoot.value.lookup(name),
+        payload: object
+      }
+    }
 
-    if(!message) {
+    for(let envelopeName of ENVELOPE_MESSAGE_NAMES) {
+      const
+        EnvelopeMessage = protobufRoot.value.lookup(envelopeName),
+        payloadFields = map(EnvelopeMessage.oneofs['payload'].fieldsArray, f => ({
+          name: f.name,
+          type: f.type.split('.').at(-1)
+        })),
+        foundField = find(payloadFields, { type: name })
+
+      if(foundField) {
+        return {
+          envelopeMessage: EnvelopeMessage,
+          payload: { [foundField.name]: object }
+        }
+      }
+    }
+
+    return {}
+  },
+
+  encodeByName = (name, object) => {
+    const { envelopeMessage, payload } = envelopeLookup(name, object)
+
+    if(!envelopeMessage) {
       console.error(`Protobuf lookup failed for ${name}`)
       return
     }
 
-    return message.encode(object).finish()
+    return envelopeMessage.encode(payload).finish()
   },
 
   decodeByName = (name, binaryMessage) => {
