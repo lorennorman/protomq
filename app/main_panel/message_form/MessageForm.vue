@@ -13,7 +13,7 @@
       <button @click="toggleManualTopic">x</button>
       <input v-if="manualTopic" class="topic-input" type="text" v-model="topicValue"/>
       <select v-else v-model="topicValue">
-        <option v-for="subscription in filteredSubscriptions" :value="subscription">{{ subscription }}</option>
+        <option v-for="subscription in topicOptions" :value="subscription">{{ subscription }}</option>
       </select>
     </label>
 
@@ -27,7 +27,8 @@
 </template>
 
 <script setup>
-  import { ref } from 'vue'
+  import { ref, computed } from 'vue'
+  import { flatMap, uniq } from 'lodash-es'
   import { useUIStore } from '/app/stores/ui'
   import { useMessageStore } from '/app/stores/message'
   import { useSubscriptionStore } from '/app/stores/subscriptions'
@@ -43,6 +44,9 @@
     { setMode } = useUIStore(),
     { messageObject, messageType } = storeToRefs(messageStore),
     { filteredSubscriptions } = storeToRefs(useSubscriptionStore()),
+    topicOptions = computed(() => uniq(flatMap(filteredSubscriptions.value, sub => (
+      [ sub, sub.replace('b2d', 'd2b'), sub.replace('d2b', 'b2d')]
+    )))),
     topicValue = ref(filteredSubscriptions.value[0]),
     manualTopic = ref(!topicValue.value),
     toggleManualTopic = () => manualTopic.value = !manualTopic.value,
