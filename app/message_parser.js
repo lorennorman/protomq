@@ -1,42 +1,23 @@
-import { find } from 'lodash-es'
+import { topicToMessageName } from './util'
 import { decodeByName } from './protobuf_service'
 
-const TOPIC_PARSERS = {
-  "*/wprsnpr/info/status": "CreateDescriptionRequest",
-  "*/info/status/device/complete": "RegistrationComplete",
-  "*/signals/device": "CreateSignalRequest",
-  "*/signals/device/i2c": "I2CResponse",
-  "*/signals/device/pinConfigComplete": "SignalResponse",
-  "*/signals/device/servo": "ServoResponse",
-  "*/signals/device/ds18x20": "Ds18x20Response",
-  "*/signals/device/pwm": "PWMResponse",
-  "*/signals/device/pixel": "PixelsResponse",
-}
-
-const parseMessageByTopic = (topic, message) => {
-  const protoName = find(TOPIC_PARSERS, (item, topicSpec) => {
-    return (topicSpec.startsWith('*') && topic.endsWith(topicSpec.slice(1)))
-      || (topic === topicSpec)
-  })
-
-  if(!protoName) { return }
-
-  // lookup protobuf type
-  // deserialize message
-  // return json
-  return decodeByName(protoName, message)
-}
 
 export const parseMessage = ({ topic, message }) => {
-  // check topic-based parsers
-  const parsedMessage = parseMessageByTopic(topic, message)
-  if(parsedMessage) { return parsedMessage }
+  // assume message type from the topic it arrived on
+  const protobufMessageName = topicToMessageName(topic)
 
-  // try json
+  if(!protobufMessageName) {
+    console.error(`Received message on unrecognized MQTT topic: "${topic}"`)
+    return tryJSONParse(message)
+  }
+
+  return decodeByName(protobufMessageName, message)
+}
+
+const tryJSONParse = message => {
   try{
     return JSON.parse(message)
   } catch(err) {
-    // return raw
     return message
   }
 }
