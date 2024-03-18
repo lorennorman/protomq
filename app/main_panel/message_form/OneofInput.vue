@@ -17,8 +17,10 @@
 </template>
 
 <script setup>
-  import { computed } from 'vue'
+  import { computed, provide } from 'vue'
   import FieldInput from './FieldInput.vue'
+
+  provide('hideMessageLabel', true)
 
   const
     props = defineProps(["field", "fieldPath"]),
@@ -28,5 +30,5 @@
 </script>
 
 <style scoped>
- button { cursor: pointer; }
+  button { cursor: pointer; }
 </style>
