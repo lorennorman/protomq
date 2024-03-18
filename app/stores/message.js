@@ -2,6 +2,7 @@ import { compact, set } from 'lodash-es'
 import { ref } from "vue"
 import { defineStore } from "pinia"
 import { useUIStore } from './ui'
+import { findProtoFor } from '../protobuf_service'
 
 export const useMessageStore = defineStore('message', () => {
   return {
@@ -11,18 +12,7 @@ export const useMessageStore = defineStore('message', () => {
       this.messageType = messageType
       this.messageObject = {}
 
-      // default all fields
-      const { fields, fieldPath } = messageType
-
-      fields.forEach(field => {
-        const
-          path = compact([fieldPath, field.fieldName]).join('.'),
-          defaultValue = defaultValueForType(field.type) || defaultValueForType(field.fieldType)
-
-        if(defaultValue) {
-          set(this.messageObject, path, defaultValue)
-        }
-      })
+      initializeDefaults(this.messageObject, this.messageType)
 
       // update the UI to edit this message
       useUIStore().setMode('configureMessage')
@@ -30,16 +20,36 @@ export const useMessageStore = defineStore('message', () => {
   }
 })
 
-const defaultValueForType = type => {
-  switch(type) {
-    case "string":
-      return "string"
-    case "enum":
-      return 1
-    case "int32":
-    case "uint32":
-      return "0"
-    case "float":
-      return "0.0"
-  }
+const initializeDefaults = (target, type, pathPrefix=null) => {
+  // default all fields
+  const { fields, fieldPath } = type
+
+  fields.forEach(field => {
+    const path = compact([pathPrefix, fieldPath, field.fieldName]).join('.')
+
+    // nested message, look up the protobuf type and recurse
+    if(field.fieldType === 'message') {
+      const protobuf = findProtoFor(field)
+      initializeDefaults(target, protobuf, path)
+      return
+    }
+
+    const defaultValue = defaultValueForField(field)
+
+    if(defaultValue) {
+      set(target, path, defaultValue)
+    }
+  })
+}
+
+const DEFAULTS_BY_TYPE = {
+  string: 'string',
+  enum: 1,
+  int32: '0',
+  uint32: '0',
+  float: '0.0'
+}
+
+const defaultValueForField = ({ type, fieldType }) => {
+  return DEFAULTS_BY_TYPE[type] || DEFAULTS_BY_TYPE[fieldType]
 }
