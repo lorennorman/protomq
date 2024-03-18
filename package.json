@@ -5,6 +5,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
+    "convert-protos": "pbjs -t json protobufs/signal.proto > protobufs/bundle.json",
     "import-protos": "node script/copy_and_transform_protobufs.js",
     "start": "(trap 'kill 0' SIGINT; npm run web & npm run broker)",
     "web": "vite dev --clearScreen=false",
@@ -24,6 +25,7 @@
     "websocket-stream": "^5.5.2"
   },
   "devDependencies": {
+    "protobufjs-cli": "^1.1.2",
     "vite": "^5.0"
   }
 }

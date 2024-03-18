@@ -1,5 +1,6 @@
 import { homedir } from 'os'
 import { copyFile, lstat, mkdir, readdir, readFile, rm, writeFile } from 'fs/promises'
+import { pbjs } from "protobufjs-cli"
 
 
 const loadEnv = async () => {
@@ -108,6 +109,14 @@ const loadEnv = async () => {
     // overwrite the file
     await writeFile(filePath, replacedContents)
   }
+
+  console.log('Processing *.proto files to bundle.json')
+
+  pbjs.main([ "--target", "json", "protobufs/signal.proto" ], async (err, output) => {
+    if (err) { throw err }
+
+    await writeFile('protobufs/bundle.json', output)
+  })
 
   console.log('Done')
 })()

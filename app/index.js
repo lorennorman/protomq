@@ -17,7 +17,7 @@ import { connect } from './mqtt_service'
 document.addEventListener("DOMContentLoaded", async () => {
   await loadStoreData()
   // load the proto files
-  await loadProtoFile('/protobufs/signal.proto')
+  await loadProtoFile('/protobufs/bundle.json')
   // and connect to mqtt
   connect()
 })
