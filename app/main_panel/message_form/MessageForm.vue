@@ -17,11 +17,16 @@
       </select>
     </label>
 
-    <FieldInput v-for="field in messageType.fields" :field="field" :key="messageType.name + '.' + field.fieldName"/>
+    <FieldInput v-for="field in messageFields['']" :field="field" :key="messageType.name + '.' + field.fieldName"/>
 
     <div class="action-bar">
       <button @click="setMode('messages')">Cancel</button>
       <button @click="publishMessage">Publish</button>
+    </div>
+
+    <div>
+      <h4>Debug: Protobuf Payload</h4>
+      <pre>{{ messageObject }}</pre>
     </div>
   </div>
 </template>
@@ -42,7 +47,8 @@
     messageStore = useMessageStore(),
     mqttStore = useMQTTStore(),
     { setMode } = useUIStore(),
-    { messageObject, messageType } = storeToRefs(messageStore),
+    { messageObject, messageType, messageFields } = storeToRefs(messageStore),
+    { clearMessage } = messageStore,
     { filteredSubscriptions } = storeToRefs(useSubscriptionStore()),
     topicOptions = computed(() => uniq(flatMap(filteredSubscriptions.value, sub => (
       [ sub, sub.replace('b2d', 'd2b'), sub.replace('d2b', 'b2d')]
@@ -66,7 +72,7 @@
       // protobuf form encode and send PoC working right here
       const encodedMessage = encodeByName(messageName, messagePayload)
       mqttStore.publishMessage(topicValue.value, encodedMessage)
-      setMode('messages')
+      clearMessage()
     }
 </script>
 

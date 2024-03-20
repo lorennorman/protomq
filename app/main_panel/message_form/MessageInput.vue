@@ -1,30 +1,30 @@
 <template>
-  <label v-if="!hideMessageLabel" class="label">
+  <label class="label">
     <p>{{ field.fieldName }}:</p>
     <p>{{ foundMessage?.name }}</p>
   </label>
 
   <div class="nested-message">
-    <FieldInput v-for="messageField in foundMessage.fields" :field="messageField" :fieldPath="nextFieldPath" :key="messageField.fieldName"/>
+    <FieldInput v-for="messageField in messageFields" :field="messageField" :fieldPath="nextFieldPath" :key="messageField.fieldName"/>
   </div>
 </template>
 
 <script setup>
-  import { computed, inject, provide } from 'vue'
+  import { computed } from 'vue'
   import { findProtoFor } from '../../protobuf_service'
+  import { useMessageStore } from '../../stores/message'
   import FieldInput from './FieldInput.vue'
-  import { useFieldPath } from './use_field_path';
-
-  provide('hideMessageLabel', false)
+  import { useFieldPath } from './use_field_path'
 
   const
     props = defineProps({
       field: Object,
       fieldPath: String
     }),
-    hideMessageLabel = inject('hideMessageLabel', false),
+    { getFieldsAtPath } = useMessageStore(),
     { nextFieldPath } = useFieldPath(props),
-    foundMessage = computed(() => findProtoFor(props.field))
+    foundMessage = computed(() => findProtoFor(props.field)),
+    messageFields = computed(() => getFieldsAtPath(nextFieldPath))
 </script>
 
 <style>

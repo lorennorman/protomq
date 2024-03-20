@@ -11,22 +11,31 @@
       </option>
     </select>
   </label>
-
-  <FieldInput v-if="selection" :field="selection" />
-
 </template>
 
 <script setup>
-  import { computed, provide } from 'vue'
-  import FieldInput from './FieldInput.vue'
-
-  provide('hideMessageLabel', true)
+  import { computed, provide, ref, watch } from 'vue'
+  import { useFieldPath } from './use_field_path'
+  import { useMessageStore } from '../../stores/message'
 
   const
     props = defineProps(["field", "fieldPath"]),
-    selectedIndex = defineModel({ default: null }),
+    { setOneOf, clearOneOf } = useMessageStore(),
+    { vModel, nextFieldPath } = useFieldPath(props),
+    initialIndex = props.field.options.indexOf(vModel.value),
+    selectedIndex = ref(initialIndex === -1 ? null : initialIndex),
     selection = computed(() => props.field.options[selectedIndex.value]),
     clearSelection = () => selectedIndex.value = null
+
+  watch(selection, (newSelection, oldSelection) => {
+    if(oldSelection) {
+      clearOneOf(nextFieldPath, oldSelection)
+    }
+
+    if(newSelection) {
+      setOneOf(nextFieldPath, newSelection)
+    }
+  })
 </script>
 
 <style scoped>

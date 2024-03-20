@@ -1,6 +1,6 @@
 <template>
-  <InputComponent v-if="isRepeated" :field="repeatedField"/>
-  <InputComponent v-else :field="field"/>
+  <InputComponent v-if="isRepeated" :field="repeatedField" :fieldPath="fieldPath"/>
+  <InputComponent v-else :field="field" :fieldPath="fieldPath"/>
 </template>
 
 <script setup>
@@ -11,7 +11,7 @@
   import PrimitiveInput from './PrimitiveInput.vue'
 
   const
-    props = defineProps(["field"]),
+    props = defineProps(["field", "fieldPath"]),
 
     fieldTypeComponentMap = {
       oneof: OneofInput,
