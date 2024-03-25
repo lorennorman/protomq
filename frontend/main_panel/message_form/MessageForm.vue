@@ -34,14 +34,14 @@
 <script setup>
   import { ref, computed } from 'vue'
   import { flatMap, uniq } from 'lodash-es'
-  import { useUIStore } from '/app/stores/ui'
-  import { useMessageStore } from '/app/stores/message'
-  import { useSubscriptionStore } from '/app/stores/subscriptions'
+  import { useUIStore } from '/frontend/stores/ui'
+  import { useMessageStore } from '/frontend/stores/message'
+  import { useSubscriptionStore } from '/frontend/stores/subscriptions'
   import { storeToRefs } from 'pinia'
   import FieldInput from './FieldInput.vue'
-  import { encodeByName, envelopeLookup } from '/app/protobuf_service'
-  import { useMQTTStore } from '/app/stores/mqtt'
-  import { topicToMessageName } from '/app/util'
+  import { encodeByName, envelopeLookup } from '/frontend/protobuf_service'
+  import { useMQTTStore } from '/frontend/stores/mqtt'
+  import { topicToMessageName } from '/frontend/util'
 
   const
     messageStore = useMessageStore(),

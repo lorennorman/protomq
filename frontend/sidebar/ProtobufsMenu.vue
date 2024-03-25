@@ -13,8 +13,8 @@
 </template>
 
 <script setup>
-  import { protosByModule } from '/app/protobuf_service';
-  import { useMessageStore } from '/app/stores/message'
+  import { protosByModule } from '/frontend/protobuf_service';
+  import { useMessageStore } from '/frontend/stores/message'
 
   const protobufClicked = protobuf => {
     useMessageStore().newMessage(protobuf)

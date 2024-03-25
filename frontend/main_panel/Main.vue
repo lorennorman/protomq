@@ -5,7 +5,7 @@
 
 <script setup>
   import { storeToRefs } from 'pinia'
-  import { useUIStore } from '/app/stores/ui'
+  import { useUIStore } from '/frontend/stores/ui'
   import MessageLog from './MessageLog.vue'
   import MessageForm from './message_form/MessageForm.vue'
 

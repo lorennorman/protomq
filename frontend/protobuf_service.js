@@ -1,4 +1,5 @@
-import { chain, filter, find, forEach, includes, isEmpty, isString, map, pick, reject, sortBy, without } from 'lodash-es'
+import { find, forEach, includes, isEmpty, map, pick, reject, sortBy } from 'lodash-es'
+import _ from 'lodash-es'
 import { ref, computed } from 'vue'
 
 // make sure we have the global protobufjs object
@@ -66,10 +67,10 @@ const traverseNested = (node, path='') => {
 }
 
 const sanitizeMessageFields = () => {
-  chain(protobufTypes.value)
+  _.chain(protobufTypes.value)
     .filter({ fieldType: 'message' })
     .forEach(message => {
-      message.fields = chain(message.fields)
+      message.fields = _.chain(message.fields)
         // convert fields into array
         .map((field, fieldName) => ({
           fieldName, fieldType: detectFieldType(field), ...field
@@ -99,7 +100,7 @@ const sanitizeMessageFields = () => {
           fieldType: 'oneof',
           type: 'oneof',
           // each listed field becomes an outer field
-          options: chain(oneof)
+          options: _.chain(oneof)
             .map(fieldName => find(message.fields, { fieldName }))
             .compact()
           .value()
@@ -136,7 +137,7 @@ export const
   }),
 
   protosByModule = computed(() => {
-    return chain(allProtos.value)
+    return _.chain(allProtos.value)
       .filter({ fieldType: 'message' })
       .groupBy(({ type }) => type.split('.').slice(1, -1).join('.'))
     .value()
