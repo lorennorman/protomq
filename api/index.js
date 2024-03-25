@@ -6,7 +6,7 @@ import makeAPIRoutes from './routes.js'
 export const createWebApp = (mqttBroker) => {
   const
     app = express(),
-    port = 5174
+    port = 5173
 
   // mount the built frontend files
   app.use(express.static('dist'))
@@ -18,7 +18,7 @@ export const createWebApp = (mqttBroker) => {
 
   // start the server
   app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
+    console.log(`HTTP frontend & API listening on port`, port)
   })
 
   return app

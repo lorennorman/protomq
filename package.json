@@ -8,8 +8,7 @@
     "convert-protos": "pbjs -t json protobufs/signal.proto > protobufs/bundle.json",
     "import-protos": "node script/copy_and_transform_protobufs.js",
     "build-web": "vite build",
-    "start": "(trap 'kill 0' SIGINT; npm run web & npm run broker)",
-    "main": "node main.js",
+    "start": "node main.js",
     "web": "vite dev --clearScreen=false",
     "broker": "node broker.js",
     "test": "echo \"Error: no test specified\" && exit 1"

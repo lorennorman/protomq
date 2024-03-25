@@ -15,13 +15,13 @@ export const createBroker = () => {
     wsPort = 8888
 
   server.listen(mqttPort, function () {
-    console.log('MQTT listening on port ', mqttPort)
+    console.log('MQTT listening on port', mqttPort)
   })
 
   ws.createServer({ server: httpServer }, broker.handle)
 
   httpServer.listen(wsPort, function () {
-    console.log('MQTT listening over WebSocket on port ', wsPort)
+    console.log('MQTT-via-WebSocket listening on port', wsPort)
   })
 
   addLoggingListeners(broker)
