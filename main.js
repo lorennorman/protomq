@@ -39,8 +39,6 @@ async function main() {
   const
     mqttBroker = createBroker(),
     webServer = createWebApp(mqttBroker)
-
-  console.log("ProtoMQ Ready!")
 }
 
 
