@@ -4,6 +4,7 @@ import ws from 'websocket-stream'
 import Aedes from 'aedes'
 
 import { addLoggingListeners, addReactiveEmitters } from "./listeners.js"
+import { addDefaultAuthResponses } from './authorization.js'
 
 
 export const createBroker = () => {
@@ -24,8 +25,10 @@ export const createBroker = () => {
     console.log('MQTT-via-WebSocket listening on port', wsPort)
   })
 
+  // add behavior to the broker
   addLoggingListeners(broker)
   addReactiveEmitters(broker)
+  addDefaultAuthResponses(broker)
 
   return broker
 }
