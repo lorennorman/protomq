@@ -13,7 +13,7 @@ export const
   addDefaultAuthResponses = broker => {
     broker.authenticate = (client, username, password, callback) => {
       password = password?.toString()
-      console.log("broker.authenticate:", username, password, client.id)
+      console.log("authenticate:", username, password, client.id)
 
       // user and key failures are the same
       if(username === INVALID_USER || password === INVALID_KEY) {
