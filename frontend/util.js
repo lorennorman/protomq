@@ -2,8 +2,8 @@ import { find } from 'lodash-es'
 
 
 const TOPIC_MESSAGE_MAP = [
-  [ /^\w+\/ws-b2d\/io-wipper-\w+\/$/, "BrokerToDevice" ],
-  [ /^\w+\/ws-d2b\/io-wipper-\w+\/$/, "DeviceToBroker" ],
+  [ /\/ws-b2d\//, "BrokerToDevice" ],
+  [ /\/ws-d2b\//, "DeviceToBroker" ],
 ]
 
 export const
