@@ -13,7 +13,8 @@ export const createWebApp = (mqttBroker) => {
   // mount the protobuf import directory
   app.use('/protobufs', express.static('protobufs'))
 
-  // expose the API endpoints
+  // enable json and expose the API endpoints
+  app.use(express.json())
   app.use('/api', makeAPIRoutes(mqttBroker))
 
   // start the server

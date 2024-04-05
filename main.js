@@ -37,9 +37,8 @@ async function main() {
   }
 
   const
-    mqttBroker = createBroker(),
-    webServer = createWebApp(mqttBroker)
+    broker = createBroker(),
+    webServer = createWebApp(broker)
 }
-
 
 main()
