@@ -19,16 +19,19 @@ const requestToResponseMap = {
 
 export const
   addDefaultPBResponses = broker => {
+    console.log("PBResponse Listener: Register")
     broker.subscribe(
       '+/ws-d2b/#',
       (packet, callback) => {
         const d2bRequest = DeviceToBroker.decode(packet.payload)
-        console.log('DELIVERY', packet.topic, d2bRequest)
 
-        // find the key in the r/r map
-        const responsePayload = find(requestToResponseMap, (response, requestKey) => d2bRequest[requestKey])
+        // find the key in the re/res map
+        const responsePayload = find(requestToResponseMap, (response, requestKey) =>
+          d2bRequest[requestKey]
+        )
 
         if(responsePayload) {
+          console.log(`Auto-Responding to:\n  ${JSON.stringify(d2bRequest, null, 2)}\nwith:\n  ${JSON.stringify(responsePayload, null, 2)}`)
           const b2dResponse = BrokerToDevice.encode(responsePayload).finish()
 
           broker.publish({
@@ -39,5 +42,6 @@ export const
 
         callback()
       },
-      () => console.log('!!!subscribed!!!'))
+      () => console.log('Protobuf autoresponders installed')
+    )
   }
