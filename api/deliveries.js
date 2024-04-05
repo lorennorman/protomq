@@ -1,5 +1,8 @@
 import { compact, filter, find, forEach, keys, map, pick } from 'lodash-es'
 
+import { BrokerToDevice, DeviceToBroker } from "../protobufs.js"
+
+
 export default (router, broker) => {
   console.log("Installing Deliveries Tracker")
 
@@ -59,7 +62,14 @@ const
 
     if(topicIsIgnored(topic)) { return }
 
-    const trackablePacket = pick(packet, ['topic', 'payload'])
+    const
+      protobufPayload = topic.includes('/ws-d2b/')
+        ? DeviceToBroker.decode(packet.payload)
+        : topic.includes('/ws-b2d/')
+        ? BrokerToDevice.decode(packet.payload)
+        : payload,
+      trackablePacket = { topic, payload: protobufPayload }
+
     // if the publishing client has an outbox, track it
     deliveries[clientId]?.outbox.push(trackablePacket)
 

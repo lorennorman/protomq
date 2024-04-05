@@ -2,14 +2,8 @@
   Specify protobufs to listen for and respond with
 */
 import { find } from 'lodash-es'
-import protobuf from "protobufjs"
-import protobufJSON from "../protobufs/bundle.json" assert { type: "json" }
+import { BrokerToDevice, DeviceToBroker } from "../protobufs.js"
 
-
-const
-  root = protobuf.Root.fromJSON(protobufJSON),
-  BrokerToDevice = root.lookupType("signal.BrokerToDevice"),
-  DeviceToBroker = root.lookupType("signal.DeviceToBroker")
 
 const requestToResponseMap = {
   checkinRequest: {
