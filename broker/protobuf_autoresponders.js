@@ -11,8 +11,7 @@ const requestToResponseMap = {
       response: 'RESPONSE_OK',
       totalGpioPins: 20,
       totalAnalogPins: 4,
-      referenceVoltage: 2.5,
-      totalI2cPorts: 1
+      referenceVoltage: 2.5
     }
   }
 }
