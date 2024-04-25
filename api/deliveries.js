@@ -67,7 +67,7 @@ const
         ? DeviceToBroker.decode(packet.payload)
         : topic.includes('/ws-b2d/')
         ? BrokerToDevice.decode(packet.payload)
-        : payload,
+        : packet.payload,
       trackablePacket = { topic, payload: protobufPayload }
 
     // if the publishing client has an outbox, track it

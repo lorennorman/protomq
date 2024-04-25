@@ -5,7 +5,7 @@ import Aedes from 'aedes'
 
 import { addLoggingListeners, addReactiveEmitters } from "./listeners.js"
 import { addDefaultAuthResponses } from './authorization.js'
-import { addDefaultPBResponses } from './protobuf_autoresponders.js'
+import { addDefaultPBResponses, addEchoService } from './protobuf_autoresponders.js'
 
 
 export const createBroker = () => {
@@ -31,6 +31,7 @@ export const createBroker = () => {
   addReactiveEmitters(broker)
   addDefaultAuthResponses(broker)
   addDefaultPBResponses(broker)
+  addEchoService(broker)
 
   return broker
 }
