@@ -7,7 +7,7 @@ export default (router, broker) => {
   router.post('/echo', (req, res) => {
     const { topic, payload } = req.body
 
-    broker.publish({ topic, payload: Buffer.from(payload, 'utf8') })
+    broker.publish({ topic, payload: Buffer.from(payload, 'latin1') })
 
     res.json({ status: "OK" })
 
