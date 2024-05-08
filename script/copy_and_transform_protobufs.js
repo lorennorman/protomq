@@ -58,7 +58,7 @@ const loadEnv = async () => {
     const items = await readdir(currentDirectory)
 
     for(const itemName of items) {
-      const fullSourcePath = `/${currentDirectory}/${itemName}`
+      const fullSourcePath = `${currentDirectory}/${itemName}`
 
       // skip nanopb
       if(itemName == "nanopb.proto") {
