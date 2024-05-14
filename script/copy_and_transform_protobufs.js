@@ -92,7 +92,7 @@ const loadEnv = async () => {
     ['import "nanopb.proto";', '// nanopb import removed'],
     ['import "nanopb/nanopb.proto";', '// nanopb import removed'],
     // flatten import directories: "wippersnapper/file.proto" -> "file.proto"
-    [/import "(\w*\/)+\w*.proto";/g, (match, group) => match.replace(group, '')]
+    [/import "((?:\w*\/)+)\w*.proto";/g, (match, group) => match.replace(group, '')]
   ]
 
   // traverse the proto files in the destination
