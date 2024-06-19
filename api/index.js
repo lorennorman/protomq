@@ -20,6 +20,7 @@ export const createWebApp = (mqttBroker) => {
   // start the server
   app.listen(port, () => {
     console.log(`HTTP frontend & API listening on port`, port)
+    console.log(`HTTP frontend url: http://localhost:${port}`)
   })
 
   return app
