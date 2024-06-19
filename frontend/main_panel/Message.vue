@@ -2,7 +2,7 @@
   <div class="message-container">
     <div class="message-metadata" :title="message.topic">
       <span class="message-name">{{ prettyMessageName }}</span>
-      ➡️
+      <a class="message-resend-button" title="Resend this message?" href="#" @click="resendMessage()">&nbsp;➡️&nbsp;</a>
       <span class="message-topic">{{ prettyTopic }}</span>
     </div>
 
@@ -15,10 +15,12 @@
 <script setup>
   import { computed } from 'vue'
   import { topicToMessageName } from '../util'
+  import { useMQTTStore } from '/frontend/stores/mqtt'
   import { parseMessage } from '../message_parser'
 
   const
     props = defineProps(["message"]),
+    mqttStore = useMQTTStore(),
     prettyTopic = computed(() => {
       const topic = props.message.topic
 
@@ -27,7 +29,13 @@
         : topic
     }),
     prettyMessageName = computed(() => topicToMessageName(props.message.topic)),
-    prettyMessageBody = computed(() => parseMessage(props.message))
+    prettyMessageBody = computed(() => parseMessage(props.message)),
+
+    // instantly publishes this message again, to the same topic
+    resendMessage = () => {
+      mqttStore.publishMessage(props.message.topic, props.message.message)
+    }
+
 </script>
 
 <style>
@@ -57,5 +65,9 @@
   .message-payload {
     /* font-family: monospace; */
     padding: 0 15px;
+  }
+
+  .message-resend-button {
+      text-decoration: none;
   }
 </style>
