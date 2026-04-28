@@ -66,7 +66,7 @@ export const loadScripts = async (scriptsDir = 'scripts') => {
  * Trigger is a dot-separated field path, e.g., "checkin.request".
  * Returns true if traversing the path finds a truthy value.
  */
-const matchesTrigger = (decodedMessage, trigger) => {
+export const matchesTrigger = (decodedMessage, trigger) => {
   const parts = trigger.split('.')
   let current = decodedMessage
   for (const part of parts) {

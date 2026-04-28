@@ -5,7 +5,7 @@
 */
 import { find, keys, camelCase } from 'lodash-es'
 import { BrokerToDevice, DeviceToBroker } from "../protobufs.js"
-import { installScriptRunner } from './script_runner.js'
+import { installScriptRunner, matchesTrigger } from './script_runner.js'
 
 
 // ============================================================================
@@ -70,10 +70,60 @@ import { ScriptExecutor } from './script_runner.js'
 let _scriptState = { scripts: new Map(), activeExecutor: null, activeScriptName: null, broker: null }
 let _fallbackCheckinEnabled = true
 
+// Registered auto-responders. First match wins.
+// Each entry: { name?, trigger: <dot.path>, match?: <wildcard pattern>, response: <B2D-shaped> }
+// trigger uses the same dot-path semantics as script steps (e.g. "checkin.request").
+// match is a deep partial pattern over the toObject form of the decoded message:
+//   - '*' or missing key → wildcard
+//   - nested objects → recurse
+//   - arrays → match by index
+let _autoresponders = []
+
 export const getScriptState = () => _scriptState
 
 export const getFallbackCheckinEnabled = () => _fallbackCheckinEnabled
 export const setFallbackCheckinEnabled = (enabled) => { _fallbackCheckinEnabled = enabled }
+
+export const getAutoresponders = () => _autoresponders.map(a => ({ ...a }))
+export const addAutoresponder = (entry) => { _autoresponders.push(entry); return _autoresponders.length }
+export const clearAutoresponders = () => { const n = _autoresponders.length; _autoresponders = []; return n }
+export const removeAutoresponderByName = (name) => {
+  const before = _autoresponders.length
+  _autoresponders = _autoresponders.filter(a => a.name !== name)
+  return before - _autoresponders.length
+}
+
+const matchesPattern = (actual, pattern) => {
+  if (pattern === '*' || pattern === undefined) return true
+  if (pattern === null) return actual === null
+  if (Array.isArray(pattern)) {
+    if (!Array.isArray(actual)) return false
+    return pattern.every((p, i) => matchesPattern(actual[i], p))
+  }
+  if (typeof pattern === 'object') {
+    if (actual === null || typeof actual !== 'object') return false
+    return Object.entries(pattern).every(([k, v]) => matchesPattern(actual[k], v))
+  }
+  return actual === pattern
+}
+
+const findAutoresponderResponse = (d2bRequest) => {
+  if (_autoresponders.length === 0) return null
+  // toObject is computed once and reused for any match-pattern checks below.
+  // Note: a raw decode() leaves unset oneof fields undefined; toObject with
+  // defaults:true here means match patterns see proto3 zero-values rather
+  // than undefined — keep that in mind when authoring patterns.
+  let decoded = null
+  for (const entry of _autoresponders) {
+    if (!matchesTrigger(d2bRequest, entry.trigger)) continue
+    if (entry.match) {
+      if (!decoded) decoded = DeviceToBroker.toObject(d2bRequest, { enums: String, defaults: true })
+      if (!matchesPattern(decoded, entry.match)) continue
+    }
+    return entry
+  }
+  return null
+}
 
 export const setActiveScript = (name, { disabledSteps = [], autoReset = true } = {}) => {
   const script = _scriptState.scripts.get(name)
@@ -122,6 +172,19 @@ export const
             callback()
             return
           }
+        }
+
+        // Registered autoresponders take precedence over the V2 fallback.
+        const autoresponder = findAutoresponderResponse(d2bRequest)
+        if (autoresponder) {
+          console.log(`[Autoresponder${autoresponder.name ? ` "${autoresponder.name}"` : ''}] trigger=${autoresponder.trigger}\n  raw: ${rawHex}\n  decoded: ${decodedJson}\n  response: ${JSON.stringify(autoresponder.response)}`)
+          const b2dResponse = BrokerToDevice.encode(BrokerToDevice.fromObject(autoresponder.response)).finish()
+          broker.publish({
+            topic: packet.topic.replace('d2b', 'b2d'),
+            payload: b2dResponse
+          })
+          callback()
+          return
         }
 
         // Fallback: V2 nested checkin matching (when no script handles it)
