@@ -5,7 +5,7 @@ import { useMQTTStore } from './stores/mqtt'
 import { useSubscriptionStore } from './stores/subscriptions'
 
 const
-  mqttUrl = `ws://localhost:8888`,
+  mqttUrl = `ws://${window.location.hostname}:8888`,
   options = {
     clientId: `web-${Math.round(Math.random()*10000000000)}`,
     connectTimeout: 60 * 1000,
