@@ -18,7 +18,7 @@ const handleV2CheckinFallback = (d2bRequest) => {
     checkin: {
       response: {
         response: 'R_OK',
-        totalGpioPins: 20,
+        totalGpioPins: 30,
         totalAnalogPins: 4,
         referenceVoltage: 2.5,
         componentAdds: {},
@@ -37,7 +37,7 @@ const v1RequestToResponseMap = {
   checkinRequest: {
     checkinResponse: {
       response: 'RESPONSE_OK',
-      totalGpioPins: 20,
+      totalGpioPins: 30,
       totalAnalogPins: 4,
       referenceVoltage: 2.5
     }
