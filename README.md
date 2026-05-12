@@ -46,6 +46,19 @@ firmware without a full backend.
 - Sequenced steps fire after their predecessor completes (with optional delay)
 - Steps can also be sent manually via the Send button in the UI
 
+### Included Demo Scripts
+
+- `scripts/feather-s2-sh1107-demo.json`: Adafruit Feather ESP32-S2 with SH1107 128x64 I2C OLED FeatherWing.
+- `scripts/guition-p4-dsi-demo.json`: Guition ESP32-P4 with JC1060P470 1024x600 MIPI DSI display.
+- `scripts/huzzah8266-oled128x32-demo.json`: Adafruit Feather Huzzah ESP8266 with SSD1306 128x32 I2C OLED FeatherWing.
+- `scripts/magtag-demo.json`: Adafruit MagTag full hardware exercise (SSD1680 EPD + pixels/buttons/LED/sensor/buzzer).
+- `scripts/metro-s2-charlcd-demo.json`: Adafruit Metro ESP32-S2 with MCP23008-based 16x2 I2C character LCD.
+- `scripts/metro-s3-oled-demo.json`: Adafruit Metro ESP32-S3 with SSD1306 128x32 I2C OLED.
+- `scripts/pi5-eyespi-beret-st7735r-demo.json`: Raspberry Pi 5 + Adafruit EYESPI Pi Beret with ST7735R 1.8" 128x160 SPI TFT.
+- `scripts/qualia-bar-5797-demo.json`: Adafruit Qualia ESP32-S3 with PID 5797 320x820 RGB TTL bar display.
+- `scripts/qualia-round-5792-demo.json`: Adafruit Qualia ESP32-S3 with PID 5792 480x480 RGB TTL round display.
+- `scripts/reverse-tft-s3-demo.json`: Adafruit Feather ESP32-S3 Reverse TFT with ST7789 SPI TFT.
+
 ### Script Format
 
 ```json
