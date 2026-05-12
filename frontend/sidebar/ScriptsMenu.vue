@@ -278,7 +278,7 @@
     font-size: 0.8em;
     color: var(--text-muted);
     margin: 0 0 0.3em 0;
-    white-space: normal;
+    white-space: normal !important;
   }
 
   .script-controls {

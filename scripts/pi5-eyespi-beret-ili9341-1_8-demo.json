@@ -1,0 +1,94 @@
+{
+  "name": "Pi 5 EYESPI Beret ILI9341 1.8\" alt 160x128 Demo",
+  "description": "Tests the ILI9341 driver on Raspberry Pi 5 with Adafruit EYESPI Pi Beret. Routes ILI9341 against PID 358's 1.8\" 128x160 wiring (the panel itself is ST7735R silicon) so the SPI + displayio path can be exercised without a second TFT on the bench. Responds to checkin, configures the display, then writes test messages.",
+  "protoVersion": "v2",
+  "steps": [
+    {
+      "name": "checkin-response",
+      "description": "Respond to device checkin with OK and Pi 5 style board capabilities",
+      "trigger": "checkin.request",
+      "response": {
+        "checkin": {
+          "response": {
+            "response": "R_OK",
+            "totalGpioPins": 28,
+            "totalAnalogPins": 0,
+            "referenceVoltage": 3.3,
+            "componentAdds": {},
+            "sleepEnabled": false
+          }
+        }
+      }
+    },
+    {
+      "name": "add-display",
+      "description": "Configure ILI9341 driver against PID 358's 1.8-inch wiring on the EYESPI Pi Beret",
+      "after": "checkin-response",
+      "waitFor": "checkin.complete",
+      "delay": 500,
+      "topic": "display",
+      "send": {
+        "display": {
+          "add": {
+            "type": "DISPLAY_CLASS_TFT",
+            "driver": "ILI9341",
+            "panel": "1.8-128x160",
+            "name": "tft-ili9341",
+            "spiTft": {
+              "spi": {
+                "bus": 0,
+                "pinMosi": "MOSI",
+                "pinSck": "SCK",
+                "pinMiso": "MISO",
+                "pinCs": "D8"
+              },
+              "pinDc": "D25",
+              "pinRst": "D27"
+            },
+            "configDisplay": {
+              "width": 160,
+              "height": 128,
+              "rotation": 1,
+              "textSize": 2
+            },
+            "write": {
+              "name": "tft-ili9341",
+              "message": "Hello from ProtoMQ!"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "write-hello",
+      "description": "Write a multi-line test message after add succeeds",
+      "after": "add-display",
+      "waitFor": "display.addedOrReplaced",
+      "delay": 2500,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "tft-ili9341",
+            "message": "Pi 5 + EYESPI Beret\nILI9341 (on 128x160)\nProtoMQ path OK"
+          }
+        }
+      }
+    },
+    {
+      "name": "write-update",
+      "description": "Write a second message to verify repeat writes",
+      "after": "write-hello",
+      "delay": 4000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "tft-ili9341",
+            "message": "CS=D8 DC=D25 RST=D27\nSPI0 MOSI/SCK/MISO\nILI9341 demo complete"
+          }
+        }
+      }
+    }
+  ]
+}

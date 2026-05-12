@@ -1,0 +1,208 @@
+{
+  "name": "Pi Zero HT16K33 Segment Trio Demo",
+  "description": "Tests three HT16K33 segment displays on a Raspberry Pi Zero 2W, replicating the Segment1/Segment2/Segment3 layout exported from a v1 Feather ESP32-S2 (Adafruit IO device id 14015866). Two quad 14-seg alphanumeric backpacks at 0x76 / 0x75 (LEFT-aligned) plus one 4-digit 7-seg at 0x74 (RIGHT-aligned). Responds to checkin, adds each backpack in order, then writes test messages.",
+  "protoVersion": "v2",
+  "steps": [
+    {
+      "name": "checkin-response",
+      "description": "Respond to device checkin with OK and Pi Zero style board capabilities",
+      "trigger": "checkin.request",
+      "response": {
+        "checkin": {
+          "response": {
+            "response": "R_OK",
+            "totalGpioPins": 28,
+            "totalAnalogPins": 0,
+            "referenceVoltage": 3.3,
+            "componentAdds": {},
+            "sleepEnabled": false
+          }
+        }
+      }
+    },
+    {
+      "name": "add-segment1-alphanum",
+      "description": "Configure Segment1 — quad 14-segment alphanumeric backpack at 0x76 (LEFT-aligned, brightness 8)",
+      "after": "checkin-response",
+      "waitFor": "checkin.complete",
+      "delay": 500,
+      "topic": "display",
+      "send": {
+        "display": {
+          "add": {
+            "type": "DISPLAY_CLASS_LED_BACKPACK",
+            "driver": "HT16K33",
+            "panel": "quadalphanum",
+            "name": "segment1",
+            "i2c": {
+              "deviceAddress": 118,
+              "busSda": "SDA",
+              "busScl": "SCL"
+            },
+            "configLed": {
+              "brightness": 8,
+              "alignment": "LBA_LEFT"
+            },
+            "write": {
+              "name": "segment1",
+              "message": "SEG1"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "add-segment2-alphanum",
+      "description": "Configure Segment2 — quad 14-segment alphanumeric backpack at 0x75 (LEFT-aligned, brightness 8)",
+      "after": "add-segment1-alphanum",
+      "waitFor": "display.addedOrReplaced",
+      "delay": 1500,
+      "topic": "display",
+      "send": {
+        "display": {
+          "add": {
+            "type": "DISPLAY_CLASS_LED_BACKPACK",
+            "driver": "HT16K33",
+            "panel": "quadalphanum",
+            "name": "segment2",
+            "i2c": {
+              "deviceAddress": 117,
+              "busSda": "SDA",
+              "busScl": "SCL"
+            },
+            "configLed": {
+              "brightness": 8,
+              "alignment": "LBA_LEFT"
+            },
+            "write": {
+              "name": "segment2",
+              "message": "SEG2"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "add-segment3-7seg",
+      "description": "Configure Segment3 — 4-digit 7-segment backpack at 0x74 (RIGHT-aligned, brightness 8)",
+      "after": "add-segment2-alphanum",
+      "waitFor": "display.addedOrReplaced",
+      "delay": 1500,
+      "topic": "display",
+      "send": {
+        "display": {
+          "add": {
+            "type": "DISPLAY_CLASS_LED_BACKPACK",
+            "driver": "HT16K33",
+            "panel": "4digit-7seg",
+            "name": "segment3",
+            "i2c": {
+              "deviceAddress": 116,
+              "busSda": "SDA",
+              "busScl": "SCL"
+            },
+            "configLed": {
+              "brightness": 8,
+              "alignment": "LBA_RIGHT"
+            },
+            "write": {
+              "name": "segment3",
+              "message": "8888"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "write-hello-alpha",
+      "description": "Write a 4-char greeting to each alphanumeric backpack",
+      "after": "add-segment3-7seg",
+      "waitFor": "display.addedOrReplaced",
+      "delay": 2000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "segment1",
+            "message": "HELO"
+          }
+        }
+      }
+    },
+    {
+      "name": "write-hi-segment2",
+      "description": "Write a second 4-char greeting to segment2",
+      "after": "write-hello-alpha",
+      "delay": 800,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "segment2",
+            "message": "PROT"
+          }
+        }
+      }
+    },
+    {
+      "name": "write-digits-segment3",
+      "description": "Write a 4-digit reading to the 7-segment backpack",
+      "after": "write-hi-segment2",
+      "delay": 800,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "segment3",
+            "message": "1234"
+          }
+        }
+      }
+    },
+    {
+      "name": "write-update-alpha1",
+      "description": "Refresh segment1 with a final message",
+      "after": "write-digits-segment3",
+      "delay": 4000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "segment1",
+            "message": "DONE"
+          }
+        }
+      }
+    },
+    {
+      "name": "write-update-alpha2",
+      "description": "Refresh segment2 with a final message",
+      "after": "write-update-alpha1",
+      "delay": 400,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "segment2",
+            "message": "MQTT"
+          }
+        }
+      }
+    },
+    {
+      "name": "write-update-7seg",
+      "description": "Refresh segment3 with a final 4-digit reading",
+      "after": "write-update-alpha2",
+      "delay": 400,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "segment3",
+            "message": "9999"
+          }
+        }
+      }
+    }
+  ]
+}
