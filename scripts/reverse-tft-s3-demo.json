@@ -35,14 +35,14 @@
             "panel": "adafruit-reverse-tft",
             "name": "tft0",
             "spiTft": {
-              "spiPins": {
+              "spi": {
                 "bus": 0,
                 "pinMosi": "D35",
                 "pinSck": "D36",
-                "pinCs": "D42",
-                "pinDc": "D40",
-                "pinRst": "D41"
-              }
+                "pinCs": "D42"
+              },
+              "pinDc": "D40",
+              "pinRst": "D41"
             },
             "configDisplay": {
               "width": 240,

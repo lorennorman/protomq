@@ -36,14 +36,14 @@
             "name": "epd0",
             "spiEpd": {
               "pinBusy": "D5",
-              "spiPins": {
+              "spi": {
                 "bus": 0,
                 "pinMosi": "D35",
                 "pinSck": "D36",
-                "pinCs": "D8",
-                "pinDc": "D7",
-                "pinRst": "D6"
-              }
+                "pinCs": "D8"
+              },
+              "pinDc": "D7",
+              "pinRst": "D6"
             },
             "configEpd": {
               "mode": "EPD_MODE_MONO",

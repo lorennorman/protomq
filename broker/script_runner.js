@@ -99,6 +99,7 @@ export class ScriptExecutor {
     this._disabledSteps = new Set(disabledSteps)
     this.autoReset = autoReset
     this._b2dTopic = null  // Derived from first incoming D2B topic
+    this._pendingCheckinResponseAcks = 0
   }
 
   get name() {
@@ -133,7 +134,73 @@ export class ScriptExecutor {
       }
     }
 
-    // Check pending waitFor steps
+    if (this._checkPendingWaitSteps(decodedMessage, packet)) matched = true
+
+    return matched
+  }
+
+  /**
+   * Process MQTT ACK events for script-generated publishes.
+   * For V2 scripts, checkin.complete is emitted when the broker receives
+   * PUBACK for a checkin response publish.
+   */
+  handleAck(packet) {
+    if (this._pendingCheckinResponseAcks <= 0) return false
+
+    console.log(
+      `[Script: ${this.script.name}] ACK event cmd=${packet?.cmd ?? 'unknown'} messageId=${packet?.messageId ?? 'n/a'} pendingCheckinAcks=${this._pendingCheckinResponseAcks}`
+    )
+
+    if (packet?.cmd !== 'puback') return false
+
+    this._pendingCheckinResponseAcks -= 1
+    console.log(`[Script: ${this.script.name}] PUBACK received for checkin response; emitting checkin.complete`)
+
+    // Synthetic event object so waitFor="checkin.complete" works for both
+    // transport-level ACK completion and any message-level completion payloads.
+    return this._checkPendingWaitSteps({ checkin: { complete: {} }, checkinComplete: {} }, packet)
+  }
+
+  /**
+   * Log subscribers + QoS for the current B2D topic to explain whether
+   * PUBACK can happen for scripted checkin responses.
+   */
+  _getB2dSubscriptionQosInfo() {
+    const rows = []
+    let hasAckCapableSubscriber = false
+    const clients = Object.values(this.broker?.clients || {})
+    for (const client of clients) {
+      const sub = client?.subscriptions?.[this._b2dTopic]
+      if (!sub) continue
+      const qos = sub?.qos ?? -1
+      if (typeof qos === 'number' && qos >= 1) hasAckCapableSubscriber = true
+      rows.push(`${client.id || 'unknown-client'}:qos${qos}`)
+    }
+
+    return { rows, hasAckCapableSubscriber }
+  }
+
+  _logB2dSubscriptionQos() {
+    const { rows, hasAckCapableSubscriber } = this._getB2dSubscriptionQosInfo()
+
+    if (rows.length === 0) {
+      console.log(
+        `[Script: ${this.script.name}] checkin-response debug topic=${this._b2dTopic} subscribers=none`
+      )
+      return { hasAckCapableSubscriber }
+    }
+
+    console.log(
+      `[Script: ${this.script.name}] checkin-response debug topic=${this._b2dTopic} subscribers=${rows.join(', ')}`
+    )
+    return { hasAckCapableSubscriber }
+  }
+
+  /**
+   * Check pending waitFor steps against a decoded/synthetic message object.
+   */
+  _checkPendingWaitSteps(decodedMessage, packet) {
+    let matched = false
     for (let i = this._pendingWaitSteps.length - 1; i >= 0; i--) {
       const step = this._pendingWaitSteps[i]
       if (matchesTrigger(decodedMessage, step.waitFor)) {
@@ -150,7 +217,6 @@ export class ScriptExecutor {
         matched = true
       }
     }
-
     return matched
   }
 
@@ -158,11 +224,38 @@ export class ScriptExecutor {
    * Execute a step: send response, mark complete, schedule follow-ups.
    */
   _executeStep(step, packet) {
+    let emitCheckinCompleteWithoutAck = false
+
     // Send response/payload to the device's B2D topic
     if (step.response) {
       console.log(`[Script: ${this.script.name}] Sending response for "${step.name}" on ${this._b2dTopic}`)
       const encoded = BrokerToDevice.encode(BrokerToDevice.fromObject(step.response)).finish()
-      this.broker.publish({ topic: this._b2dTopic, payload: encoded })
+      const publishPacket = { topic: this._b2dTopic, payload: encoded }
+
+      // checkin.complete should map to transport completion (PUBACK), not
+      // merely enqueueing the checkin response publish.
+      if (step.response.checkin?.response || step.response.checkinResponse) {
+        // QoS 1 is required so MQTT PUBACK can drive checkin.complete.
+        publishPacket.qos = 1
+        const { hasAckCapableSubscriber } = this._logB2dSubscriptionQos()
+
+        if (hasAckCapableSubscriber) {
+          this._pendingCheckinResponseAcks += 1
+        }
+
+        console.log(
+          `[Script: ${this.script.name}] checkin-response publish qos=${publishPacket.qos} pendingCheckinAcks=${this._pendingCheckinResponseAcks}`
+        )
+
+        // If all subscribers are QoS 0 (or there are no subscribers yet),
+        // PUBACK will never arrive. Emit checkin.complete after this step is
+        // fully completed and follow-up waitFor steps are queued.
+        if (!hasAckCapableSubscriber) {
+          emitCheckinCompleteWithoutAck = true
+        }
+      }
+
+      this.broker.publish(publishPacket)
     }
 
     if (step.send) {
@@ -176,6 +269,16 @@ export class ScriptExecutor {
 
     // Schedule follow-up steps
     this._scheduleFollowUps(step.name)
+
+    if (emitCheckinCompleteWithoutAck) {
+      console.log(
+        `[Script: ${this.script.name}] No QoS>=1 subscribers for ${this._b2dTopic}; emitting checkin.complete without PUBACK`
+      )
+      this._checkPendingWaitSteps(
+        { checkin: { complete: {} }, checkinComplete: {} },
+        packet
+      )
+    }
   }
 
   /**
@@ -214,6 +317,7 @@ export class ScriptExecutor {
     this._pendingWaitSteps = []
     this.completedSteps.clear()
     this._b2dTopic = null
+    this._pendingCheckinResponseAcks = 0
     if (disabledSteps !== undefined) this._disabledSteps = new Set(disabledSteps)
     if (autoReset !== undefined) this.autoReset = autoReset
     console.log(`[Script: ${this.script.name}] Reset`)

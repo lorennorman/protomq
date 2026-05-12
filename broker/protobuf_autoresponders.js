@@ -223,6 +223,13 @@ export const
       () => console.log('V2 protobuf autoresponders installed')
     )
 
+    // Feed MQTT ACK packets to the active script executor so waitFor steps
+    // like checkin.complete can be bound to PUBACK semantics.
+    broker.on('ack', (packet) => {
+      if (!_scriptState.activeExecutor) return
+      _scriptState.activeExecutor.handleAck(packet)
+    })
+
     // V1 topic pattern (for devices on older firmware)
     console.log("PBResponse Listener: Register (V1 topics: +/wprsnpr/+/signals/device/+)")
     broker.subscribe(
