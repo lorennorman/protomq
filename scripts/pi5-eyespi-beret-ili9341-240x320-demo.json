@@ -1,6 +1,6 @@
 {
-  "name": "Pi 5 EYESPI Beret ILI9341 2.2\" 320x240 Demo",
-  "description": "Tests the ILI9341 driver on Raspberry Pi 5 with Adafruit EYESPI Pi Beret. Routes ILI9341 against PID 358's 2.2\" 320x240 wiring (the panel itself is ST7735R silicon) so the SPI + displayio path can be exercised without a second TFT on the bench. Responds to checkin, configures the display, then writes test messages.",
+  "name": "Pi 5 EYESPI Beret ILI9341 2.2\" 240x320 Demo",
+  "description": "Tests the ILI9341 driver on Raspberry Pi 5 with Adafruit EYESPI Pi Beret. Routes ILI9341 against PID 358's 2.2\" 240x320 wiring (the panel itself is ST7735R silicon) so the SPI + displayio path can be exercised without a second TFT on the bench. Responds to checkin, configures the display, then writes test messages.",
   "protoVersion": "v2",
   "steps": [
     {
@@ -46,8 +46,8 @@
               "pinRst": "D27"
             },
             "configDisplay": {
-              "width": 320,
-              "height": 240,
+              "width": 240,
+              "height": 320,
               "rotation": 1,
               "textSize": 2
             },
