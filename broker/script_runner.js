@@ -26,6 +26,7 @@
  *   ]
  * }
  */
+import path from 'path'
 import { readdir, readFile } from 'fs/promises'
 import { BrokerToDevice, DeviceToBroker } from "../protobufs.js"
 
@@ -58,6 +59,35 @@ export const loadScripts = async (scriptsDir = 'scripts') => {
   }
 
   return scripts
+}
+
+
+const normalizeScriptKey = (value) => {
+  if (!value) return null
+  const trimmed = String(value).trim()
+  if (!trimmed) return null
+  const parsed = path.parse(trimmed)
+  return parsed.ext.toLowerCase() === '.json' ? parsed.name : parsed.base
+}
+
+
+const resolveRequestedScript = (requestedValue, scripts) => {
+  const normalized = normalizeScriptKey(requestedValue)
+  if (!normalized) return null
+
+  // Exact key match (filename without .json)
+  if (scripts.has(normalized)) return normalized
+
+  // Filename or full path to a filename
+  const filenameFromPath = normalizeScriptKey(path.basename(String(requestedValue)))
+  if (filenameFromPath && scripts.has(filenameFromPath)) return filenameFromPath
+
+  // Human-readable script name match
+  for (const [key, script] of scripts.entries()) {
+    if (script?.name === requestedValue) return key
+  }
+
+  return null
 }
 
 
@@ -342,11 +372,20 @@ export const installScriptRunner = async (broker, activeScriptName = null) => {
   console.log(`Script Runner: Loaded ${scripts.size} script(s)`)
 
   // Only activate a script if explicitly requested
-  if (activeScriptName && scripts.has(activeScriptName)) {
-    const activeScript = scripts.get(activeScriptName)
-    console.log(`Script Runner: Active script: "${activeScript.name}" (${activeScriptName})`)
+  const resolvedScriptName = resolveRequestedScript(activeScriptName, scripts)
+  if (resolvedScriptName) {
+    const activeScript = scripts.get(resolvedScriptName)
+    console.log(`Script Runner: Active script: "${activeScript.name}" (${resolvedScriptName})`)
     const executor = new ScriptExecutor(activeScript, broker)
-    return { scripts, activeExecutor: executor, activeScriptName }
+    return { scripts, activeExecutor: executor, activeScriptName: resolvedScriptName }
+  }
+
+  if (activeScriptName) {
+    const available = [...scripts.entries()].map(([key, script]) => `${key} ("${script?.name || 'Unnamed'}")`)
+    console.warn(`Script Runner: Could not resolve --active-script="${activeScriptName}"`)
+    if (available.length > 0) {
+      console.warn(`Script Runner: Available scripts: ${available.join(', ')}`)
+    }
   }
 
   console.log(`Script Runner: No script active (activate via UI or --script flag)`)

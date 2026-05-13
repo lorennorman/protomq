@@ -41,6 +41,14 @@ firmware without a full backend.
 ### Usage
 
 - Scripts are loaded automatically on startup but **no script is active by default**
+- Optionally activate at startup with either form:
+  - `npm run start -- --active-script="..."`
+  - `npm run start --active-script="..."`
+  - Accepts full JSON path, script filename, or exact JSON `name` field
+  - Examples:
+    - `npm run start -- --active-script="scripts/pi5-eyespi-beret-st7735r-demo.json"`
+    - `npm run start -- --active-script="pi5-eyespi-beret-st7735r-demo"`
+    - `npm run start -- --active-script="Pi 5 EYESPI Beret ST7735R Demo"`
 - Activate a script via the Scripts panel in the web UI
 - Once active, trigger steps fire automatically when matching messages arrive
 - Sequenced steps fire after their predecessor completes (with optional delay)
@@ -110,6 +118,10 @@ firmware without a full backend.
   (`"response": "R_OK"`). protobufjs encodes unknown string enum names as 0.
 - **Topic routing**: V2 devices subscribe to a single B2D topic. The script runner
   derives the correct topic from the incoming D2B message automatically.
+- **`checkin.complete` semantics**: For V2 scripts, `waitFor: "checkin.complete"`
+  is emitted when the broker receives MQTT `PUBACK` for the script's
+  `checkin.response` publish (transport completion), not when a follow-up D2B
+  checkin payload arrives.
 
 ## Autoresponders
 

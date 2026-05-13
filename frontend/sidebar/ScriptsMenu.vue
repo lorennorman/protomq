@@ -76,7 +76,7 @@
 </template>
 
 <script setup>
-  import { ref, reactive, onMounted } from 'vue'
+  import { ref, reactive, onMounted, onUnmounted } from 'vue'
   import { useMessageStore } from '/frontend/stores/message'
   import { findProtoBy } from '/frontend/protobuf_service'
 
@@ -88,7 +88,10 @@
     fallbackCheckinEnabled = ref(true),
     expanded = reactive({}),
     disabledSteps = reactive({}),  // { filename: Set<stepName> }
-    autoResetState = reactive({})  // { filename: boolean } — default true
+    autoResetState = reactive({}),  // { filename: boolean } — default true
+    REFRESH_MS = 10000
+
+  let refreshTimer = null
 
   const getAutoReset = (filename) => autoResetState[filename] !== false
 
@@ -194,7 +197,15 @@
     messageStore.loadFromData(b2dProto, data)
   }
 
-  onMounted(fetchScripts)
+  onMounted(async () => {
+    await fetchScripts()
+    // Keep active/completed status in sync even if startup state changes before initial UI interaction.
+    refreshTimer = setInterval(fetchScripts, REFRESH_MS)
+  })
+
+  onUnmounted(() => {
+    if (refreshTimer) clearInterval(refreshTimer)
+  })
 </script>
 
 <style>

@@ -8,13 +8,20 @@ import { addDefaultAuthResponses } from './authorization.js'
 import { addDefaultPBResponses, addEchoService } from './protobuf_autoresponders.js'
 
 
-export const createBroker = async () => {
+export const createBroker = async ({ activeScriptName = null } = {}) => {
   const
     broker = Aedes(),
     server = net.createServer(broker.handle),
     mqttPort = 1884,
     httpServer = http.createServer(),
     wsPort = 8888
+
+  // add behavior to the broker
+  addLoggingListeners(broker)
+  addReactiveEmitters(broker)
+  addDefaultAuthResponses(broker)
+  await addDefaultPBResponses(broker, { activeScriptName })
+  addEchoService(broker)
 
   server.listen(mqttPort, function () {
     console.log('MQTT listening on port', mqttPort)
@@ -25,13 +32,6 @@ export const createBroker = async () => {
   httpServer.listen(wsPort, function () {
     console.log('MQTT-via-WebSocket listening on port', wsPort)
   })
-
-  // add behavior to the broker
-  addLoggingListeners(broker)
-  addReactiveEmitters(broker)
-  addDefaultAuthResponses(broker)
-  await addDefaultPBResponses(broker)
-  addEchoService(broker)
 
   return broker
 }

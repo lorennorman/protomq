@@ -144,10 +144,10 @@ export const deactivateScript = () => {
 }
 
 export const
-  addDefaultPBResponses = async (broker) => {
+  addDefaultPBResponses = async (broker, { activeScriptName = null } = {}) => {
     // Load and install the script runner
-    const { scripts, activeExecutor, activeScriptName } = await installScriptRunner(broker)
-    _scriptState = { scripts, activeExecutor, activeScriptName, broker }
+    const { scripts, activeExecutor, activeScriptName: resolvedActiveScriptName } = await installScriptRunner(broker, activeScriptName)
+    _scriptState = { scripts, activeExecutor, activeScriptName: resolvedActiveScriptName, broker }
 
     // V2 topic pattern
     console.log("PBResponse Listener: Register (V2 topics: +/ws-d2b/+)")
