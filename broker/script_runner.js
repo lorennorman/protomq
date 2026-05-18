@@ -126,7 +126,10 @@ export class ScriptExecutor {
     this.completedSteps = new Set()
     this.pendingTimers = []
     this._pendingWaitSteps = []  // Steps waiting for a D2B message match
-    this._disabledSteps = new Set(disabledSteps)
+    const stepsDisabledByFlag = script.steps
+      .filter(s => s.enabled === false)
+      .map(s => s.name)
+    this._disabledSteps = new Set([...disabledSteps, ...stepsDisabledByFlag])
     this.autoReset = autoReset
     this._b2dTopic = null  // Derived from first incoming D2B topic
     this._pendingCheckinResponseAcks = 0
