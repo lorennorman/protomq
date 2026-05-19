@@ -209,6 +209,50 @@
           }
         }
       }
+    },
+    {
+      "name": "remove-segment1",
+      "description": "Tear down segment1 - HT16K33 driver should fill(0) + show() so the digits blank.",
+      "after": "write-update-7seg",
+      "delay": 4000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "remove": {
+            "name": "segment1"
+          }
+        }
+      }
+    },
+    {
+      "name": "remove-segment2",
+      "description": "Tear down segment2 - HT16K33 driver should fill(0) + show() so the digits blank.",
+      "after": "remove-segment1",
+      "waitFor": "display.removed",
+      "delay": 1500,
+      "topic": "display",
+      "send": {
+        "display": {
+          "remove": {
+            "name": "segment2"
+          }
+        }
+      }
+    },
+    {
+      "name": "remove-segment3",
+      "description": "Tear down segment3 - HT16K33 driver should fill(0) + show() so the digits blank.",
+      "after": "remove-segment2",
+      "waitFor": "display.removed",
+      "delay": 1500,
+      "topic": "display",
+      "send": {
+        "display": {
+          "remove": {
+            "name": "segment3"
+          }
+        }
+      }
     }
   ]
 }
