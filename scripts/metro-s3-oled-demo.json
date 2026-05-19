@@ -35,9 +35,11 @@
             "panel": "oled128x32default",
             "name": "oled128x32default",
             "i2c": {
-              "deviceAddress": 60,
-              "busSda": "D47",
-              "busScl": "D48"
+              "addressSpace": {
+                "pinSda": 47,
+                "pinScl": 48
+              },
+              "address": 60
             },
             "configDisplay": {
               "width": 128,

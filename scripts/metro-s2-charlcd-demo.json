@@ -35,9 +35,11 @@
             "panel": "charlcd16x2default",
             "name": "charlcd16x2default",
             "i2c": {
-              "deviceAddress": 32,
-              "busSda": "D33",
-              "busScl": "D34"
+              "addressSpace": {
+                "pinSda": 33,
+                "pinScl": 34
+              },
+              "address": 32
             },
             "configCharLcd": {
               "columns": 16,

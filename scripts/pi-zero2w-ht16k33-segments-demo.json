@@ -1,11 +1,11 @@
 {
-  "name": "Pi Zero HT16K33 Segment Trio Demo",
+  "name": "Pi Zero 2W + HT16K33 Segment Trio Demo",
   "description": "Tests three HT16K33 segment displays on a Raspberry Pi Zero 2W, replicating the Segment1/Segment2/Segment3 layout exported from a v1 Feather ESP32-S2 (Adafruit IO device id 14015866). Two quad 14-seg alphanumeric backpacks at 0x76 / 0x75 (LEFT-aligned) plus one 4-digit 7-seg at 0x74 (RIGHT-aligned). Responds to checkin, adds each backpack in order, then writes test messages.",
   "protoVersion": "v2",
   "steps": [
     {
       "name": "checkin-response",
-      "description": "Respond to device checkin with OK and Pi Zero style board capabilities",
+      "description": "Respond to device checkin with OK and Pi Zero 2W style board capabilities",
       "trigger": "checkin.request",
       "response": {
         "checkin": {
@@ -22,7 +22,7 @@
     },
     {
       "name": "add-segment1-alphanum",
-      "description": "Configure Segment1 — quad 14-segment alphanumeric backpack at 0x76 (LEFT-aligned, brightness 8)",
+      "description": "Configure Segment1 - quad 14-segment alphanumeric backpack at 0x76 (LEFT-aligned, brightness 8)",
       "after": "checkin-response",
       "waitFor": "checkin.complete",
       "delay": 500,
@@ -35,9 +35,11 @@
             "panel": "quadalphanum",
             "name": "segment1",
             "i2c": {
-              "deviceAddress": 118,
-              "busSda": "SDA",
-              "busScl": "SCL"
+              "addressSpace": {
+                "pinSda": 2,
+                "pinScl": 3
+              },
+              "address": 118
             },
             "configLed": {
               "brightness": 8,
@@ -53,7 +55,7 @@
     },
     {
       "name": "add-segment2-alphanum",
-      "description": "Configure Segment2 — quad 14-segment alphanumeric backpack at 0x75 (LEFT-aligned, brightness 8)",
+      "description": "Configure Segment2 - quad 14-segment alphanumeric backpack at 0x75 (LEFT-aligned, brightness 8)",
       "after": "add-segment1-alphanum",
       "waitFor": "display.addedOrReplaced",
       "delay": 1500,
@@ -66,9 +68,11 @@
             "panel": "quadalphanum",
             "name": "segment2",
             "i2c": {
-              "deviceAddress": 117,
-              "busSda": "SDA",
-              "busScl": "SCL"
+              "addressSpace": {
+                "pinSda": 2,
+                "pinScl": 3
+              },
+              "address": 117
             },
             "configLed": {
               "brightness": 8,
@@ -84,7 +88,7 @@
     },
     {
       "name": "add-segment3-7seg",
-      "description": "Configure Segment3 — 4-digit 7-segment backpack at 0x74 (RIGHT-aligned, brightness 8)",
+      "description": "Configure Segment3 - 4-digit 7-segment backpack at 0x74 (RIGHT-aligned, brightness 8)",
       "after": "add-segment2-alphanum",
       "waitFor": "display.addedOrReplaced",
       "delay": 1500,
@@ -97,9 +101,11 @@
             "panel": "4digit-7seg",
             "name": "segment3",
             "i2c": {
-              "deviceAddress": 116,
-              "busSda": "SDA",
-              "busScl": "SCL"
+              "addressSpace": {
+                "pinSda": 2,
+                "pinScl": 3
+              },
+              "address": 116
             },
             "configLed": {
               "brightness": 8,
