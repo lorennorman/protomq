@@ -1468,11 +1468,7 @@
                     "DISPLAY_DRIVER_UNSPECIFIED": 0,
                     "DISPLAY_DRIVER_EPD_SSD1680": 1,
                     "DISPLAY_DRIVER_EPD_ILI0373": 2,
-                    "DISPLAY_DRIVER_TFT_ST7789": 3,
-                    "DISPLAY_DRIVER_EPD_UC8253": 4,
-                    "DISPLAY_DRIVER_EPD_UC8179": 5,
-                    "DISPLAY_DRIVER_EPD_UC8151": 6,
-                    "DISPLAY_DRIVER_EPD_SSD1683": 7
+                    "DISPLAY_DRIVER_TFT_ST7789": 3
                   }
                 },
                 "EpdSpiConfig": {

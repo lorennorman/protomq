@@ -10,8 +10,9 @@ export const createWebApp = (mqttBroker) => {
 
   // mount the built frontend files
   app.use(express.static('dist'))
-  // mount the protobuf import directory
+  // mount the protobuf import directories (V2 primary + V1 legacy)
   app.use('/protobufs', express.static('protobufs'))
+  app.use('/protobufs-v1', express.static('protobufs-v1'))
 
   // enable json and expose the API endpoints
   app.use(express.json())

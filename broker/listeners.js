@@ -1,5 +1,5 @@
 import { map } from 'lodash-es'
-import { BrokerToDevice, DeviceToBroker } from '../protobufs.js'
+import { decodeByTopic } from '../protobufs.js'
 
 // CONSTANTS
 const EVENT_NAMES = [
@@ -20,18 +20,11 @@ const EVENT_NAMES = [
 
 // HELPERS
 const
+  // Topic-shape decode covering both V1 (+/wprsnpr/#) and V2 (ws-b2d/ws-d2b).
   tryProtobufDecode = (topic, payload) => {
-    try {
-      if (topic.includes('/ws-b2d/')) {
-        const msg = BrokerToDevice.decode(payload)
-        return BrokerToDevice.toObject(msg, { enums: String, defaults: false })
-      }
-      if (topic.includes('/ws-d2b/')) {
-        const msg = DeviceToBroker.decode(payload)
-        return DeviceToBroker.toObject(msg, { enums: String, defaults: false })
-      }
-    } catch (e) { /* not a protobuf topic or decode failed */ }
-    return null
+    const decoded = decodeByTopic(topic, payload)
+    if (!decoded) return null
+    return decoded.type.toObject(decoded.message, { enums: String, defaults: false })
   },
 
   formatPacket = packet => {

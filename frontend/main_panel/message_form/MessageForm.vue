@@ -44,9 +44,9 @@
   import { useSubscriptionStore } from '/frontend/stores/subscriptions'
   import { storeToRefs } from 'pinia'
   import FieldInput from './FieldInput.vue'
-  import { encodeByName, envelopeLookup } from '/frontend/protobuf_service'
+  import { encodeByName, encodeMessage, envelopeLookup } from '/frontend/protobuf_service'
   import { useMQTTStore } from '/frontend/stores/mqtt'
-  import { topicToMessageName, TOPIC_MESSAGE_MAP } from '/frontend/util'
+  import { topicToMessageName, resolveV1TopicName, TOPIC_MESSAGE_MAP } from '/frontend/util'
 
   const
     messageStore = useMessageStore(),
@@ -75,8 +75,35 @@
 
       const
         topic = topicValue.value,
-        messageName = messageType.value.name,
-        messagePayload = messageObject.value,
+        mt = messageType.value,
+        messageName = mt.name,
+        messagePayload = messageObject.value
+
+      // Can't PUBLISH to a wildcard/empty topic — MQTT silently drops it. The
+      // topic dropdown defaults to a subscription pattern (e.g. +/wprsnpr/#),
+      // so guard loudly instead of failing quietly.
+      if(!topic || /[+#]/.test(topic)) {
+        alert(`Can't publish to a wildcard or empty topic:\n"${topic}"\n\nPick a concrete topic (e.g. .../signals/broker for a V1 CreateSignalRequest).`)
+        return
+      }
+
+      // V1 has no envelope: the selected message type IS the wire message, sent
+      // directly to its +/wprsnpr/# topic. Validate the topic resolves to this
+      // type (when recognizable), then encode + publish.
+      if(mt.version === 'v1') {
+        const expected = resolveV1TopicName(topic)
+        if(expected && expected !== messageName) {
+          alert(`V1 topic/message mismatch!\nTopic "${topic}" expects: ${expected}\nSelected message: ${messageName}`)
+          return
+        }
+        const encodedMessage = encodeMessage(mt, messagePayload)
+        if(!encodedMessage) return
+        mqttStore.publishMessage(topic, encodedMessage)
+        clearMessage()
+        return
+      }
+
+      const
         { envelopeMessage } = envelopeLookup(messageName, messagePayload),
         messageNameByTopic = topicToMessageName(topic)
 

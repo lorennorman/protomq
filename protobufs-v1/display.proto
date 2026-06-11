@@ -39,25 +39,7 @@ enum DisplayDriver {
   DISPLAY_DRIVER_EPD_SSD1680 = 1; /** EPD SSD1680 driver */
   DISPLAY_DRIVER_EPD_ILI0373 = 2; /** EPD SSD167 driver */
   DISPLAY_DRIVER_TFT_ST7789  = 3; /** TFT ST7789 driver */
-  DISPLAY_DRIVER_EPD_UC8253  = 4; /** EPD UC8253 driver */
-  DISPLAY_DRIVER_EPD_UC8179  = 5; /** EPD UC8179 driver */
-  DISPLAY_DRIVER_EPD_UC8151  = 6; /** EPD UC8151 driver */
-  DISPLAY_DRIVER_EPD_SSD1683 = 7; /** EPD SSD1683 driver */
 }
-
-  /*
-5.83" Monochrome E-Ink Display (648x480 UC8179) (#6397)
-4.2" Grayscale E-Ink Display (300x400 SSD1683) (#6381)
-3.7" Monochrome E-Ink Display (416x240 UC8253) (#6395)
-2.9" Flexible E-Ink Display (296x128 UC8151 / now ILI0343) (#4262)
-
-Qualia - pick one
-Memento?
-
-T-DisplayS3 ("i8080" intel 8-bit parallel bus - rgb565)
-
-P4 pick one
-  */
 
 // ============================================================================
 // Configuration Messages

@@ -4,7 +4,7 @@
   Uses playback scripts from scripts/ directory for demo sequences.
 */
 import { find, keys, camelCase } from 'lodash-es'
-import { BrokerToDevice, DeviceToBroker } from "../protobufs.js"
+import { BrokerToDevice, DeviceToBroker, protobufRootV1, resolveV1Topic } from "../protobufs.js"
 import { installScriptRunner, matchesTrigger } from './script_runner.js'
 
 
@@ -43,6 +43,35 @@ const v1RequestToResponseMap = {
     }
   }
 }
+
+
+// ============================================================================
+// Fallback V1 checkin (description) handler
+// ============================================================================
+// V1 registration: the device publishes a CreateDescriptionRequest to
+// {user}/wprsnpr/info/status (note: no device-uid in that topic) and listens
+// for the CreateDescriptionResponse on {user}/wprsnpr/{uid}/info/status/broker.
+// The uid is the device's MQTT client id, which the checkin topic doesn't
+// carry — so we pull it off the publishing client and rebuild the topic.
+const V1_CheckinResponse = protobufRootV1.lookupType('wippersnapper.description.v1.CreateDescriptionResponse')
+
+const v1CheckinResponsePayload = {
+  response: 'RESPONSE_OK',
+  totalGpioPins: 30,
+  totalAnalogPins: 4,
+  referenceVoltage: 2.5,
+  totalI2cPorts: 1
+}
+
+// After the description response, real Adafruit IO sends a CreateSignalRequest
+// carrying the hardware (pin) configuration on signals/broker. With no saved
+// components it's an EMPTY pinConfigs — `{pinConfigs:{list:[]}}` encodes to the
+// 2 bytes 0x32 0x00 — which is exactly what unblocks the firmware's
+// `while(!pinCfgCompleted)` poll (nanopb still fires the oneof callback for the
+// zero-length submessage). We send it immediately after the checkin response so
+// it arrives while the device is connected and subscribed to signals/broker.
+const V1_CreateSignalRequest = protobufRootV1.lookupType('wippersnapper.signal.v1.CreateSignalRequest')
+const v1EmptyPinConfigsPayload = { pinConfigs: { list: [] } }
 
 
 // ============================================================================
@@ -230,19 +259,60 @@ export const
       _scriptState.activeExecutor.handleAck(packet)
     })
 
-    // V1 topic pattern (for devices on older firmware)
-    console.log("PBResponse Listener: Register (V1 topics: +/wprsnpr/+/signals/device/+)")
+    // V1 topic pattern (for devices on older firmware). Version is inferred
+    // purely from topic shape: anything under +/wprsnpr/# is V1. A single
+    // wildcard subscription catches every V1 subtopic (checkin, signals,
+    // i2c, servo, etc.) in both directions; resolveV1Topic maps each to its
+    // proto type so we can decode for the audit log and detect the checkin.
+    console.log("PBResponse Listener: Register (V1 topics: +/wprsnpr/#)")
     broker.subscribe(
-      '+/wprsnpr/+/signals/device/+',
+      '+/wprsnpr/#',
       (packet, callback) => {
-        // V1 messages use per-component wrapper protos (DisplayRequest, etc.)
-        // Full V1 decode requires V1 proto bundle (not yet imported)
-        console.log(`[V1 topic] Received on: ${packet.topic} (${packet.payload.length} bytes)`)
-        console.log(`[V1 topic] Note: V1 proto decode not yet implemented`)
+        const { topic } = packet
+        const rawHex = Buffer.from(packet.payload).toString('hex')
+        const resolved = resolveV1Topic(topic)
+
+        // Bidirectional audit: attempt to decode whatever arrived here.
+        let decodedJson = null
+        if (resolved?.type) {
+          try {
+            const msg = resolved.type.decode(packet.payload)
+            decodedJson = JSON.stringify(resolved.type.toObject(msg, { enums: String, defaults: true }), null, 2)
+          } catch (err) {
+            console.log(`[V1] Failed to decode ${resolved.name} on ${topic} (${packet.payload.length} bytes, hex: ${rawHex}): ${err.message}`)
+          }
+        }
+        console.log(`[V1 ${resolved?.direction ?? '?'}] ${topic} → ${resolved?.name ?? 'unknown type'}` +
+          (decodedJson ? `\n  decoded: ${decodedJson}` : `\n  raw: ${rawHex}`))
+
+        // Fallback checkin: respond with a CreateDescriptionResponse so the
+        // device can finish registration and proceed. Gated by the same flag
+        // as the V2 checkin fallback.
+        if (_fallbackCheckinEnabled && resolved?.isCheckinRequest) {
+          const user = topic.slice(0, topic.indexOf('/wprsnpr/'))
+          const uid = packet.clientId
+          if (!uid) {
+            console.log(`[Fallback V1] checkin on ${topic} but packet has no clientId — cannot route response`)
+            callback()
+            return
+          }
+          const responseTopic = `${user}/wprsnpr/${uid}/info/status/broker`
+          const payload = V1_CheckinResponse.encode(V1_CheckinResponse.fromObject(v1CheckinResponsePayload)).finish()
+          console.log(`[Fallback V1] Auto-Responding to checkin → ${responseTopic}\n  response: ${JSON.stringify(v1CheckinResponsePayload)}`)
+          broker.publish({ topic: responseTopic, payload })
+
+          // Follow with the hardware (pin) configuration so the device clears its
+          // `while(!pinCfgCompleted)` poll. Empty pinConfigs = "no components",
+          // matching what real Adafruit IO sends (0x32 0x00).
+          const signalTopic = `${user}/wprsnpr/${uid}/signals/broker`
+          const signalPayload = V1_CreateSignalRequest.encode(V1_CreateSignalRequest.fromObject(v1EmptyPinConfigsPayload)).finish()
+          console.log(`[Fallback V1] Sending empty pin config → ${signalTopic}\n  payload: ${JSON.stringify(v1EmptyPinConfigsPayload)} (${Buffer.from(signalPayload).toString('hex') || '∅'})`)
+          broker.publish({ topic: signalTopic, payload: signalPayload })
+        }
 
         callback()
       },
-      () => console.log('V1 topic listener installed (decode pending V1 proto import)')
+      () => console.log('V1 protobuf autoresponders installed (topics: +/wprsnpr/#)')
     )
   },
 
