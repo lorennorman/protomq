@@ -1,11 +1,11 @@
 {
-  "name": "Pi Zero 2W + SSD1683 4.2\" EPD Bonnet Demo",
-  "description": "Drives an Adafruit 4.2\" 400x300 SSD1683 EPD (PID 6381) sat on the Pi e-Ink Bonnet, on a Pi Zero 2W running the host build. Pin map matches Blinka's BCM-keyed Dxx aliases (CS=CE0/D8, DC=D22, RST=D27, BUSY=D17). The host driver pins `seconds_per_frame=5` on the upstream lib (vs the 180 s default), so script delays only need to cover the actual refresh time plus a moment for a human to read each frame.",
+  "name": "Pi Zero 2W + SSD1683 3.7\" 416x240 Mono EPD (PID 6395) Demo",
+  "description": "Drives the Adafruit 3.7\" 416x240 monochrome E-Ink bare display (PID 6395) on the Pi e-Ink Bonnet, on a Pi Zero 2W running the host build. The panel is the ThinkInk_370_Mono_BAAMFGN (UC8253 silicon) which the host SSD1683 driver covers via its mono path (mode=EPD_MODE_MONO, no grayscale LUT). Pin map matches Blinka's BCM-keyed Dxx aliases (CS=CE0/D8, DC=D22, RST=D27, BUSY=D17). seconds_per_frame is pinned to 5s on the host driver; the 12s step delays clear that cooldown with room for a human to read each frame.",
   "protoVersion": "v2",
   "steps": [
     {
       "name": "checkin-response",
-      "description": "Respond to device checkin with OK and Pi-bonnet-shaped capabilities (display added separately so it shows up in the controller flow).",
+      "description": "Respond to device checkin with OK and Pi-bonnet-shaped capabilities.",
       "trigger": "checkin.request",
       "response": {
         "checkin": {
@@ -22,7 +22,7 @@
     },
     {
       "name": "add-display",
-      "description": "Add the SSD1683 4.2\" 400x300 EPD over SPI bus 0 with the bonnet's fixed bonnet pin map. Initial blank refresh runs as part of Add.",
+      "description": "Add the SSD1683-driven 3.7\" 416x240 mono EPD over SPI bus 0 with the bonnet's fixed pin map. Initial blank refresh runs as part of Add.",
       "after": "checkin-response",
       "waitFor": "checkin.complete",
       "delay": 500,
@@ -32,24 +32,26 @@
           "add": {
             "type": "DISPLAY_CLASS_EPD",
             "driver": "SSD1683",
-            "panel": "4.2-400x300-grayscale4",
+            "panel": "3.7-416x240-mono",
             "name": "epd-bonnet",
-            "spiEpd": {
-              "pinDc": "D22",
-              "pinRst": "D27",
-              "pinBusy": "D17",
-              "spi": {
-                "bus": 0,
-                "pinCs": "D8",
-                "pinMosi": "MOSI",
-                "pinSck": "SCK"
+            "interfaceType": {
+              "spiEpd": {
+                "pinDc": "D22",
+                "pinRst": "D27",
+                "pinBusy": "D17",
+                "spi": {
+                  "bus": 0,
+                  "pinCs": "D8",
+                  "pinMosi": "MOSI",
+                  "pinSck": "SCK"
+                }
               }
             },
             "configEpd": {
-              "mode": "EPD_MODE_GRAYSCALE4",
+              "mode": "EPD_MODE_MONO",
               "properties": {
-                "width": 400,
-                "height": 300,
+                "width": 416,
+                "height": 240,
                 "textSize": 3
               }
             }
@@ -61,22 +63,22 @@
       "name": "write-hello",
       "description": "First message after the initial blank refresh.",
       "after": "add-display",
-      "delay": 10000,
+      "delay": 12000,
       "topic": "display",
       "send": {
         "display": {
           "write": {
             "name": "epd-bonnet",
-            "message": "hello eink\\nSSD1683 4.2in\\nPi Zero 2W bonnet"
+            "message": "hello eink\\nSSD1683 3.7in\\n416x240 mono"
           }
         }
       }
     },
     {
       "name": "write-step2",
-      "description": "Second message — driver's seconds_per_frame is 5 s, this gives a beat to read.",
+      "description": "Second message; 12s gap clears the 5s refresh cooldown.",
       "after": "write-hello",
-      "delay": 10000,
+      "delay": 12000,
       "topic": "display",
       "send": {
         "display": {
@@ -91,7 +93,7 @@
       "name": "write-removing",
       "description": "Final message before the display is removed.",
       "after": "write-step2",
-      "delay": 10000,
+      "delay": 12000,
       "topic": "display",
       "send": {
         "display": {
@@ -106,7 +108,7 @@
       "name": "remove-display",
       "description": "Tear down the display so a future Add can re-init the bus cleanly.",
       "after": "write-removing",
-      "delay": 10000,
+      "delay": 12000,
       "topic": "display",
       "send": {
         "display": {
