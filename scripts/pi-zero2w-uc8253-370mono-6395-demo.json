@@ -52,6 +52,7 @@
               "properties": {
                 "width": 420,
                 "height": 240,
+                "rotation": 1,
                 "textSize": 3
               }
             }
