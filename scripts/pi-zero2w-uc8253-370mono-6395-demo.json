@@ -50,7 +50,7 @@
             "configEpd": {
               "mode": "EPD_MODE_MONO",
               "properties": {
-                "width": 420,
+                "width": 416,
                 "height": 240,
                 "rotation": 1,
                 "textSize": 3
