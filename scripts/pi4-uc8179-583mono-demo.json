@@ -1,6 +1,6 @@
 {
-  "name": "Pi Zero 2W + UC8253 3.7\" 416x240 Mono EPD (PID 6395) Demo",
-  "description": "Drives the Adafruit 3.7\" 416x240 monochrome E-Ink bare display (PID 6395, UC8253 chipset) on the Pi e-Ink Bonnet, on a Pi Zero 2W running the host build. driver=\"UC8253\" maps to the host DisplayDriverUC8253 (adafruit_uc8253.UC8253); the Arduino host build uses the equivalent ThinkInk_370_Mono_BAAMFGN. Pin map matches Blinka's BCM-keyed Dxx aliases (CS=CE0/D8, DC=D22, RST=D27, BUSY=D17). seconds_per_frame is pinned to 5s on the host driver; the 12s step delays clear that cooldown with room for a human to read each frame.",
+  "name": "Pi 4 + UC8179 5.83\" 648x480 Mono EPD Demo",
+  "description": "Drives the Adafruit 5.83\" 648x480 monochrome E-Ink bare display (UC8179 chipset) on the Pi e-Ink Bonnet, on a Pi 4 running the host build. driver=\"UC8179\" maps to the host DisplayDriverUC8179 (adafruit_uc8179.UC8179). Pin map matches the bonnet's BCM-keyed Dxx aliases (CS=CE0/D8, DC=D22, RST=D27, BUSY=D17). seconds_per_frame is pinned to 20s on the host driver; the 25s step delays clear that cooldown.",
   "protoVersion": "v2",
   "steps": [
     {
@@ -22,7 +22,7 @@
     },
     {
       "name": "add-display",
-      "description": "Add the UC8253-driven 3.7\" 416x240 mono EPD over SPI bus 0 with the bonnet's fixed pin map. Initial blank refresh runs as part of Add.",
+      "description": "Add the UC8179-driven 5.83\" 648x480 mono EPD over SPI bus 0 with the bonnet's fixed pin map. Initial blank refresh runs as part of Add.",
       "after": "checkin-response",
       "waitFor": "checkin.complete",
       "delay": 500,
@@ -31,9 +31,9 @@
         "display": {
           "add": {
             "type": "DISPLAY_CLASS_EPD",
-            "driver": "UC8253",
-            "panel": "3.7-416x240-mono",
-            "name": "epd-bonnet-mono37",
+            "driver": "UC8179",
+            "panel": "5.83-648x480-mono",
+            "name": "epd-bonnet-mono583",
             "interfaceType": {
               "spiEpd": {
                 "pinDc": "D22",
@@ -50,8 +50,8 @@
             "configEpd": {
               "mode": "EPD_MODE_MONO",
               "properties": {
-                "width": 416,
-                "height": 240,
+                "width": 648,
+                "height": 480,
                 "textSize": 3
               }
             }
@@ -63,12 +63,12 @@
       "name": "write-hello",
       "description": "First message after the initial blank refresh.",
       "after": "add-display",
-      "delay": 12000,
+      "delay": 25000,
       "topic": "display",
       "send": {
         "display": {
           "write": {
-            "name": "epd-bonnet-mono37",
+            "name": "epd-bonnet-mono583",
             "descriptor": {
               "spiEpd": {
                 "pinDc": "D22",
@@ -82,21 +82,21 @@
                 }
               }
             },
-            "message": "hello eink\\nUC8253 3.7in\\n416x240 mono"
+            "message": "hello eink\\nUC8179 5.83in\\n648x480 mono"
           }
         }
       }
     },
     {
       "name": "write-step2",
-      "description": "Second message; 12s gap clears the 5s refresh cooldown.",
+      "description": "Second message; 25s gap clears the 20s refresh cooldown.",
       "after": "write-hello",
-      "delay": 12000,
+      "delay": 25000,
       "topic": "display",
       "send": {
         "display": {
           "write": {
-            "name": "epd-bonnet-mono37",
+            "name": "epd-bonnet-mono583",
             "descriptor": {
               "spiEpd": {
                 "pinDc": "D22",
@@ -119,12 +119,12 @@
       "name": "write-removing",
       "description": "Final message before the display is removed.",
       "after": "write-step2",
-      "delay": 12000,
+      "delay": 25000,
       "topic": "display",
       "send": {
         "display": {
           "write": {
-            "name": "epd-bonnet-mono37",
+            "name": "epd-bonnet-mono583",
             "descriptor": {
               "spiEpd": {
                 "pinDc": "D22",
@@ -147,12 +147,12 @@
       "name": "remove-display",
       "description": "Tear down the display so a future Add can re-init the bus cleanly.",
       "after": "write-removing",
-      "delay": 12000,
+      "delay": 25000,
       "topic": "display",
       "send": {
         "display": {
           "remove": {
-            "name": "epd-bonnet-mono37",
+            "name": "epd-bonnet-mono583",
             "descriptor": {
               "spiEpd": {
                 "pinDc": "D22",

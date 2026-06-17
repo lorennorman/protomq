@@ -34,16 +34,18 @@
             "driver": "ILI9341",
             "panel": "2.2-320x240",
             "name": "tft-ili9341",
-            "spiTft": {
-              "spi": {
-                "bus": 0,
-                "pinMosi": "MOSI",
-                "pinSck": "SCK",
-                "pinMiso": "MISO",
-                "pinCs": "D8"
-              },
-              "pinDc": "D25",
-              "pinRst": "D27"
+            "interfaceType": {
+              "spiTft": {
+                "spi": {
+                  "bus": 0,
+                  "pinMosi": "MOSI",
+                  "pinSck": "SCK",
+                  "pinMiso": "MISO",
+                  "pinCs": "D8"
+                },
+                "pinDc": "D25",
+                "pinRst": "D27"
+              }
             },
             "configDisplay": {
               "width": 240,
@@ -53,6 +55,19 @@
             },
             "write": {
               "name": "tft-ili9341",
+              "descriptor": {
+                "spiTft": {
+                  "spi": {
+                    "bus": 0,
+                    "pinMosi": "MOSI",
+                    "pinSck": "SCK",
+                    "pinMiso": "MISO",
+                    "pinCs": "D8"
+                  },
+                  "pinDc": "D25",
+                  "pinRst": "D27"
+                }
+              },
               "message": "Hello from ProtoMQ!"
             }
           }
@@ -70,6 +85,19 @@
         "display": {
           "write": {
             "name": "tft-ili9341",
+            "descriptor": {
+              "spiTft": {
+                "spi": {
+                  "bus": 0,
+                  "pinMosi": "MOSI",
+                  "pinSck": "SCK",
+                  "pinMiso": "MISO",
+                  "pinCs": "D8"
+                },
+                "pinDc": "D25",
+                "pinRst": "D27"
+              }
+            },
             "message": "Tachyon + EYESPI Beret\nILI9341 240x320\nProtoMQ path OK"
           }
         }
@@ -85,6 +113,19 @@
         "display": {
           "write": {
             "name": "tft-ili9341",
+            "descriptor": {
+              "spiTft": {
+                "spi": {
+                  "bus": 0,
+                  "pinMosi": "MOSI",
+                  "pinSck": "SCK",
+                  "pinMiso": "MISO",
+                  "pinCs": "D8"
+                },
+                "pinDc": "D25",
+                "pinRst": "D27"
+              }
+            },
             "message": "CS=D8 DC=D25 RST=D27\nSPI0 MOSI/SCK/MISO\nILI9341 demo complete"
           }
         }
@@ -100,7 +141,20 @@
       "send": {
         "display": {
           "remove": {
-            "name": "tft-ili9341"
+            "name": "tft-ili9341",
+            "descriptor": {
+              "spiTft": {
+                "spi": {
+                  "bus": 0,
+                  "pinMosi": "MOSI",
+                  "pinSck": "SCK",
+                  "pinMiso": "MISO",
+                  "pinCs": "D8"
+                },
+                "pinDc": "D25",
+                "pinRst": "D27"
+              }
+            }
           }
         }
       }
