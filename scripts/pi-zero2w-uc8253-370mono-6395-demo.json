@@ -82,7 +82,7 @@
                 }
               }
             },
-            "message": "hello eink\\nUC8253 3.7in\\n416x240 mono"
+            "message": "hello eink\nUC8253 3.7in\n416x240 mono"
           }
         }
       }
@@ -110,7 +110,7 @@
                 }
               }
             },
-            "message": "step 2 of 3\\nrefreshing\\nfrom protomq"
+            "message": "step 2 of 3\nrefreshing\nfrom protomq"
           }
         }
       }
@@ -138,7 +138,7 @@
                 }
               }
             },
-            "message": "removing now...\\ngoodbye eink"
+            "message": "removing now...\ngoodbye eink"
           }
         }
       }
