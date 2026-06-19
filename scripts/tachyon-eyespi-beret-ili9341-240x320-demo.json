@@ -51,7 +51,8 @@
               "width": 240,
               "height": 320,
               "rotation": 1,
-              "textSize": 2
+              "textSize": 2,
+              "statusBar": true
             },
             "write": {
               "name": "tft-ili9341",
@@ -133,7 +134,7 @@
     },
     {
       "name": "remove-display",
-      "description": "Remove the display — clears the screen and releases the SPI bus",
+      "description": "Remove the display \u2014 clears the screen and releases the SPI bus",
       "enabled": false,
       "after": "write-update",
       "delay": 30000,

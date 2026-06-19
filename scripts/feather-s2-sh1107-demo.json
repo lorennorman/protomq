@@ -34,12 +34,14 @@
             "driver": "SH1107",
             "panel": "oled128x64default",
             "name": "oled128x64default",
-            "i2c": {
-              "addressSpace": {
-                "pinSda": 3,
-                "pinScl": 4
-              },
-              "address": 60
+            "interfaceType": {
+              "i2c": {
+                "addressSpace": {
+                  "pinSda": 3,
+                  "pinScl": 4
+                },
+                "address": 60
+              }
             },
             "configDisplay": {
               "width": 128,

@@ -34,9 +34,11 @@
             "driver": "JC1060P470",
             "panel": "guition-p4-jc1060p470",
             "name": "dsi0",
-            "dsi": {
-              "bus": 0,
-              "pinRst": "D27"
+            "interfaceType": {
+              "dsi": {
+                "bus": 0,
+                "pinRst": "D27"
+              }
             },
             "configDisplay": {
               "width": 1024,

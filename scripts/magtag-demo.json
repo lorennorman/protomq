@@ -34,23 +34,26 @@
             "driver": "SSD1680",
             "panel": "adafruit-magtag",
             "name": "epd0",
-            "spiEpd": {
-              "pinBusy": "D5",
-              "spi": {
-                "bus": 0,
-                "pinMosi": "D35",
-                "pinSck": "D36",
-                "pinCs": "D8"
-              },
-              "pinDc": "D7",
-              "pinRst": "D6"
+            "interfaceType": {
+              "spiEpd": {
+                "pinBusy": "D5",
+                "spi": {
+                  "bus": 0,
+                  "pinMosi": "D35",
+                  "pinSck": "D36",
+                  "pinCs": "D8"
+                },
+                "pinDc": "D7",
+                "pinRst": "D6"
+              }
             },
             "configEpd": {
               "mode": "EPD_MODE_MONO",
               "properties": {
                 "width": 296,
                 "height": 128,
-                "textSize": 3
+                "textSize": 3,
+                "statusBar": true
               }
             },
             "write": {
@@ -91,7 +94,10 @@
             "gpioDirection": "D_OUTPUT",
             "write": {
               "pinName": "D21",
-              "value": { "type": "T_BOOLEAN", "boolValue": false }
+              "value": {
+                "type": "T_BOOLEAN",
+                "boolValue": false
+              }
             }
           }
         }
@@ -127,7 +133,12 @@
         "pixels": {
           "write": {
             "pinData": "D1",
-            "colors": [16711680, 16711680, 16711680, 16711680]
+            "colors": [
+              16711680,
+              16711680,
+              16711680,
+              16711680
+            ]
           }
         }
       }
@@ -143,7 +154,12 @@
         "pixels": {
           "write": {
             "pinData": "D1",
-            "colors": [16711680, 65280, 255, 16777215]
+            "colors": [
+              16711680,
+              65280,
+              255,
+              16777215
+            ]
           }
         }
       }
@@ -286,7 +302,10 @@
             "gpioDirection": "D_OUTPUT",
             "write": {
               "pinName": "D16",
-              "value": { "type": "T_BOOLEAN", "boolValue": true }
+              "value": {
+                "type": "T_BOOLEAN",
+                "boolValue": true
+              }
             }
           }
         }

@@ -53,7 +53,8 @@
                 "width": 416,
                 "height": 240,
                 "rotation": 0,
-                "textSize": 3
+                "textSize": 3,
+                "statusBar": true
               }
             }
           }

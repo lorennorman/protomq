@@ -52,7 +52,8 @@
               "properties": {
                 "width": 416,
                 "height": 240,
-                "textSize": 3
+                "textSize": 3,
+                "statusBar": true
               }
             }
           }

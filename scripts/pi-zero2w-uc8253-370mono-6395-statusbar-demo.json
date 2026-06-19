@@ -1,6 +1,6 @@
 {
-  "name": "Pi 4 + UC8179 5.83\" 648x480 Mono EPD Demo",
-  "description": "Drives the Adafruit 5.83\" 648x480 monochrome E-Ink bare display (UC8179 chipset) on the Pi e-Ink Bonnet, on a Pi 4 running the host build. driver=\"UC8179\" maps to the host DisplayDriverUC8179 (adafruit_uc8179.UC8179). Pin map matches the bonnet's BCM-keyed Dxx aliases (CS=CE0/D8, DC=D22, RST=D27, BUSY=D17). seconds_per_frame is pinned to 20s on the host driver; the 25s step delays clear that cooldown.",
+  "name": "Pi Zero 2W + UC8253 3.7\" 416x240 Mono EPD (PID 6395) Status-Bar Toggle Demo",
+  "description": "Proves DisplayProperties.status_bar on the UC8253 3.7\" mono EPD: first Add sets statusBar=true (top bar with io_username + cloud/wifi/battery icons, body text shifted down), then Remove, then a second Add omits statusBar (defaults false -> no bar, body text uses the full panel height). A plain proto3 bool can't carry an explicit false distinctly from absent, so the host treats a missing field as 'no status bar'. Pin map matches Blinka's BCM-keyed Dxx aliases (CS=CE0/D8, DC=D22, RST=D27, BUSY=D17). 12s step delays clear the EPD refresh cooldown with room to read/capture each frame.",
   "protoVersion": "v2",
   "steps": [
     {
@@ -21,8 +21,8 @@
       }
     },
     {
-      "name": "add-display",
-      "description": "Add the UC8179-driven 5.83\" 648x480 mono EPD over SPI bus 0 with the bonnet's fixed pin map. Initial blank refresh runs as part of Add.",
+      "name": "add-with-statusbar",
+      "description": "Add the UC8253 EPD with statusBar=true. Boot splash -> hold -> status bar painted (username + icons); body label sits below the bar.",
       "after": "checkin-response",
       "waitFor": "checkin.complete",
       "delay": 500,
@@ -31,9 +31,9 @@
         "display": {
           "add": {
             "type": "DISPLAY_CLASS_EPD",
-            "driver": "UC8179",
-            "panel": "5.83-648x480-mono",
-            "name": "epd-bonnet-mono583",
+            "driver": "UC8253",
+            "panel": "3.7-416x240-mono",
+            "name": "epd-bonnet-mono37",
             "interfaceType": {
               "spiEpd": {
                 "pinDc": "D22",
@@ -50,8 +50,9 @@
             "configEpd": {
               "mode": "EPD_MODE_MONO",
               "properties": {
-                "width": 648,
-                "height": 480,
+                "width": 416,
+                "height": 240,
+                "rotation": 0,
                 "textSize": 3,
                 "statusBar": true
               }
@@ -61,15 +62,15 @@
       }
     },
     {
-      "name": "write-hello",
-      "description": "First message after the initial blank refresh.",
-      "after": "add-display",
-      "delay": 25000,
+      "name": "write-with-statusbar",
+      "description": "Body text under the status bar (statusBar=true layout).",
+      "after": "add-with-statusbar",
+      "delay": 12000,
       "topic": "display",
       "send": {
         "display": {
           "write": {
-            "name": "epd-bonnet-mono583",
+            "name": "epd-bonnet-mono37",
             "descriptor": {
               "spiEpd": {
                 "pinDc": "D22",
@@ -83,21 +84,21 @@
                 }
               }
             },
-            "message": "hello eink\nUC8179 5.83in\n648x480 mono"
+            "message": "status bar ON\nbody below bar\nUC8253 3.7in"
           }
         }
       }
     },
     {
-      "name": "write-step2",
-      "description": "Second message; 25s gap clears the 20s refresh cooldown.",
-      "after": "write-hello",
-      "delay": 25000,
+      "name": "remove-before-toggle",
+      "description": "Remove the display (blanks the panel) so the next Add re-inits with the opposite status_bar setting.",
+      "after": "write-with-statusbar",
+      "delay": 12000,
       "topic": "display",
       "send": {
         "display": {
-          "write": {
-            "name": "epd-bonnet-mono583",
+          "remove": {
+            "name": "epd-bonnet-mono37",
             "descriptor": {
               "spiEpd": {
                 "pinDc": "D22",
@@ -110,22 +111,60 @@
                   "pinSck": "SCK"
                 }
               }
-            },
-            "message": "step 2 of 3\nrefreshing\nfrom protomq"
+            }
           }
         }
       }
     },
     {
-      "name": "write-removing",
-      "description": "Final message before the display is removed.",
-      "after": "write-step2",
-      "delay": 25000,
+      "name": "add-without-statusbar",
+      "description": "Re-Add the same EPD with statusBar omitted (defaults false). No status bar is built or drawn; the body label starts at the top and uses the full panel height.",
+      "after": "remove-before-toggle",
+      "delay": 12000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "add": {
+            "type": "DISPLAY_CLASS_EPD",
+            "driver": "UC8253",
+            "panel": "3.7-416x240-mono",
+            "name": "epd-bonnet-mono37",
+            "interfaceType": {
+              "spiEpd": {
+                "pinDc": "D22",
+                "pinRst": "D27",
+                "pinBusy": "D17",
+                "spi": {
+                  "bus": 0,
+                  "pinCs": "D8",
+                  "pinMosi": "MOSI",
+                  "pinSck": "SCK"
+                }
+              }
+            },
+            "configEpd": {
+              "mode": "EPD_MODE_MONO",
+              "properties": {
+                "width": 416,
+                "height": 240,
+                "rotation": 0,
+                "textSize": 3
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "write-without-statusbar",
+      "description": "Body text with no status bar (full-height layout, no username/icons strip).",
+      "after": "add-without-statusbar",
+      "delay": 12000,
       "topic": "display",
       "send": {
         "display": {
           "write": {
-            "name": "epd-bonnet-mono583",
+            "name": "epd-bonnet-mono37",
             "descriptor": {
               "spiEpd": {
                 "pinDc": "D22",
@@ -139,7 +178,7 @@
                 }
               }
             },
-            "message": "removing now...\ngoodbye eink"
+            "message": "status bar OFF\nfull height body\nno icons strip"
           }
         }
       }
@@ -147,13 +186,13 @@
     {
       "name": "remove-display",
       "description": "Tear down the display so a future Add can re-init the bus cleanly.",
-      "after": "write-removing",
-      "delay": 25000,
+      "after": "write-without-statusbar",
+      "delay": 12000,
       "topic": "display",
       "send": {
         "display": {
           "remove": {
-            "name": "epd-bonnet-mono583",
+            "name": "epd-bonnet-mono37",
             "descriptor": {
               "spiEpd": {
                 "pinDc": "D22",

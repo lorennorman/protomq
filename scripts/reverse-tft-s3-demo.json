@@ -34,21 +34,24 @@
             "driver": "ST7789",
             "panel": "adafruit-reverse-tft",
             "name": "tft0",
-            "spiTft": {
-              "spi": {
-                "bus": 0,
-                "pinMosi": "D35",
-                "pinSck": "D36",
-                "pinCs": "D42"
-              },
-              "pinDc": "D40",
-              "pinRst": "D41"
+            "interfaceType": {
+              "spiTft": {
+                "spi": {
+                  "bus": 0,
+                  "pinMosi": "D35",
+                  "pinSck": "D36",
+                  "pinCs": "D42"
+                },
+                "pinDc": "D40",
+                "pinRst": "D41"
+              }
             },
             "configDisplay": {
               "width": 240,
               "height": 135,
               "rotation": 1,
-              "textSize": 2
+              "textSize": 2,
+              "statusBar": true
             },
             "write": {
               "name": "tft0",

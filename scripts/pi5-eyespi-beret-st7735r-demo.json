@@ -34,22 +34,25 @@
             "driver": "ST7735R",
             "panel": "1.8-128x160",
             "name": "tft-beret",
-            "spiTft": {
-              "spi": {
-                "bus": 0,
-                "pinMosi": "MOSI",
-                "pinSck": "SCK",
-                "pinMiso": "MISO",
-                "pinCs": "D8"
-              },
-              "pinDc": "D25",
-              "pinRst": "D27"
+            "interfaceType": {
+              "spiTft": {
+                "spi": {
+                  "bus": 0,
+                  "pinMosi": "MOSI",
+                  "pinSck": "SCK",
+                  "pinMiso": "MISO",
+                  "pinCs": "D8"
+                },
+                "pinDc": "D25",
+                "pinRst": "D27"
+              }
             },
             "configDisplay": {
               "width": 160,
               "height": 128,
               "rotation": 1,
-              "textSize": 2
+              "textSize": 2,
+              "statusBar": true
             },
             "write": {
               "name": "tft-beret",

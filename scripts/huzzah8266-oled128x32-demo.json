@@ -34,12 +34,14 @@
             "driver": "SSD1306",
             "panel": "oled128x32default",
             "name": "oled128x32default",
-            "i2c": {
-              "addressSpace": {
-                "pinSda": 4,
-                "pinScl": 5
-              },
-              "address": 60
+            "interfaceType": {
+              "i2c": {
+                "addressSpace": {
+                  "pinSda": 4,
+                  "pinScl": 5
+                },
+                "address": 60
+              }
             },
             "configDisplay": {
               "width": 128,

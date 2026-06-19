@@ -52,7 +52,8 @@
               "properties": {
                 "width": 400,
                 "height": 300,
-                "textSize": 3
+                "textSize": 3,
+                "statusBar": true
               }
             }
           }
@@ -76,7 +77,7 @@
     },
     {
       "name": "write-step2",
-      "description": "Second message — driver's seconds_per_frame is 5 s, this gives a beat to read.",
+      "description": "Second message \u2014 driver's seconds_per_frame is 5 s, this gives a beat to read.",
       "after": "write-hello",
       "delay": 10000,
       "topic": "display",

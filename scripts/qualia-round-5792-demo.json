@@ -33,10 +33,18 @@
             "driver": "ST7701",
             "panel": "adafruit-5792",
             "name": "qualia-round",
-            "ttlRgb666": {
-              "pinR0": "D1", "pinR1": "D2", "pinR2": "D42",
-              "pinG0": "D21", "pinG1": "D47", "pinG2": "D48",
-              "pinB0": "D10", "pinB1": "D11", "pinB2": "D12"
+            "interfaceType": {
+              "ttlRgb666": {
+                "pinR0": "D1",
+                "pinR1": "D2",
+                "pinR2": "D42",
+                "pinG0": "D21",
+                "pinG1": "D47",
+                "pinG2": "D48",
+                "pinB0": "D10",
+                "pinB1": "D11",
+                "pinB2": "D12"
+              }
             },
             "configDisplay": {
               "width": 480,
