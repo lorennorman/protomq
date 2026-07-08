@@ -1,0 +1,96 @@
+{
+  "name": "FT232H ST7789 4383 Display Demo",
+  "description": "Tests the Adafruit 1.14in 240x135 ST7789 TFT (PID 4383) driven over SPI by an FTDI FT232H breakout, wired through a Jumperless V5 crossbar. Responds to checkin, configures the display, then writes test messages. FT232H Blinka pins: SPI = SCK/MOSI/MISO (D0/D1/D2), CS=D4, DC=D5, RST=C0 (D3 is not exposed by the FT232H board module; RST is on C0 to spread crossbar lanes across chips and keep SCK/MOSI/CS/DC each on a dedicated 2-switch path).",
+  "protoVersion": "v2",
+  "steps": [
+    {
+      "name": "checkin-response",
+      "description": "Respond to device checkin with OK and board capabilities",
+      "trigger": "checkin.request",
+      "response": {
+        "checkin": {
+          "response": {
+            "response": "R_OK",
+            "totalGpioPins": 12,
+            "totalAnalogPins": 0,
+            "referenceVoltage": 3.3,
+            "componentAdds": {},
+            "sleepEnabled": false
+          }
+        }
+      }
+    },
+    {
+      "name": "add-display",
+      "description": "Configure the ST7789 TFT (240x135, SPI) on the FT232H",
+      "after": "checkin-response",
+      "waitFor": "checkin.complete",
+      "delay": 500,
+      "topic": "display",
+      "send": {
+        "display": {
+          "add": {
+            "type": "DISPLAY_CLASS_TFT",
+            "driver": "ST7789",
+            "panel": "1.14-240x135",
+            "name": "tft0",
+            "interfaceType": {
+              "spiTft": {
+                "spi": {
+                  "bus": 0,
+                  "pinSck": "SCK",
+                  "pinMosi": "MOSI",
+                  "pinMiso": "MISO",
+                  "pinCs": "D4"
+                },
+                "pinDc": "D5",
+                "pinRst": "C0"
+              }
+            },
+            "configDisplay": {
+              "width": 240,
+              "height": 135,
+              "rotation": 0,
+              "textSize": 2,
+              "statusBar": true
+            },
+            "write": {
+              "name": "tft0",
+              "message": "FT232H + ST7789\nSPI via Jumperless\nboot: splash>text"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "write-hello",
+      "description": "Write a test message to the display",
+      "after": "add-display",
+      "delay": 3000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "tft0",
+            "message": "SPI OK @ 12MHz\n240x135 landscape\nstatusbar=full W"
+          }
+        }
+      }
+    },
+    {
+      "name": "write-update",
+      "description": "Write an updated message after a pause",
+      "after": "write-hello",
+      "delay": 5000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "tft0",
+            "message": "Temp 23.5C RH 45%\nAll systems OK\n<end WS d2b>"
+          }
+        }
+      }
+    }
+  ]
+}
