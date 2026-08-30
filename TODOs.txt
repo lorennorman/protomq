@@ -1,0 +1,16 @@
+## TODO
+
+* add timestamp to message log entries
+
+* swap log of payload to raw_payload, then add protobuf json representation or equivalent pretty print
+
+* print received payloads in logs (even if decode fails - as hex or whatever - if simple then don't duplicate logs of "Not Auto-Responding to:")
+
+* NEW FEATURE: Add icon to edit previously sent message (similar auto population to Edit play script message)
+
+* BUG: Switching from new message to edit message doesn't reset the form properly, choosing different message types via Edit playscript buttons doesnt clean up previous message type so from breaks / shows wrong data.
+
+* BUG: UI: avoid the double display message entry (one for dropdown when starting a fresh message via Signal -> D2B, and one for Edit play script message triggered autopopulated)
+
+* Explain: BUG: display write is not part of display add in checkin response, why not, it should be part of the proto so why did the form not pick it up?
+

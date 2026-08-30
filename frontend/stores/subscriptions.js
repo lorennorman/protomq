@@ -1,7 +1,15 @@
 import { includes, map, reject, some, without } from 'lodash-es'
-import { ref, computed } from "vue"
+import { ref, computed, watch } from "vue"
 import { defineStore } from "pinia"
 import { get, set } from 'idb-keyval'
+
+// Topic patterns per subscription mode
+export const SUBSCRIPTION_MODES = {
+  both:   { label: 'Both V1+V2', topics: ['+/ws-b2d/+', '+/ws-d2b/+', '+/wprsnpr/#'] },
+  v2:     { label: 'V2 Only',    topics: ['+/ws-b2d/+', '+/ws-d2b/+'] },
+  v1:     { label: 'V1 Only',    topics: ['+/wprsnpr/#'] },
+}
+const SYSTEM_TOPICS = ['$SYS/#', 'state/clients']
 
 export const useSubscriptionStore = defineStore('subscriptions', () => {
   const
@@ -9,15 +17,18 @@ export const useSubscriptionStore = defineStore('subscriptions', () => {
     recentSubscriptions = ref([]),
     filters = ref(["#", "$SYS/*", "state/clients"]),
     disabledFilters = ref([]),
+    subscriptionMode = ref('both'),
     activeFilters = computed(() => without(filters.value, ...disabledFilters.value)),
     filteredSubscriptions = computed(() => reject(recentSubscriptions.value, sub =>
       topicIsFiltered(sub)
     )),
     rejectedSubscriptions = computed(() => without(recentSubscriptions.value, ...filteredSubscriptions.value)),
     subscriptionsWithStatus = computed(() => map(filteredSubscriptions.value, sub => {
+      const ours = includes(activeTopics.value, sub)
+      const brokerLive = includes(liveSubscriptions.value, sub)
       return {
         topic: sub,
-        status: includes(liveSubscriptions.value, sub) ? 'live' : 'recent'
+        status: ours ? 'live' : brokerLive ? 'other' : 'recent'
       }
     }))
 
@@ -28,6 +39,28 @@ export const useSubscriptionStore = defineStore('subscriptions', () => {
         this.recentSubscriptions.push(sub)
       }
     })
+    saveData()
+  }
+
+  function clearRecentSubscriptions() {
+    this.recentSubscriptions = [...this.liveSubscriptions]
+    saveData()
+  }
+
+  function onBrokerConnect() {
+    // New server session — clear stale recents, they'll rebuild from state/clients
+    this.recentSubscriptions = []
+  }
+
+  // Computed list of topics the MQTT client should subscribe to
+  const activeTopics = computed(() => [
+    ...SUBSCRIPTION_MODES[subscriptionMode.value].topics,
+    ...SYSTEM_TOPICS
+  ])
+
+  function setSubscriptionMode(mode) {
+    if (!SUBSCRIPTION_MODES[mode]) return
+    subscriptionMode.value = mode
     saveData()
   }
 
@@ -69,13 +102,17 @@ export const useSubscriptionStore = defineStore('subscriptions', () => {
     this.recentSubscriptions = data.recentSubscriptions
     this.filters = data.filters
     this.disabledFilters = data.disabledFilters || []
+    if (data.subscriptionMode && SUBSCRIPTION_MODES[data.subscriptionMode]) {
+      this.subscriptionMode = data.subscriptionMode
+    }
   }
 
   function saveData() {
     set('subscriptions', JSON.stringify({
       recentSubscriptions: recentSubscriptions.value,
       filters: filters.value,
-      disabledFilters: disabledFilters.value
+      disabledFilters: disabledFilters.value,
+      subscriptionMode: subscriptionMode.value
     }))
   }
 
@@ -92,6 +129,11 @@ export const useSubscriptionStore = defineStore('subscriptions', () => {
     addFilter,
     toggleFilter,
     topicIsFiltered,
-    loadSavedData
+    loadSavedData,
+    subscriptionMode,
+    activeTopics,
+    setSubscriptionMode,
+    clearRecentSubscriptions,
+    onBrokerConnect
   }
 })

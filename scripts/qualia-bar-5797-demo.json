@@ -1,0 +1,79 @@
+{
+  "name": "Qualia Bar Display Demo (PID 5797)",
+  "description": "Tests TL032FWV01CT-I1440A Rectangle Bar RGB TTL TFT Display (320x820) on Adafruit Qualia ESP32-S3. Responds to checkin, configures the display via RGB666 interface, then writes test messages.",
+  "protoVersion": "v2",
+  "steps": [
+    {
+      "name": "checkin-response",
+      "description": "Respond to device checkin with OK and board capabilities",
+      "trigger": "checkin.request",
+      "response": {
+        "checkin": {
+          "response": {
+            "response": "R_OK",
+            "totalGpioPins": 20,
+            "totalAnalogPins": 4,
+            "referenceVoltage": 2.5,
+            "componentAdds": {},
+            "sleepEnabled": false
+          }
+        }
+      }
+    },
+    {
+      "name": "add-display",
+      "description": "Configure the RGB TTL Bar display (320x820, RGB666 interface)",
+      "after": "checkin-response",
+      "delay": 2000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "add": {
+            "type": "DISPLAY_CLASS_TFT",
+            "driver": "ST7701",
+            "panel": "adafruit-5797",
+            "name": "qualia-bar",
+            "interfaceType": {
+              "ttlRgb666": {
+                "pinR0": "D1",
+                "pinR1": "D2",
+                "pinR2": "D42",
+                "pinG0": "D21",
+                "pinG1": "D47",
+                "pinG2": "D48",
+                "pinB0": "D10",
+                "pinB1": "D11",
+                "pinB2": "D12"
+              }
+            },
+            "configDisplay": {
+              "width": 320,
+              "height": 820,
+              "rotation": 0,
+              "textSize": 2
+            },
+            "write": {
+              "name": "qualia-bar",
+              "message": "Hello from ProtoMQ!"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "write-hello",
+      "description": "Write a test message to the bar display",
+      "after": "add-display",
+      "delay": 3000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "qualia-bar",
+            "message": "Hello from ProtoMQ!\\nQualia Bar Display\\n320x820 RGB TTL\\nPID 5797"
+          }
+        }
+      }
+    }
+  ]
+}

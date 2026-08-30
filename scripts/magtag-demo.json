@@ -1,0 +1,380 @@
+{
+  "name": "MagTag 2.9\" E-Ink Display Demo",
+  "description": "Tests SSD1680 EPD display, NeoPixels, buttons, LED, light sensor, and piezo buzzer on Adafruit MagTag. Responds to checkin, configures components, then exercises each one.",
+  "protoVersion": "v2",
+  "steps": [
+    {
+      "name": "checkin-response",
+      "description": "Respond to device checkin with OK and board capabilities",
+      "trigger": "checkin.request",
+      "response": {
+        "checkin": {
+          "response": {
+            "response": "R_OK",
+            "totalGpioPins": 20,
+            "totalAnalogPins": 4,
+            "referenceVoltage": 2.5,
+            "componentAdds": {},
+            "sleepEnabled": false
+          }
+        }
+      }
+    },
+    {
+      "name": "add-display",
+      "description": "Configure the 2.9\" E-Ink EPD display (296x128, SPI)",
+      "after": "checkin-response",
+      "waitFor": "checkin.complete",
+      "delay": 500,
+      "topic": "display",
+      "send": {
+        "display": {
+          "add": {
+            "type": "DISPLAY_CLASS_EPD",
+            "driver": "SSD1680",
+            "panel": "adafruit-magtag",
+            "name": "epd0",
+            "interfaceType": {
+              "spiEpd": {
+                "pinBusy": "D5",
+                "spi": {
+                  "bus": 0,
+                  "pinMosi": "D35",
+                  "pinSck": "D36",
+                  "pinCs": "D8"
+                },
+                "pinDc": "D7",
+                "pinRst": "D6"
+              }
+            },
+            "configEpd": {
+              "mode": "EPD_MODE_MONO",
+              "properties": {
+                "width": 296,
+                "height": 128,
+                "textSize": 3,
+                "statusBar": true
+              }
+            },
+            "write": {
+              "name": "epd0",
+              "message": "Hello from ProtoMQ!"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "write-hello",
+      "description": "Write a test message to the E-Ink display",
+      "after": "add-display",
+      "delay": 5000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "epd0",
+            "message": "Hello from ProtoMQ!\\nMagTag E-Ink\\n296x128 EPD\\nDisplay test OK"
+          }
+        }
+      }
+    },
+    {
+      "enabled": false,
+      "name": "enable-neopixel-power",
+      "description": "Enable NeoPixel + Light Sensor power (D21 LOW = enabled)",
+      "after": "checkin-response",
+      "waitFor": "checkin.complete",
+      "delay": 500,
+      "topic": "digitalio",
+      "send": {
+        "digitalio": {
+          "add": {
+            "pinName": "D21",
+            "gpioDirection": "D_OUTPUT",
+            "write": {
+              "pinName": "D21",
+              "value": {
+                "type": "T_BOOLEAN",
+                "boolValue": false
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "enabled": false,
+      "name": "add-neopixels",
+      "description": "Configure 4x NeoPixel strand on D1 (GRB order)",
+      "after": "enable-neopixel-power",
+      "delay": 1000,
+      "topic": "pixels",
+      "send": {
+        "pixels": {
+          "add": {
+            "type": "T_NEOPIXEL",
+            "num": 4,
+            "ordering": "O_GRB",
+            "brightness": 255,
+            "pinData": "D1"
+          }
+        }
+      }
+    },
+    {
+      "enabled": false,
+      "name": "neopixel-red",
+      "description": "Set all NeoPixels to red",
+      "after": "add-neopixels",
+      "delay": 2000,
+      "topic": "pixels",
+      "send": {
+        "pixels": {
+          "write": {
+            "pinData": "D1",
+            "colors": [
+              16711680,
+              16711680,
+              16711680,
+              16711680
+            ]
+          }
+        }
+      }
+    },
+    {
+      "enabled": false,
+      "name": "neopixel-rainbow",
+      "description": "Set NeoPixels to rainbow colors (red, green, blue, white)",
+      "after": "neopixel-red",
+      "delay": 3000,
+      "topic": "pixels",
+      "send": {
+        "pixels": {
+          "write": {
+            "pinData": "D1",
+            "colors": [
+              16711680,
+              65280,
+              255,
+              16777215
+            ]
+          }
+        }
+      }
+    },
+    {
+      "enabled": false,
+      "name": "add-button-a",
+      "description": "Add Button A (D15) as digital input with pull-up",
+      "after": "checkin-response",
+      "waitFor": "checkin.complete",
+      "delay": 500,
+      "topic": "digitalio",
+      "send": {
+        "digitalio": {
+          "add": {
+            "pinName": "D15",
+            "gpioDirection": "D_INPUT_PULL_UP",
+            "sampleMode": "SM_EVENT"
+          }
+        }
+      }
+    },
+    {
+      "enabled": false,
+      "name": "add-button-b",
+      "description": "Add Button B (D14) as digital input with pull-up",
+      "after": "checkin-response",
+      "waitFor": "checkin.complete",
+      "delay": 600,
+      "topic": "digitalio",
+      "send": {
+        "digitalio": {
+          "add": {
+            "pinName": "D14",
+            "gpioDirection": "D_INPUT_PULL_UP",
+            "sampleMode": "SM_EVENT"
+          }
+        }
+      }
+    },
+    {
+      "enabled": false,
+      "name": "add-button-c",
+      "description": "Add Button C (D12) as digital input with pull-up",
+      "after": "checkin-response",
+      "waitFor": "checkin.complete",
+      "delay": 700,
+      "topic": "digitalio",
+      "send": {
+        "digitalio": {
+          "add": {
+            "pinName": "D12",
+            "gpioDirection": "D_INPUT_PULL_UP",
+            "sampleMode": "SM_EVENT"
+          }
+        }
+      }
+    },
+    {
+      "enabled": false,
+      "name": "add-button-d",
+      "description": "Add Button D (D11) as digital input with pull-up",
+      "after": "checkin-response",
+      "waitFor": "checkin.complete",
+      "delay": 800,
+      "topic": "digitalio",
+      "send": {
+        "digitalio": {
+          "add": {
+            "pinName": "D11",
+            "gpioDirection": "D_INPUT_PULL_UP",
+            "sampleMode": "SM_EVENT"
+          }
+        }
+      }
+    },
+    {
+      "enabled": false,
+      "name": "add-dimmable-led",
+      "description": "Add dimmable LED on D13 (PWM, 5000Hz, 12-bit resolution)",
+      "after": "checkin-response",
+      "waitFor": "checkin.complete",
+      "delay": 500,
+      "topic": "pwm",
+      "send": {
+        "pwm": {
+          "add": {
+            "pin": "D13",
+            "frequency": 5000,
+            "resolution": 12
+          }
+        }
+      }
+    },
+    {
+      "enabled": false,
+      "name": "led-on",
+      "description": "Turn LED on at 50% brightness (duty cycle 2048/4096)",
+      "after": "add-dimmable-led",
+      "delay": 2000,
+      "topic": "pwm",
+      "send": {
+        "pwm": {
+          "write": {
+            "pin": "D13",
+            "dutyCycle": 2048
+          }
+        }
+      }
+    },
+    {
+      "enabled": false,
+      "name": "add-light-sensor",
+      "description": "Add light sensor on A3 (analog input, 30s period)",
+      "after": "enable-neopixel-power",
+      "delay": 1500,
+      "topic": "analogio",
+      "send": {
+        "analogio": {
+          "add": {
+            "pinName": "A3",
+            "period": 30,
+            "readMode": "SENSOR_TYPE_RAW"
+          }
+        }
+      }
+    },
+    {
+      "enabled": false,
+      "name": "enable-speaker",
+      "description": "Enable speaker power (D16 HIGH)",
+      "after": "checkin-response",
+      "waitFor": "checkin.complete",
+      "delay": 500,
+      "topic": "digitalio",
+      "send": {
+        "digitalio": {
+          "add": {
+            "pinName": "D16",
+            "gpioDirection": "D_OUTPUT",
+            "write": {
+              "pinName": "D16",
+              "value": {
+                "type": "T_BOOLEAN",
+                "boolValue": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "enabled": false,
+      "name": "add-buzzer",
+      "description": "Add piezo buzzer on D17 (PWM, variable frequency, 10-bit resolution)",
+      "after": "enable-speaker",
+      "delay": 1000,
+      "topic": "pwm",
+      "send": {
+        "pwm": {
+          "add": {
+            "pin": "D17",
+            "frequency": 146,
+            "resolution": 10
+          }
+        }
+      }
+    },
+    {
+      "enabled": false,
+      "name": "buzzer-tone",
+      "description": "Play a 440Hz tone on the buzzer",
+      "after": "add-buzzer",
+      "delay": 2000,
+      "topic": "pwm",
+      "send": {
+        "pwm": {
+          "write": {
+            "pin": "D17",
+            "frequency": 440
+          }
+        }
+      }
+    },
+    {
+      "enabled": false,
+      "name": "buzzer-off",
+      "description": "Silence the buzzer",
+      "after": "buzzer-tone",
+      "delay": 2000,
+      "topic": "pwm",
+      "send": {
+        "pwm": {
+          "write": {
+            "pin": "D17",
+            "frequency": 0
+          }
+        }
+      }
+    },
+    {
+      "enabled": false,
+      "name": "write-status",
+      "description": "Write final status message to the E-Ink display",
+      "after": "neopixel-rainbow",
+      "delay": 5000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "epd0",
+            "message": "MagTag Test Complete\\nNeoPixels: OK\\nButtons: Ready\\nBuzzer: OK\\nLED: OK"
+          }
+        }
+      }
+    }
+  ]
+}

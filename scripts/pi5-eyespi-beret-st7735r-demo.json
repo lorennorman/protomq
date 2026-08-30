@@ -1,0 +1,97 @@
+{
+  "name": "Pi 5 EYESPI Beret ST7735R Demo",
+  "description": "Tests ST7735R 1.8\" 128x160 SPI TFT on Raspberry Pi 5 with Adafruit EYESPI Pi Beret. Responds to checkin, configures the display, then writes test messages.",
+  "protoVersion": "v2",
+  "steps": [
+    {
+      "name": "checkin-response",
+      "description": "Respond to device checkin with OK and Pi 5 style board capabilities",
+      "trigger": "checkin.request",
+      "response": {
+        "checkin": {
+          "response": {
+            "response": "R_OK",
+            "totalGpioPins": 28,
+            "totalAnalogPins": 0,
+            "referenceVoltage": 3.3,
+            "componentAdds": {},
+            "sleepEnabled": false
+          }
+        }
+      }
+    },
+    {
+      "name": "add-display",
+      "description": "Configure ST7735R 1.8-inch TFT over SPI on the EYESPI Pi Beret",
+      "after": "checkin-response",
+      "waitFor": "checkin.complete",
+      "delay": 500,
+      "topic": "display",
+      "send": {
+        "display": {
+          "add": {
+            "type": "DISPLAY_CLASS_TFT",
+            "driver": "ST7735R",
+            "panel": "1.8-128x160",
+            "name": "tft-beret",
+            "interfaceType": {
+              "spiTft": {
+                "spi": {
+                  "bus": 0,
+                  "pinMosi": "MOSI",
+                  "pinSck": "SCK",
+                  "pinMiso": "MISO",
+                  "pinCs": "D8"
+                },
+                "pinDc": "D25",
+                "pinRst": "D27"
+              }
+            },
+            "configDisplay": {
+              "width": 160,
+              "height": 128,
+              "rotation": 1,
+              "textSize": 2,
+              "statusBar": true
+            },
+            "write": {
+              "name": "tft-beret",
+              "message": "Hello from ProtoMQ!"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "write-hello",
+      "description": "Write a multi-line test message after add succeeds",
+      "after": "add-display",
+      "waitFor": "display.addedOrReplaced",
+      "delay": 2500,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "tft-beret",
+            "message": "Pi 5 + EYESPI Beret\\nST7735R 128x160\\nProtoMQ path OK"
+          }
+        }
+      }
+    },
+    {
+      "name": "write-update",
+      "description": "Write a second message to verify repeat writes",
+      "after": "write-hello",
+      "delay": 4000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "tft-beret",
+            "message": "CS=D8 DC=D25 RST=D27\\nSPI0 MOSI/SCK/MISO\\nST7735R demo complete"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "name": "Metro S2 16x2 Character LCD Demo",
+  "description": "Tests MCP23008-based 16x2 I2C character LCD on Adafruit Metro ESP32-S2. Responds to checkin, configures the LCD at 0x20, then writes test messages.",
+  "protoVersion": "v2",
+  "steps": [
+    {
+      "name": "checkin-response",
+      "description": "Respond to device checkin with OK and board capabilities",
+      "trigger": "checkin.request",
+      "response": {
+        "checkin": {
+          "response": {
+            "response": "R_OK",
+            "totalGpioPins": 20,
+            "totalAnalogPins": 4,
+            "referenceVoltage": 2.5,
+            "componentAdds": {},
+            "sleepEnabled": false
+          }
+        }
+      }
+    },
+    {
+      "name": "add-display",
+      "description": "Configure the 16x2 character LCD via I2C at 0x20 (MCP23008 backpack)",
+      "after": "checkin-response",
+      "waitFor": "checkin.complete",
+      "delay": 500,
+      "topic": "display",
+      "send": {
+        "display": {
+          "add": {
+            "type": "DISPLAY_CLASS_CHAR_LCD",
+            "driver": "charlcd",
+            "panel": "charlcd16x2default",
+            "name": "charlcd16x2default",
+            "i2c": {
+              "addressSpace": {
+                "pinSda": 33,
+                "pinScl": 34
+              },
+              "address": 32
+            },
+            "configCharLcd": {
+              "columns": 16,
+              "rows": 2
+            },
+            "write": {
+              "name": "charlcd16x2default",
+              "message": "Hello ProtoMQ!"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "write-hello",
+      "description": "Write a test message to the LCD",
+      "after": "add-display",
+      "delay": 3000,
+      "waitFor": "display.addedOrReplaced",
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "charlcd16x2default",
+            "message": "Hello ProtoMQ!\nMetro S2 LCD"
+          }
+        }
+      }
+    },
+    {
+      "name": "write-update",
+      "description": "Write an updated status message",
+      "after": "write-hello",
+      "delay": 5000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "charlcd16x2default",
+            "message": "LCD 0x20 ready\n16x2 Test OK"
+          }
+        }
+      }
+    }
+  ]
+}

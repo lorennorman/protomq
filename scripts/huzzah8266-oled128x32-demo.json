@@ -1,0 +1,91 @@
+{
+  "name": "Huzzah ESP8266 128x32 OLED Demo",
+  "description": "Tests SSD1306 128x32 I2C OLED FeatherWing on Adafruit Feather Huzzah ESP8266. Responds to checkin, configures the OLED at 0x3C, then writes test messages.",
+  "protoVersion": "v2",
+  "steps": [
+    {
+      "name": "checkin-response",
+      "description": "Respond to device checkin with OK and board capabilities",
+      "trigger": "checkin.request",
+      "response": {
+        "checkin": {
+          "response": {
+            "response": "R_OK",
+            "totalGpioPins": 9,
+            "totalAnalogPins": 1,
+            "referenceVoltage": 3.3,
+            "componentAdds": {},
+            "sleepEnabled": false
+          }
+        }
+      }
+    },
+    {
+      "name": "add-display",
+      "description": "Configure the 128x32 SSD1306 OLED FeatherWing via I2C at 0x3C",
+      "after": "checkin-response",
+      "waitFor": "checkin.complete",
+      "delay": 500,
+      "topic": "display",
+      "send": {
+        "display": {
+          "add": {
+            "type": "DISPLAY_CLASS_OLED",
+            "driver": "SSD1306",
+            "panel": "oled128x32default",
+            "name": "oled128x32default",
+            "interfaceType": {
+              "i2c": {
+                "addressSpace": {
+                  "pinSda": 4,
+                  "pinScl": 5
+                },
+                "address": 60
+              }
+            },
+            "configDisplay": {
+              "width": 128,
+              "height": 32,
+              "textSize": 1
+            },
+            "write": {
+              "name": "oled128x32default",
+              "message": "Hello from ProtoMQ!"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "write-hello",
+      "description": "Write a test message to the OLED",
+      "after": "add-display",
+      "delay": 3000,
+      "waitFor": "display.addedOrReplaced",
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "oled128x32default",
+            "message": "Hello from ProtoMQ!\nHuzzah ESP8266\n128x32 I2C OLED"
+          }
+        }
+      }
+    },
+    {
+      "name": "write-update",
+      "description": "Write an updated status message",
+      "after": "write-hello",
+      "delay": 5000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "oled128x32default",
+            "message": "ESP8266 Test OK\nOLED 0x3C ready"
+          }
+        }
+      }
+    }
+  ]
+}

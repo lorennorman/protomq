@@ -1,0 +1,95 @@
+{
+  "name": "Reverse TFT S3 Display Demo",
+  "description": "Tests ST7789 TFT display via SPI on Adafruit Feather ESP32-S3 Reverse TFT. Responds to checkin, configures the display, then writes a test message.",
+  "protoVersion": "v2",
+  "steps": [
+    {
+      "name": "checkin-response",
+      "description": "Respond to device checkin with OK and board capabilities",
+      "trigger": "checkin.request",
+      "response": {
+        "checkin": {
+          "response": {
+            "response": "R_OK",
+            "totalGpioPins": 20,
+            "totalAnalogPins": 4,
+            "referenceVoltage": 2.5,
+            "componentAdds": {},
+            "sleepEnabled": false
+          }
+        }
+      }
+    },
+    {
+      "name": "add-display",
+      "description": "Configure the ST7789 TFT display (240x135, SPI)",
+      "after": "checkin-response",
+      "waitFor": "checkin.complete",
+      "delay": 500,
+      "topic": "display",
+      "send": {
+        "display": {
+          "add": {
+            "type": "DISPLAY_CLASS_TFT",
+            "driver": "ST7789",
+            "panel": "adafruit-reverse-tft",
+            "name": "tft0",
+            "interfaceType": {
+              "spiTft": {
+                "spi": {
+                  "bus": 0,
+                  "pinMosi": "D35",
+                  "pinSck": "D36",
+                  "pinCs": "D42"
+                },
+                "pinDc": "D40",
+                "pinRst": "D41"
+              }
+            },
+            "configDisplay": {
+              "width": 240,
+              "height": 135,
+              "rotation": 1,
+              "textSize": 2,
+              "statusBar": true
+            },
+            "write": {
+              "name": "tft0",
+              "message": "Hello from ProtoMQ!"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "write-hello",
+      "description": "Write a test message to the display",
+      "after": "add-display",
+      "delay": 3000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "tft0",
+            "message": "Hello from ProtoMQ!\\nReverse TFT S3\\nDisplay test OK"
+          }
+        }
+      }
+    },
+    {
+      "name": "write-update",
+      "description": "Write an updated message after a pause",
+      "after": "write-hello",
+      "delay": 5000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "tft0",
+            "message": "Temperature: 23.5C\\nHumidity: 45%\\n\\nAll systems OK"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,16 +1,20 @@
 <template>
-  <label class="label">
-    <p>{{ (label ?? field.fieldName) || label }}:</p>
+  <div class="label">
+    <p>
+      <button v-if="!expanded" @click="addMessage" class="add-msg-btn">+</button>
+      <button v-else @click="removeMessage" class="add-msg-btn">-</button>
+      {{ (label ?? field.fieldName) || label }}:
+    </p>
     <p>{{ foundMessage?.name }}</p>
-  </label>
+  </div>
 
-  <div class="nested-message">
+  <div v-if="expanded" class="nested-message">
     <FieldInput v-for="messageField in messageFields" :field="messageField" :fieldPath="nextFieldPath" :key="messageField.fieldName"/>
   </div>
 </template>
 
 <script setup>
-  import { computed } from 'vue'
+  import { computed, ref } from 'vue'
   import { findProtoFor } from '../../protobuf_service'
   import { useMessageStore } from '../../stores/message'
   import FieldInput from './FieldInput.vue'
@@ -22,15 +26,36 @@
       field: Object,
       fieldPath: String
     }),
-    { getFieldsAtPath } = useMessageStore(),
+    messageStore = useMessageStore(),
+    { getFieldsAtPath } = messageStore,
     { nextFieldPath } = useFieldPath(props),
     foundMessage = computed(() => findProtoFor(props.field)),
-    messageFields = computed(() => getFieldsAtPath(nextFieldPath))
+    messageFields = computed(() => getFieldsAtPath(nextFieldPath)),
+    expanded = ref(messageStore.getDeep(nextFieldPath) !== undefined),
+
+    addMessage = () => {
+      messageStore.setDeep(nextFieldPath, {})
+      const proto = foundMessage.value
+      if (proto) messageStore.setDefaults(proto, nextFieldPath)
+      expanded.value = true
+    },
+
+    removeMessage = () => {
+      messageStore.setDeep(nextFieldPath, undefined)
+      expanded.value = false
+    }
 </script>
 
 <style>
   .nested-message {
-    border: 1px dashed lightgray;
+    border: 1px dashed var(--border);
     margin-left: 1.2em;
+  }
+
+  .add-msg-btn {
+    font-size: 0.8em;
+    padding: 0 4px;
+    cursor: pointer;
+    font-family: monospace;
   }
 </style>

@@ -1,0 +1,1671 @@
+{
+  "nested": {
+    "wippersnapper": {
+      "nested": {
+        "signal": {
+          "nested": {
+            "v1": {
+              "nested": {
+                "UARTRequest": {
+                  "oneofs": {
+                    "payload": {
+                      "oneof": [
+                        "reqUartDeviceAttach",
+                        "reqUartDeviceDetach"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "reqUartDeviceAttach": {
+                      "type": "wippersnapper.uart.v1.UARTDeviceAttachRequest",
+                      "id": 1
+                    },
+                    "reqUartDeviceDetach": {
+                      "type": "wippersnapper.uart.v1.UARTDeviceDetachRequest",
+                      "id": 2
+                    }
+                  }
+                },
+                "UARTResponse": {
+                  "oneofs": {
+                    "payload": {
+                      "oneof": [
+                        "respUartDeviceAttach",
+                        "respUartDeviceEvent"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "respUartDeviceAttach": {
+                      "type": "wippersnapper.uart.v1.UARTDeviceAttachResponse",
+                      "id": 1
+                    },
+                    "respUartDeviceEvent": {
+                      "type": "wippersnapper.uart.v1.UARTDeviceEvent",
+                      "id": 2
+                    }
+                  }
+                },
+                "Ds18x20Request": {
+                  "oneofs": {
+                    "payload": {
+                      "oneof": [
+                        "reqDs18x20Init",
+                        "reqDs18x20Deinit"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "reqDs18x20Init": {
+                      "type": "wippersnapper.ds18x20.v1.Ds18x20InitRequest",
+                      "id": 1
+                    },
+                    "reqDs18x20Deinit": {
+                      "type": "wippersnapper.ds18x20.v1.Ds18x20DeInitRequest",
+                      "id": 2
+                    }
+                  }
+                },
+                "Ds18x20Response": {
+                  "oneofs": {
+                    "payload": {
+                      "oneof": [
+                        "respDs18x20Init",
+                        "respDs18x20Event"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "respDs18x20Init": {
+                      "type": "wippersnapper.ds18x20.v1.Ds18x20InitResponse",
+                      "id": 1
+                    },
+                    "respDs18x20Event": {
+                      "type": "wippersnapper.ds18x20.v1.Ds18x20DeviceEvent",
+                      "id": 2
+                    }
+                  }
+                },
+                "I2CRequest": {
+                  "oneofs": {
+                    "payload": {
+                      "oneof": [
+                        "reqI2cInit",
+                        "reqI2cScan",
+                        "reqI2cSetFreq",
+                        "reqI2cDeviceInit",
+                        "reqI2cDeviceDeinit",
+                        "reqI2cDeviceUpdate",
+                        "reqI2cDeviceInitRequests",
+                        "reqI2cDeviceOutWrite"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "reqI2cInit": {
+                      "type": "wippersnapper.i2c.v1.I2CBusInitRequest",
+                      "id": 1,
+                      "options": {
+                        "deprecated": true
+                      }
+                    },
+                    "reqI2cScan": {
+                      "type": "wippersnapper.i2c.v1.I2CBusScanRequest",
+                      "id": 2
+                    },
+                    "reqI2cSetFreq": {
+                      "type": "wippersnapper.i2c.v1.I2CBusSetFrequency",
+                      "id": 3
+                    },
+                    "reqI2cDeviceInit": {
+                      "type": "wippersnapper.i2c.v1.I2CDeviceInitRequest",
+                      "id": 4
+                    },
+                    "reqI2cDeviceDeinit": {
+                      "type": "wippersnapper.i2c.v1.I2CDeviceDeinitRequest",
+                      "id": 5
+                    },
+                    "reqI2cDeviceUpdate": {
+                      "type": "wippersnapper.i2c.v1.I2CDeviceUpdateRequest",
+                      "id": 6
+                    },
+                    "reqI2cDeviceInitRequests": {
+                      "type": "wippersnapper.i2c.v1.I2CDeviceInitRequests",
+                      "id": 7
+                    },
+                    "reqI2cDeviceOutWrite": {
+                      "type": "wippersnapper.i2c.v1.I2CDeviceOutputWrite",
+                      "id": 8
+                    }
+                  }
+                },
+                "I2CResponse": {
+                  "oneofs": {
+                    "payload": {
+                      "oneof": [
+                        "respI2cInit",
+                        "respI2cScan",
+                        "respI2cDeviceInit",
+                        "respI2cDeviceDeinit",
+                        "respI2cDeviceUpdate",
+                        "respI2cDeviceEvent"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "respI2cInit": {
+                      "type": "wippersnapper.i2c.v1.I2CBusInitResponse",
+                      "id": 1,
+                      "options": {
+                        "deprecated": true
+                      }
+                    },
+                    "respI2cScan": {
+                      "type": "wippersnapper.i2c.v1.I2CBusScanResponse",
+                      "id": 2
+                    },
+                    "respI2cDeviceInit": {
+                      "type": "wippersnapper.i2c.v1.I2CDeviceInitResponse",
+                      "id": 3
+                    },
+                    "respI2cDeviceDeinit": {
+                      "type": "wippersnapper.i2c.v1.I2CDeviceDeinitResponse",
+                      "id": 4
+                    },
+                    "respI2cDeviceUpdate": {
+                      "type": "wippersnapper.i2c.v1.I2CDeviceUpdateResponse",
+                      "id": 5
+                    },
+                    "respI2cDeviceEvent": {
+                      "type": "wippersnapper.i2c.v1.I2CDeviceEvent",
+                      "id": 6
+                    }
+                  }
+                },
+                "ServoRequest": {
+                  "oneofs": {
+                    "payload": {
+                      "oneof": [
+                        "servoAttach",
+                        "servoDetach",
+                        "servoWrite"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "servoAttach": {
+                      "type": "wippersnapper.servo.v1.ServoAttachRequest",
+                      "id": 1
+                    },
+                    "servoDetach": {
+                      "type": "wippersnapper.servo.v1.ServoDetachRequest",
+                      "id": 2
+                    },
+                    "servoWrite": {
+                      "type": "wippersnapper.servo.v1.ServoWriteRequest",
+                      "id": 3
+                    }
+                  }
+                },
+                "ServoResponse": {
+                  "oneofs": {
+                    "payload": {
+                      "oneof": [
+                        "servoAttachResp"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "servoAttachResp": {
+                      "type": "wippersnapper.servo.v1.ServoAttachResponse",
+                      "id": 1
+                    }
+                  }
+                },
+                "PixelsRequest": {
+                  "oneofs": {
+                    "payload": {
+                      "oneof": [
+                        "reqPixelsCreate",
+                        "reqPixelsDelete",
+                        "reqPixelsWrite"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "reqPixelsCreate": {
+                      "type": "wippersnapper.pixels.v1.PixelsCreateRequest",
+                      "id": 1
+                    },
+                    "reqPixelsDelete": {
+                      "type": "wippersnapper.pixels.v1.PixelsDeleteRequest",
+                      "id": 2
+                    },
+                    "reqPixelsWrite": {
+                      "type": "wippersnapper.pixels.v1.PixelsWriteRequest",
+                      "id": 3
+                    }
+                  }
+                },
+                "PixelsResponse": {
+                  "oneofs": {
+                    "payload": {
+                      "oneof": [
+                        "respPixelsCreate"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "respPixelsCreate": {
+                      "type": "wippersnapper.pixels.v1.PixelsCreateResponse",
+                      "id": 1
+                    }
+                  }
+                },
+                "CreateSignalRequest": {
+                  "oneofs": {
+                    "payload": {
+                      "oneof": [
+                        "pinConfigs",
+                        "pinEvent",
+                        "pwmPinConfig",
+                        "pwmPinEvent",
+                        "pinEvents"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "pinConfigs": {
+                      "type": "wippersnapper.pin.v1.ConfigurePinRequests",
+                      "id": 6
+                    },
+                    "pinEvent": {
+                      "type": "wippersnapper.pin.v1.PinEvent",
+                      "id": 15
+                    },
+                    "pwmPinConfig": {
+                      "type": "wippersnapper.pin.v1.ConfigurePWMPinRequests",
+                      "id": 10,
+                      "options": {
+                        "deprecated": true
+                      }
+                    },
+                    "pwmPinEvent": {
+                      "type": "wippersnapper.pin.v1.PWMPinEvents",
+                      "id": 12,
+                      "options": {
+                        "deprecated": true
+                      }
+                    },
+                    "pinEvents": {
+                      "type": "wippersnapper.pin.v1.PinEvents",
+                      "id": 7
+                    }
+                  }
+                },
+                "SignalResponse": {
+                  "oneofs": {
+                    "payload": {
+                      "oneof": [
+                        "configurationComplete"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "configurationComplete": {
+                      "type": "bool",
+                      "id": 1
+                    }
+                  }
+                },
+                "PWMRequest": {
+                  "oneofs": {
+                    "payload": {
+                      "oneof": [
+                        "attachRequest",
+                        "detachRequest",
+                        "writeDutyRequest",
+                        "writeDutyMultiRequest",
+                        "writeFreqRequest"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "attachRequest": {
+                      "type": "wippersnapper.pwm.v1.PWMAttachRequest",
+                      "id": 1
+                    },
+                    "detachRequest": {
+                      "type": "wippersnapper.pwm.v1.PWMDetachRequest",
+                      "id": 2
+                    },
+                    "writeDutyRequest": {
+                      "type": "wippersnapper.pwm.v1.PWMWriteDutyCycleRequest",
+                      "id": 3
+                    },
+                    "writeDutyMultiRequest": {
+                      "type": "wippersnapper.pwm.v1.PWMWriteDutyCycleMultiRequest",
+                      "id": 4
+                    },
+                    "writeFreqRequest": {
+                      "type": "wippersnapper.pwm.v1.PWMWriteFrequencyRequest",
+                      "id": 5
+                    }
+                  }
+                },
+                "PWMResponse": {
+                  "oneofs": {
+                    "payload": {
+                      "oneof": [
+                        "attachResponse"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "attachResponse": {
+                      "type": "wippersnapper.pwm.v1.PWMAttachResponse",
+                      "id": 1
+                    }
+                  }
+                },
+                "DisplayRequest": {
+                  "oneofs": {
+                    "payload": {
+                      "oneof": [
+                        "displayAdd",
+                        "displayRemove",
+                        "displayWrite"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "displayAdd": {
+                      "type": "wippersnapper.display.v1.DisplayAddOrReplace",
+                      "id": 1
+                    },
+                    "displayRemove": {
+                      "type": "wippersnapper.display.v1.DisplayRemove",
+                      "id": 2
+                    },
+                    "displayWrite": {
+                      "type": "wippersnapper.display.v1.DisplayWrite",
+                      "id": 3
+                    }
+                  }
+                },
+                "DisplayResponse": {
+                  "oneofs": {
+                    "payload": {
+                      "oneof": [
+                        "displayAdded",
+                        "displayRemoved"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "displayAdded": {
+                      "type": "wippersnapper.display.v1.DisplayAddedOrReplaced",
+                      "id": 1
+                    },
+                    "displayRemoved": {
+                      "type": "wippersnapper.display.v1.DisplayRemoved",
+                      "id": 2
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "pin": {
+          "nested": {
+            "v1": {
+              "nested": {
+                "Mode": {
+                  "values": {
+                    "MODE_UNSPECIFIED": 0,
+                    "MODE_ANALOG": 1,
+                    "MODE_DIGITAL": 2
+                  }
+                },
+                "ConfigurePinRequests": {
+                  "fields": {
+                    "list": {
+                      "rule": "repeated",
+                      "type": "ConfigurePinRequest",
+                      "id": 1
+                    }
+                  }
+                },
+                "ConfigurePinRequest": {
+                  "fields": {
+                    "pinName": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "mode": {
+                      "type": "Mode",
+                      "id": 2
+                    },
+                    "direction": {
+                      "type": "Direction",
+                      "id": 3
+                    },
+                    "pull": {
+                      "type": "Pull",
+                      "id": 4
+                    },
+                    "period": {
+                      "type": "float",
+                      "id": 5
+                    },
+                    "requestType": {
+                      "type": "RequestType",
+                      "id": 6
+                    },
+                    "aref": {
+                      "type": "float",
+                      "id": 7,
+                      "options": {
+                        "deprecated": true
+                      }
+                    },
+                    "analogReadMode": {
+                      "type": "AnalogReadMode",
+                      "id": 8
+                    }
+                  },
+                  "nested": {
+                    "Direction": {
+                      "values": {
+                        "DIRECTION_UNSPECIFIED": 0,
+                        "DIRECTION_INPUT": 1,
+                        "DIRECTION_OUTPUT": 2
+                      }
+                    },
+                    "Pull": {
+                      "values": {
+                        "PULL_UNSPECIFIED": 0,
+                        "PULL_UP": 1,
+                        "PULL_DOWN": 2
+                      }
+                    },
+                    "RequestType": {
+                      "values": {
+                        "REQUEST_TYPE_UNSPECIFIED": 0,
+                        "REQUEST_TYPE_CREATE": 1,
+                        "REQUEST_TYPE_UPDATE": 2,
+                        "REQUEST_TYPE_DELETE": 3
+                      }
+                    },
+                    "AnalogReadMode": {
+                      "values": {
+                        "ANALOG_READ_MODE_UNSPECIFIED": 0,
+                        "ANALOG_READ_MODE_PIN_VALUE": 1,
+                        "ANALOG_READ_MODE_PIN_VOLTAGE": 2
+                      }
+                    }
+                  }
+                },
+                "PinEvent": {
+                  "fields": {
+                    "pinName": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "pinValue": {
+                      "type": "string",
+                      "id": 2
+                    },
+                    "mode": {
+                      "type": "Mode",
+                      "id": 3,
+                      "options": {
+                        "deprecated": true
+                      }
+                    },
+                    "pinValueVolts": {
+                      "type": "float",
+                      "id": 4,
+                      "options": {
+                        "deprecated": true
+                      }
+                    }
+                  }
+                },
+                "ConfigureReferenceVoltage": {
+                  "fields": {
+                    "referenceVoltage": {
+                      "type": "float",
+                      "id": 1
+                    }
+                  }
+                },
+                "PinEvents": {
+                  "options": {
+                    "deprecated": true
+                  },
+                  "fields": {
+                    "list": {
+                      "rule": "repeated",
+                      "type": "PinEvent",
+                      "id": 1
+                    }
+                  }
+                },
+                "ConfigurePWMPinRequest": {
+                  "options": {
+                    "deprecated": true
+                  },
+                  "fields": {
+                    "pinName": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "dutyCycle": {
+                      "type": "int32",
+                      "id": 2,
+                      "options": {
+                        "deprecated": true
+                      }
+                    },
+                    "frequency": {
+                      "type": "int32",
+                      "id": 3,
+                      "options": {
+                        "deprecated": true
+                      }
+                    },
+                    "variableFrequency": {
+                      "type": "bool",
+                      "id": 4,
+                      "options": {
+                        "deprecated": true
+                      }
+                    }
+                  }
+                },
+                "ConfigurePWMPinRequests": {
+                  "options": {
+                    "deprecated": true
+                  },
+                  "fields": {
+                    "list": {
+                      "rule": "repeated",
+                      "type": "ConfigurePWMPinRequest",
+                      "id": 1,
+                      "options": {
+                        "deprecated": true
+                      }
+                    }
+                  }
+                },
+                "PWMPinEvent": {
+                  "options": {
+                    "deprecated": true
+                  },
+                  "fields": {
+                    "dutyCycle": {
+                      "type": "int32",
+                      "id": 2,
+                      "options": {
+                        "deprecated": true
+                      }
+                    }
+                  }
+                },
+                "PWMPinEvents": {
+                  "options": {
+                    "deprecated": true
+                  },
+                  "fields": {
+                    "list": {
+                      "rule": "repeated",
+                      "type": "PWMPinEvent",
+                      "id": 1,
+                      "options": {
+                        "deprecated": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "i2c": {
+          "nested": {
+            "v1": {
+              "nested": {
+                "BusResponse": {
+                  "values": {
+                    "BUS_RESPONSE_UNSPECIFIED": 0,
+                    "BUS_RESPONSE_SUCCESS": 1,
+                    "BUS_RESPONSE_ERROR_HANG": 2,
+                    "BUS_RESPONSE_ERROR_PULLUPS": 3,
+                    "BUS_RESPONSE_ERROR_WIRING": 4,
+                    "BUS_RESPONSE_UNSUPPORTED_SENSOR": 5,
+                    "BUS_RESPONSE_DEVICE_INIT_FAIL": 6,
+                    "BUS_RESPONSE_DEVICE_DEINIT_FAIL": 7
+                  }
+                },
+                "I2CBusInitRequest": {
+                  "fields": {
+                    "i2cPinScl": {
+                      "type": "int32",
+                      "id": 1
+                    },
+                    "i2cPinSda": {
+                      "type": "int32",
+                      "id": 2
+                    },
+                    "i2cFrequency": {
+                      "type": "uint32",
+                      "id": 3
+                    },
+                    "i2cPortNumber": {
+                      "type": "int32",
+                      "id": 4
+                    }
+                  }
+                },
+                "I2CBusInitResponse": {
+                  "fields": {
+                    "isInitialized": {
+                      "type": "bool",
+                      "id": 1,
+                      "options": {
+                        "deprecated": true
+                      }
+                    },
+                    "busResponse": {
+                      "type": "BusResponse",
+                      "id": 2
+                    }
+                  }
+                },
+                "I2CBusSetFrequency": {
+                  "fields": {
+                    "frequency": {
+                      "type": "uint32",
+                      "id": 1
+                    },
+                    "busId": {
+                      "type": "int32",
+                      "id": 2
+                    }
+                  }
+                },
+                "I2CBusScanRequest": {
+                  "fields": {
+                    "i2cPortNumber": {
+                      "type": "int32",
+                      "id": 1
+                    },
+                    "busInitRequest": {
+                      "type": "I2CBusInitRequest",
+                      "id": 2
+                    }
+                  }
+                },
+                "I2CBusScanResponse": {
+                  "fields": {
+                    "addressesFound": {
+                      "rule": "repeated",
+                      "type": "uint32",
+                      "id": 1
+                    },
+                    "busResponse": {
+                      "type": "BusResponse",
+                      "id": 2
+                    }
+                  }
+                },
+                "I2CDeviceSensorProperties": {
+                  "fields": {
+                    "sensorType": {
+                      "type": "SensorType",
+                      "id": 1
+                    },
+                    "sensorPeriod": {
+                      "type": "uint32",
+                      "id": 2
+                    }
+                  }
+                },
+                "I2CDeviceInitRequests": {
+                  "fields": {
+                    "list": {
+                      "rule": "repeated",
+                      "type": "I2CDeviceInitRequest",
+                      "id": 1
+                    }
+                  }
+                },
+                "I2CDeviceInitRequest": {
+                  "fields": {
+                    "i2cPortNumber": {
+                      "type": "int32",
+                      "id": 1
+                    },
+                    "i2cBusInitReq": {
+                      "type": "I2CBusInitRequest",
+                      "id": 2
+                    },
+                    "i2cDeviceAddress": {
+                      "type": "uint32",
+                      "id": 3
+                    },
+                    "i2cDeviceName": {
+                      "type": "string",
+                      "id": 4
+                    },
+                    "i2cDeviceProperties": {
+                      "rule": "repeated",
+                      "type": "I2CDeviceSensorProperties",
+                      "id": 5
+                    },
+                    "isOutputDevice": {
+                      "type": "bool",
+                      "id": 6
+                    },
+                    "i2cOutputAdd": {
+                      "type": "I2COutputAdd",
+                      "id": 7
+                    }
+                  }
+                },
+                "I2CDeviceInitResponse": {
+                  "fields": {
+                    "isSuccess": {
+                      "type": "bool",
+                      "id": 1,
+                      "options": {
+                        "deprecated": true
+                      }
+                    },
+                    "i2cDeviceAddress": {
+                      "type": "uint32",
+                      "id": 2
+                    },
+                    "busResponse": {
+                      "type": "BusResponse",
+                      "id": 3
+                    }
+                  }
+                },
+                "I2CDeviceUpdateRequest": {
+                  "fields": {
+                    "i2cPortNumber": {
+                      "type": "int32",
+                      "id": 1
+                    },
+                    "i2cDeviceAddress": {
+                      "type": "uint32",
+                      "id": 2
+                    },
+                    "i2cDeviceName": {
+                      "type": "string",
+                      "id": 3
+                    },
+                    "i2cDeviceProperties": {
+                      "rule": "repeated",
+                      "type": "I2CDeviceSensorProperties",
+                      "id": 4
+                    }
+                  }
+                },
+                "I2CDeviceUpdateResponse": {
+                  "fields": {
+                    "i2cDeviceAddress": {
+                      "type": "uint32",
+                      "id": 1
+                    },
+                    "isSuccess": {
+                      "type": "bool",
+                      "id": 2,
+                      "options": {
+                        "deprecated": true
+                      }
+                    },
+                    "busResponse": {
+                      "type": "BusResponse",
+                      "id": 3
+                    }
+                  }
+                },
+                "I2CDeviceDeinitRequest": {
+                  "fields": {
+                    "i2cPortNumber": {
+                      "type": "int32",
+                      "id": 1
+                    },
+                    "i2cDeviceAddress": {
+                      "type": "uint32",
+                      "id": 2
+                    }
+                  }
+                },
+                "I2CDeviceDeinitResponse": {
+                  "fields": {
+                    "isSuccess": {
+                      "type": "bool",
+                      "id": 1,
+                      "options": {
+                        "deprecated": true
+                      }
+                    },
+                    "i2cDeviceAddress": {
+                      "type": "uint32",
+                      "id": 2
+                    },
+                    "busResponse": {
+                      "type": "BusResponse",
+                      "id": 3
+                    }
+                  }
+                },
+                "SensorType": {
+                  "values": {
+                    "SENSOR_TYPE_UNSPECIFIED": 0,
+                    "SENSOR_TYPE_ACCELEROMETER": 1,
+                    "SENSOR_TYPE_MAGNETIC_FIELD": 2,
+                    "SENSOR_TYPE_ORIENTATION": 3,
+                    "SENSOR_TYPE_GYROSCOPE": 4,
+                    "SENSOR_TYPE_LIGHT": 5,
+                    "SENSOR_TYPE_PRESSURE": 6,
+                    "SENSOR_TYPE_PROXIMITY": 8,
+                    "SENSOR_TYPE_GRAVITY": 9,
+                    "SENSOR_TYPE_LINEAR_ACCELERATION": 10,
+                    "SENSOR_TYPE_ROTATION_VECTOR": 11,
+                    "SENSOR_TYPE_RELATIVE_HUMIDITY": 12,
+                    "SENSOR_TYPE_AMBIENT_TEMPERATURE": 13,
+                    "SENSOR_TYPE_OBJECT_TEMPERATURE": 14,
+                    "SENSOR_TYPE_VOLTAGE": 15,
+                    "SENSOR_TYPE_CURRENT": 16,
+                    "SENSOR_TYPE_COLOR": 17,
+                    "SENSOR_TYPE_RAW": 18,
+                    "SENSOR_TYPE_PM10_STD": 19,
+                    "SENSOR_TYPE_PM25_STD": 20,
+                    "SENSOR_TYPE_PM100_STD": 21,
+                    "SENSOR_TYPE_PM10_ENV": 22,
+                    "SENSOR_TYPE_PM25_ENV": 23,
+                    "SENSOR_TYPE_PM100_ENV": 24,
+                    "SENSOR_TYPE_CO2": 25,
+                    "SENSOR_TYPE_GAS_RESISTANCE": 26,
+                    "SENSOR_TYPE_ALTITUDE": 27,
+                    "SENSOR_TYPE_LUX": 28,
+                    "SENSOR_TYPE_ECO2": 29,
+                    "SENSOR_TYPE_UNITLESS_PERCENT": 30,
+                    "SENSOR_TYPE_AMBIENT_TEMPERATURE_FAHRENHEIT": 31,
+                    "SENSOR_TYPE_OBJECT_TEMPERATURE_FAHRENHEIT": 32,
+                    "SENSOR_TYPE_VOC_INDEX": 33,
+                    "SENSOR_TYPE_NOX_INDEX": 34,
+                    "SENSOR_TYPE_TVOC": 35
+                  }
+                },
+                "SensorEvent": {
+                  "fields": {
+                    "type": {
+                      "type": "SensorType",
+                      "id": 1
+                    },
+                    "value": {
+                      "type": "float",
+                      "id": 2
+                    }
+                  }
+                },
+                "I2CDeviceEvent": {
+                  "fields": {
+                    "sensorAddress": {
+                      "type": "uint32",
+                      "id": 1
+                    },
+                    "sensorEvent": {
+                      "rule": "repeated",
+                      "type": "SensorEvent",
+                      "id": 2
+                    }
+                  }
+                },
+                "I2CDeviceOutputWrite": {
+                  "oneofs": {
+                    "outputMsg": {
+                      "oneof": [
+                        "writeLedBackpack",
+                        "writeCharLcd",
+                        "writeSsd1306"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "i2cDeviceAddress": {
+                      "type": "uint32",
+                      "id": 1
+                    },
+                    "i2cDeviceName": {
+                      "type": "string",
+                      "id": 2
+                    },
+                    "writeLedBackpack": {
+                      "type": "LEDBackpackWrite",
+                      "id": 3
+                    },
+                    "writeCharLcd": {
+                      "type": "CharLCDWrite",
+                      "id": 4
+                    },
+                    "writeSsd1306": {
+                      "type": "SSD1306Write",
+                      "id": 5
+                    }
+                  }
+                },
+                "LEDBackpackAlignment": {
+                  "values": {
+                    "LED_BACKPACK_ALIGNMENT_UNSPECIFIED": 0,
+                    "LED_BACKPACK_ALIGNMENT_LEFT": 1,
+                    "LED_BACKPACK_ALIGNMENT_RIGHT": 2
+                  }
+                },
+                "SSD1306TextSize": {
+                  "values": {
+                    "SSD1306_TEXT_SIZE_UNSPECIFIED": 0,
+                    "SSD1306_TEXT_SIZE_1": 1,
+                    "SSD1306_TEXT_SIZE_2": 2
+                  }
+                },
+                "LEDBackpackConfig": {
+                  "fields": {
+                    "brightness": {
+                      "type": "int32",
+                      "id": 1
+                    },
+                    "alignment": {
+                      "type": "LEDBackpackAlignment",
+                      "id": 2
+                    }
+                  }
+                },
+                "CharLCDConfig": {
+                  "fields": {
+                    "rows": {
+                      "type": "uint32",
+                      "id": 1
+                    },
+                    "columns": {
+                      "type": "uint32",
+                      "id": 2
+                    }
+                  }
+                },
+                "SSD1306Config": {
+                  "fields": {
+                    "width": {
+                      "type": "uint32",
+                      "id": 1
+                    },
+                    "height": {
+                      "type": "uint32",
+                      "id": 2
+                    },
+                    "textSize": {
+                      "type": "SSD1306TextSize",
+                      "id": 3
+                    }
+                  }
+                },
+                "I2COutputAdd": {
+                  "oneofs": {
+                    "config": {
+                      "oneof": [
+                        "ledBackpackConfig",
+                        "charLcdConfig",
+                        "ssd1306Config"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "ledBackpackConfig": {
+                      "type": "LEDBackpackConfig",
+                      "id": 1
+                    },
+                    "charLcdConfig": {
+                      "type": "CharLCDConfig",
+                      "id": 2
+                    },
+                    "ssd1306Config": {
+                      "type": "SSD1306Config",
+                      "id": 3
+                    }
+                  }
+                },
+                "LEDBackpackWrite": {
+                  "fields": {
+                    "message": {
+                      "type": "string",
+                      "id": 1
+                    }
+                  }
+                },
+                "CharLCDWrite": {
+                  "fields": {
+                    "message": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "enableBacklight": {
+                      "type": "bool",
+                      "id": 2
+                    }
+                  }
+                },
+                "SSD1306Write": {
+                  "fields": {
+                    "message": {
+                      "type": "string",
+                      "id": 1
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servo": {
+          "nested": {
+            "v1": {
+              "nested": {
+                "ServoAttachRequest": {
+                  "fields": {
+                    "servoPin": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "servoFreq": {
+                      "type": "int32",
+                      "id": 2
+                    },
+                    "minPulseWidth": {
+                      "type": "int32",
+                      "id": 3
+                    },
+                    "maxPulseWidth": {
+                      "type": "int32",
+                      "id": 4
+                    }
+                  }
+                },
+                "ServoAttachResponse": {
+                  "fields": {
+                    "attachSuccess": {
+                      "type": "bool",
+                      "id": 1
+                    },
+                    "servoPin": {
+                      "type": "string",
+                      "id": 2
+                    }
+                  }
+                },
+                "ServoDetachRequest": {
+                  "fields": {
+                    "servoPin": {
+                      "type": "string",
+                      "id": 1
+                    }
+                  }
+                },
+                "ServoWriteRequest": {
+                  "fields": {
+                    "servoPin": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "pulseWidth": {
+                      "type": "int32",
+                      "id": 2
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "pwm": {
+          "nested": {
+            "v1": {
+              "nested": {
+                "PWMAttachRequest": {
+                  "fields": {
+                    "pin": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "frequency": {
+                      "type": "int32",
+                      "id": 2
+                    },
+                    "resolution": {
+                      "type": "int32",
+                      "id": 3
+                    }
+                  }
+                },
+                "PWMAttachResponse": {
+                  "fields": {
+                    "pin": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "didAttach": {
+                      "type": "bool",
+                      "id": 2
+                    }
+                  }
+                },
+                "PWMDetachRequest": {
+                  "fields": {
+                    "pin": {
+                      "type": "string",
+                      "id": 1
+                    }
+                  }
+                },
+                "PWMWriteDutyCycleRequest": {
+                  "fields": {
+                    "pin": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "dutyCycle": {
+                      "type": "int32",
+                      "id": 2
+                    }
+                  }
+                },
+                "PWMWriteDutyCycleMultiRequest": {
+                  "fields": {
+                    "writeDutyCycleReq": {
+                      "rule": "repeated",
+                      "type": "PWMWriteDutyCycleRequest",
+                      "id": 1
+                    }
+                  }
+                },
+                "PWMWriteFrequencyRequest": {
+                  "fields": {
+                    "pin": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "frequency": {
+                      "type": "int32",
+                      "id": 2
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ds18x20": {
+          "nested": {
+            "v1": {
+              "nested": {
+                "Ds18x20InitRequest": {
+                  "fields": {
+                    "onewirePin": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "sensorResolution": {
+                      "type": "int32",
+                      "id": 2
+                    },
+                    "i2cDeviceProperties": {
+                      "rule": "repeated",
+                      "type": "wippersnapper.i2c.v1.I2CDeviceSensorProperties",
+                      "id": 3
+                    }
+                  }
+                },
+                "Ds18x20InitResponse": {
+                  "fields": {
+                    "isInitialized": {
+                      "type": "bool",
+                      "id": 1
+                    },
+                    "onewirePin": {
+                      "type": "string",
+                      "id": 2
+                    }
+                  }
+                },
+                "Ds18x20DeInitRequest": {
+                  "fields": {
+                    "onewirePin": {
+                      "type": "string",
+                      "id": 1
+                    }
+                  }
+                },
+                "Ds18x20DeviceEvent": {
+                  "fields": {
+                    "onewirePin": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "sensorEvent": {
+                      "rule": "repeated",
+                      "type": "wippersnapper.i2c.v1.SensorEvent",
+                      "id": 2
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "pixels": {
+          "nested": {
+            "v1": {
+              "nested": {
+                "PixelsType": {
+                  "values": {
+                    "PIXELS_TYPE_UNSPECIFIED": 0,
+                    "PIXELS_TYPE_NEOPIXEL": 1,
+                    "PIXELS_TYPE_DOTSTAR": 2
+                  }
+                },
+                "PixelsOrder": {
+                  "values": {
+                    "PIXELS_ORDER_UNSPECIFIED": 0,
+                    "PIXELS_ORDER_GRB": 1,
+                    "PIXELS_ORDER_GRBW": 2,
+                    "PIXELS_ORDER_RGB": 3,
+                    "PIXELS_ORDER_RGBW": 4,
+                    "PIXELS_ORDER_BRG": 5,
+                    "PIXELS_ORDER_RBG": 6,
+                    "PIXELS_ORDER_GBR": 7,
+                    "PIXELS_ORDER_BGR": 8
+                  }
+                },
+                "PixelsCreateRequest": {
+                  "fields": {
+                    "pixelsType": {
+                      "type": "PixelsType",
+                      "id": 1
+                    },
+                    "pixelsNum": {
+                      "type": "uint32",
+                      "id": 2
+                    },
+                    "pixelsOrdering": {
+                      "type": "PixelsOrder",
+                      "id": 3
+                    },
+                    "pixelsBrightness": {
+                      "type": "uint32",
+                      "id": 4
+                    },
+                    "pixelsPinNeopixel": {
+                      "type": "string",
+                      "id": 5
+                    },
+                    "pixelsPinDotstarData": {
+                      "type": "string",
+                      "id": 6
+                    },
+                    "pixelsPinDotstarClock": {
+                      "type": "string",
+                      "id": 7
+                    }
+                  }
+                },
+                "PixelsCreateResponse": {
+                  "fields": {
+                    "isSuccess": {
+                      "type": "bool",
+                      "id": 1
+                    },
+                    "pixelsPinData": {
+                      "type": "string",
+                      "id": 2
+                    }
+                  }
+                },
+                "PixelsDeleteRequest": {
+                  "fields": {
+                    "pixelsType": {
+                      "type": "PixelsType",
+                      "id": 1
+                    },
+                    "pixelsPinData": {
+                      "type": "string",
+                      "id": 2
+                    }
+                  }
+                },
+                "PixelsWriteRequest": {
+                  "fields": {
+                    "pixelsType": {
+                      "type": "PixelsType",
+                      "id": 1
+                    },
+                    "pixelsPinData": {
+                      "type": "string",
+                      "id": 2
+                    },
+                    "pixelsColor": {
+                      "type": "uint32",
+                      "id": 3
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "uart": {
+          "nested": {
+            "v1": {
+              "nested": {
+                "UARTBusData": {
+                  "fields": {
+                    "baudrate": {
+                      "type": "int32",
+                      "id": 1
+                    },
+                    "pinRx": {
+                      "type": "string",
+                      "id": 2
+                    },
+                    "pinTx": {
+                      "type": "string",
+                      "id": 3
+                    },
+                    "isInvert": {
+                      "type": "bool",
+                      "id": 4
+                    }
+                  }
+                },
+                "UARTDeviceAttachRequest": {
+                  "fields": {
+                    "busInfo": {
+                      "type": "UARTBusData",
+                      "id": 1
+                    },
+                    "deviceId": {
+                      "type": "string",
+                      "id": 2
+                    },
+                    "pollingInterval": {
+                      "type": "int32",
+                      "id": 3
+                    }
+                  }
+                },
+                "UARTDeviceAttachResponse": {
+                  "fields": {
+                    "deviceId": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "isSuccess": {
+                      "type": "bool",
+                      "id": 2
+                    }
+                  }
+                },
+                "UARTDeviceDetachRequest": {
+                  "fields": {
+                    "deviceId": {
+                      "type": "string",
+                      "id": 1
+                    }
+                  }
+                },
+                "UARTDeviceEvent": {
+                  "fields": {
+                    "deviceId": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "sensorEvent": {
+                      "rule": "repeated",
+                      "type": "wippersnapper.i2c.v1.SensorEvent",
+                      "id": 2
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "display": {
+          "nested": {
+            "v1": {
+              "nested": {
+                "DisplayType": {
+                  "values": {
+                    "DISPLAY_TYPE_UNSPECIFIED": 0,
+                    "DISPLAY_TYPE_EPD": 1,
+                    "DISPLAY_TYPE_TFT": 2
+                  }
+                },
+                "EPDMode": {
+                  "values": {
+                    "EPD_MODE_UNSPECIFIED": 0,
+                    "EPD_MODE_GRAYSCALE4": 1,
+                    "EPD_MODE_MONO": 2
+                  }
+                },
+                "DisplayDriver": {
+                  "values": {
+                    "DISPLAY_DRIVER_UNSPECIFIED": 0,
+                    "DISPLAY_DRIVER_EPD_SSD1680": 1,
+                    "DISPLAY_DRIVER_EPD_ILI0373": 2,
+                    "DISPLAY_DRIVER_TFT_ST7789": 3
+                  }
+                },
+                "EpdSpiConfig": {
+                  "fields": {
+                    "bus": {
+                      "type": "int32",
+                      "id": 1
+                    },
+                    "pinDc": {
+                      "type": "string",
+                      "id": 2
+                    },
+                    "pinRst": {
+                      "type": "string",
+                      "id": 3
+                    },
+                    "pinCs": {
+                      "type": "string",
+                      "id": 4
+                    },
+                    "pinSramCs": {
+                      "type": "string",
+                      "id": 5
+                    },
+                    "pinBusy": {
+                      "type": "string",
+                      "id": 6
+                    }
+                  }
+                },
+                "EPDConfig": {
+                  "fields": {
+                    "mode": {
+                      "type": "EPDMode",
+                      "id": 1
+                    },
+                    "width": {
+                      "type": "int32",
+                      "id": 2
+                    },
+                    "height": {
+                      "type": "int32",
+                      "id": 3
+                    },
+                    "textSize": {
+                      "type": "int32",
+                      "id": 4
+                    }
+                  }
+                },
+                "TftSpiConfig": {
+                  "fields": {
+                    "bus": {
+                      "type": "int32",
+                      "id": 1
+                    },
+                    "pinCs": {
+                      "type": "string",
+                      "id": 2
+                    },
+                    "pinDc": {
+                      "type": "string",
+                      "id": 3
+                    },
+                    "pinMosi": {
+                      "type": "string",
+                      "id": 4
+                    },
+                    "pinSck": {
+                      "type": "string",
+                      "id": 5
+                    },
+                    "pinRst": {
+                      "type": "string",
+                      "id": 6
+                    },
+                    "pinMiso": {
+                      "type": "string",
+                      "id": 7
+                    }
+                  }
+                },
+                "TftConfig": {
+                  "fields": {
+                    "width": {
+                      "type": "int32",
+                      "id": 1
+                    },
+                    "height": {
+                      "type": "int32",
+                      "id": 2
+                    },
+                    "rotation": {
+                      "type": "int32",
+                      "id": 3
+                    },
+                    "textSize": {
+                      "type": "int32",
+                      "id": 4
+                    }
+                  }
+                },
+                "DisplayAddOrReplace": {
+                  "oneofs": {
+                    "interfaceType": {
+                      "oneof": [
+                        "spiEpd",
+                        "spiTft"
+                      ]
+                    },
+                    "config": {
+                      "oneof": [
+                        "configEpd",
+                        "configTft"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "type": {
+                      "type": "DisplayType",
+                      "id": 1
+                    },
+                    "driver": {
+                      "type": "DisplayDriver",
+                      "id": 2
+                    },
+                    "name": {
+                      "type": "string",
+                      "id": 3
+                    },
+                    "spiEpd": {
+                      "type": "EpdSpiConfig",
+                      "id": 4
+                    },
+                    "spiTft": {
+                      "type": "TftSpiConfig",
+                      "id": 5
+                    },
+                    "configEpd": {
+                      "type": "EPDConfig",
+                      "id": 6
+                    },
+                    "configTft": {
+                      "type": "TftConfig",
+                      "id": 7
+                    }
+                  }
+                },
+                "DisplayRemove": {
+                  "fields": {
+                    "name": {
+                      "type": "string",
+                      "id": 1
+                    }
+                  }
+                },
+                "DisplayWrite": {
+                  "fields": {
+                    "name": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "message": {
+                      "type": "string",
+                      "id": 2
+                    }
+                  }
+                },
+                "DisplayAddedOrReplaced": {
+                  "fields": {
+                    "name": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "didAdd": {
+                      "type": "bool",
+                      "id": 2
+                    }
+                  }
+                },
+                "DisplayRemoved": {
+                  "fields": {
+                    "name": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "didRemove": {
+                      "type": "bool",
+                      "id": 2
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

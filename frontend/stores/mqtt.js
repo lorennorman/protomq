@@ -19,7 +19,8 @@ export const useMQTTStore = defineStore('mqtt', () => {
   function addMessage(newMessage) {
     this.messages.unshift({
       ...newMessage,
-      id: `message-${Math.round(Math.random()*10000000000)}`
+      id: `message-${Math.round(Math.random()*10000000000)}`,
+      timestamp: new Date()
     })
   }
 

@@ -1,0 +1,123 @@
+{
+  "name": "Pi Zero 2W + SSD1683 4.2\" EPD Bonnet Demo",
+  "description": "Drives an Adafruit 4.2\" 400x300 SSD1683 EPD (PID 6381) sat on the Pi e-Ink Bonnet, on a Pi Zero 2W running the host build. Pin map matches Blinka's BCM-keyed Dxx aliases (CS=CE0/D8, DC=D22, RST=D27, BUSY=D17). The host driver pins `seconds_per_frame=5` on the upstream lib (vs the 180 s default), so script delays only need to cover the actual refresh time plus a moment for a human to read each frame.",
+  "protoVersion": "v2",
+  "steps": [
+    {
+      "name": "checkin-response",
+      "description": "Respond to device checkin with OK and Pi-bonnet-shaped capabilities (display added separately so it shows up in the controller flow).",
+      "trigger": "checkin.request",
+      "response": {
+        "checkin": {
+          "response": {
+            "response": "R_OK",
+            "totalGpioPins": 28,
+            "totalAnalogPins": 0,
+            "referenceVoltage": 3.3,
+            "componentAdds": {},
+            "sleepEnabled": false
+          }
+        }
+      }
+    },
+    {
+      "name": "add-display",
+      "description": "Add the SSD1683 4.2\" 400x300 EPD over SPI bus 0 with the bonnet's fixed bonnet pin map. Initial blank refresh runs as part of Add.",
+      "after": "checkin-response",
+      "waitFor": "checkin.complete",
+      "delay": 500,
+      "topic": "display",
+      "send": {
+        "display": {
+          "add": {
+            "type": "DISPLAY_CLASS_EPD",
+            "driver": "SSD1683",
+            "panel": "4.2-400x300-grayscale4",
+            "name": "epd-bonnet",
+            "interfaceType": {
+              "spiEpd": {
+                "pinDc": "D22",
+                "pinRst": "D27",
+                "pinBusy": "D17",
+                "spi": {
+                  "bus": 0,
+                  "pinCs": "D8",
+                  "pinMosi": "MOSI",
+                  "pinSck": "SCK"
+                }
+              }
+            },
+            "configEpd": {
+              "mode": "EPD_MODE_GRAYSCALE4",
+              "properties": {
+                "width": 400,
+                "height": 300,
+                "textSize": 3,
+                "statusBar": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "write-hello",
+      "description": "First message after the initial blank refresh.",
+      "after": "add-display",
+      "delay": 10000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "epd-bonnet",
+            "message": "hello eink\\nSSD1683 4.2in\\nPi Zero 2W bonnet"
+          }
+        }
+      }
+    },
+    {
+      "name": "write-step2",
+      "description": "Second message \u2014 driver's seconds_per_frame is 5 s, this gives a beat to read.",
+      "after": "write-hello",
+      "delay": 10000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "epd-bonnet",
+            "message": "step 2 of 3\\nrefreshing\\nfrom protomq"
+          }
+        }
+      }
+    },
+    {
+      "name": "write-removing",
+      "description": "Final message before the display is removed.",
+      "after": "write-step2",
+      "delay": 10000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "epd-bonnet",
+            "message": "removing now...\\ngoodbye eink"
+          }
+        }
+      }
+    },
+    {
+      "name": "remove-display",
+      "description": "Tear down the display so a future Add can re-init the bus cleanly.",
+      "after": "write-removing",
+      "delay": 10000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "remove": {
+            "name": "epd-bonnet"
+          }
+        }
+      }
+    }
+  ]
+}

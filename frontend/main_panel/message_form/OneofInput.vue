@@ -22,7 +22,7 @@
     props = defineProps(["label", "field", "fieldPath"]),
     { setOneOf, clearOneOf } = useMessageStore(),
     { vModel, nextFieldPath } = useFieldPath(props),
-    initialIndex = props.field.options.indexOf(vModel.value),
+    initialIndex = props.field.options.findIndex(o => o.fieldName === vModel.value),
     selectedIndex = ref(initialIndex === -1 ? null : initialIndex),
     selection = computed(() => props.field.options[selectedIndex.value]),
     clearSelection = () => selectedIndex.value = null

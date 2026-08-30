@@ -1,0 +1,148 @@
+// SPDX-FileCopyrightText: 2025 Brent Rubell for Adafruit Industries
+// SPDX-License-Identifier: MIT
+// Display API for Adafruit WipperSnapper
+
+syntax = "proto3";
+
+package wippersnapper.display.v1;
+// nanopb import removed
+
+// ============================================================================
+// Enums
+// ============================================================================
+
+/**
+ * DisplayType determines the type of display
+ * and selects which driver should be used.
+ */
+enum DisplayType {
+  DISPLAY_TYPE_UNSPECIFIED = 0; /** Unspecified display type. */
+  DISPLAY_TYPE_EPD         = 1; /** EPD display type */
+  DISPLAY_TYPE_TFT         = 2; /** TFT display type */
+}
+
+/**
+ * EPDMode defines the mode of the EPD display.
+ * This affects how the display renders images.
+ */
+enum EPDMode {
+  EPD_MODE_UNSPECIFIED = 0; /** Unspecified EPD mode */
+  EPD_MODE_GRAYSCALE4  = 1; /** Grayscale 4 EPD mode */
+  EPD_MODE_MONO        = 2; /** Monochrome EPD mode */
+}
+
+/**
+ * DisplayDriver determines the specific driver to use for the display.
+ */
+enum DisplayDriver {
+  DISPLAY_DRIVER_UNSPECIFIED = 0; /** Unspecified display driver */
+  DISPLAY_DRIVER_EPD_SSD1680 = 1; /** EPD SSD1680 driver */
+  DISPLAY_DRIVER_EPD_ILI0373 = 2; /** EPD SSD167 driver */
+  DISPLAY_DRIVER_TFT_ST7789  = 3; /** TFT ST7789 driver */
+}
+
+// ============================================================================
+// Configuration Messages
+// ============================================================================
+
+/**
+ * EpdSpiConfig contains the configuration for SPI-based EPD displays.
+ * Includes the SPI bus number and pin assignments.
+ */
+message EpdSpiConfig {
+  int32 bus          = 1; /** The SPI bus to use */
+  string pin_dc      = 2; /** Pin for data/command */
+  string pin_rst     = 3; /** Pin for reset */
+  string pin_cs      = 4; /** Pin for chip select */
+  string pin_sram_cs = 5; /** Pin for SRAM chip select */
+  string pin_busy    = 6; /** Pin for busy signal */
+}
+
+/**
+ * EPDConfig contains the configuration for an EPD display.
+ * It includes the mode, dimensions, and panel type.
+ */
+message EPDConfig {
+  EPDMode mode    = 1; /** The mode of the EPD display */
+  int32 width     = 2;   /** Width of the EPD display, in pixels */
+  int32 height    = 3;   /** Height of the EPD display, in pixels */
+  int32 text_size = 4; /** Scale factor for text (1 = 6x8px, 2 = 12x16px,...) */
+}
+
+/**
+ * TftSpiConfig contains the configuration for SPI TFT displays.
+ * Includes the SPI bus number and pin assignments.
+ */
+message TftSpiConfig {
+  int32 bus          = 1; /** The SPI bus to use */
+  string pin_cs      = 2; /** Pin for chip select */
+  string pin_dc      = 3; /** Pin for data/command */
+  string pin_mosi    = 4; /** Pin for MOSI */
+  string pin_sck     = 5; /** Pin for SCK */
+  string pin_rst     = 6; /** Pin for reset */
+  string pin_miso    = 7; /** Pin for MISO */
+}
+
+message TftConfig {
+  int32 width     = 1;   /** Width of the TFT display in pixels */
+  int32 height    = 2;   /** Height of the TFT display in pixels */
+  int32 rotation  = 3; /** Rotation of the display (0-3) */
+  int32 text_size = 4; /** Scale factor for text (1 = 6x8px, 2 = 12x16px,...) */
+}
+
+// ============================================================================
+// Request Messages
+// ============================================================================
+
+/**
+ * DisplayAddOrReplace adds a new display or replaces an existing one.
+ */
+message DisplayAddOrReplace {
+  DisplayType type       = 1; /** The type of display */
+  DisplayDriver driver   = 2; /** The specific driver for the display */
+  string name = 3; /** Identifies the display. */
+  oneof interface_type {
+    EpdSpiConfig spi_epd = 4; /** SPI configuration for EPD. */
+    TftSpiConfig spi_tft = 5; /** SPI configuration for TFT. */
+  }
+  oneof config {
+    EPDConfig config_epd = 6; /** Configuration for EPD. */
+    TftConfig config_tft = 7; /** Configuration for TFT. */
+  }
+}
+
+/**
+ * DisplayRemove removes an existing display.
+ */
+message DisplayRemove {
+  string name = 1; /** Identifier for the display. */
+}
+
+/**
+ * DisplayWrite writes content to a display.
+ */
+message DisplayWrite {
+  string name     = 1; /** Identifies the display. */
+  string message  = 2; /** Message to write. */
+}
+
+// ============================================================================
+// Response Messages
+// ============================================================================
+
+/**
+ * DisplayAddedOrReplaced confirms a display was added or replaced.
+ */
+message DisplayAddedOrReplaced {
+  string name  = 1; /** Identifier for the display. */
+  bool did_add = 2; /** Indicates if a display was added */
+}
+
+/**
+ * DisplayRemoved confirms a display was removed.
+ */
+message DisplayRemoved {
+  string name     = 1; /** Identifies the display. */
+  bool did_remove = 2; /** Indicates if a display was removed */
+}
+

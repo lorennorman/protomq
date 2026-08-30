@@ -5,11 +5,12 @@ export const useUIStore = defineStore('ui', () => {
   const
     mode = ref('messages'),
     messagesMode = computed(() => mode.value === 'messages'),
-    configureMessageMode = computed(() => mode.value === 'configureMessage')
+    configureMessageMode = computed(() => mode.value === 'configureMessage'),
+    enforceNanopbLimits = ref(true)
 
   function setMode(newMode) {
     this.mode = newMode
   }
 
-  return { mode, setMode, messagesMode, configureMessageMode }
+  return { mode, setMode, messagesMode, configureMessageMode, enforceNanopbLimits }
 })

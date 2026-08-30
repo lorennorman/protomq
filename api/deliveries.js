@@ -1,6 +1,6 @@
 import { compact, filter, find, forEach, keys, map, pick } from 'lodash-es'
 
-import { BrokerToDevice, DeviceToBroker } from "../protobufs.js"
+import { decodeByTopic } from "../protobufs.js"
 
 
 export default (router, broker) => {
@@ -60,15 +60,12 @@ const
   sortDeliveries = broker => (packet, callback) => {
     const { topic, clientId } = packet
 
-    if(topicIsIgnored(topic)) { return }
+    if(topicIsIgnored(topic)) { callback(); return }
 
-    const
-      protobufPayload = topic.includes('/ws-d2b/')
-        ? DeviceToBroker.decode(packet.payload)
-        : topic.includes('/ws-b2d/')
-        ? BrokerToDevice.decode(packet.payload)
-        : packet.payload,
-      trackablePacket = { topic, payload: protobufPayload }
+    // Decode by topic shape (V1 +/wprsnpr/# and V2 ws-b2d/ws-d2b alike);
+    // fall back to the raw payload when it isn't a recognized protobuf topic.
+    const decoded = decodeByTopic(topic, packet.payload)
+    const trackablePacket = { topic, payload: decoded ? decoded.message : packet.payload }
 
     // if the publishing client has an outbox, track it
     deliveries[clientId]?.outbox.push(trackablePacket)
@@ -81,4 +78,5 @@ const
 
     // push it into their inboxes
     forEach(hitClients, client => deliveries[client.id].inbox.push(trackablePacket))
+    callback()
   }

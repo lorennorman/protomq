@@ -1,0 +1,304 @@
+// SPDX-FileCopyrightText: 2021-2025 Brent Rubell for Adafruit Industries
+// SPDX-License-Identifier: MIT
+syntax = "proto3";
+
+package wippersnapper.i2c.v1;
+// nanopb import removed
+
+/**
+* BusResponse represents the state of the I2C bus, from a device.
+*/
+enum BusResponse {
+  BUS_RESPONSE_UNSPECIFIED         = 0; /** Unspecified error occurred. **/
+  BUS_RESPONSE_SUCCESS             = 1; /** I2C bus successfully initialized. **/
+  BUS_RESPONSE_ERROR_HANG          = 2; /** I2C Bus hang, user should reset their board if this persists. **/
+  BUS_RESPONSE_ERROR_PULLUPS       = 3; /** I2C bus failed to initialize - SDA or SCL needs a pull up. **/
+  BUS_RESPONSE_ERROR_WIRING        = 4; /** I2C bus failed to communicate - Please check your wiring. **/
+  BUS_RESPONSE_UNSUPPORTED_SENSOR  = 5; /** WipperSnapper firmware is outdated and does not include the sensor type - Please update your WipperSnapper firmware. **/
+  BUS_RESPONSE_DEVICE_INIT_FAIL    = 6; /** I2C device failed to initialize. **/
+  BUS_RESPONSE_DEVICE_DEINIT_FAIL  = 7; /** I2C device failed to de-initialize. **/
+}
+
+/**
+* I2CBusInitRequest represents a request to
+* initialize the I2C bus from the broker.
+*/
+message I2CBusInitRequest {
+  int32  i2c_pin_scl     = 1; /** The desired I2C SCL pin. */
+  int32  i2c_pin_sda     = 2; /** The desired I2C SDA pin. */
+  uint32 i2c_frequency   = 3; /** The desired I2C SCL frequency, in Hz. Default is 100000Hz. */
+  int32  i2c_port_number = 4; /** The I2C port number. */
+}
+
+/**
+* I2CBusInitResponse represents a response to I2CBusInitRequest
+*/
+message I2CBusInitResponse {
+  bool is_initialized  = 1 [deprecated = true]; /** True if the I2C port has been initialized successfully, False otherwise. */
+  BusResponse bus_response = 2; /** Whether the I2C bus initialized properly or failed. **/
+}
+
+/**
+* I2CBusSetFrequency represents a request to change the
+* I2C clock speed to a desired frequency, in Hz.
+*/
+message I2CBusSetFrequency {
+  uint32 frequency = 1; /** The desired I2C SCL frequency, in Hz. */
+  int32 bus_id     = 2; /** An optional I2C bus identifier, if multiple exist. */
+}
+
+/**
+* I2CBusScanRequest represents the parameters required to execute
+* a device's I2C scan.
+*/
+message I2CBusScanRequest {
+  int32 i2c_port_number              = 1; /** The desired I2C port to scan. */
+  I2CBusInitRequest bus_init_request = 2; /** The I2C bus initialization request. */
+}
+
+/**
+* I2CBusScanResponse represents a list of I2C addresses
+* found on the bus after I2CBusScanRequest has executed.
+*/
+message I2CBusScanResponse {
+  repeated uint32 addresses_found  = 1 [packed=true]; /** The 7-bit addresses of the I2C devices found on the bus, empty if not found. */
+  BusResponse bus_response         = 2; /** The I2C bus' status. **/
+}
+
+/**
+* I2CDeviceSensorProperties contains
+* the properties of an I2C device's sensor such as
+* its type and period.
+*/
+message I2CDeviceSensorProperties {
+  SensorType sensor_type = 1;
+  uint32 sensor_period   = 2;
+}
+
+
+/**
+* Represents a list of I2CDeviceInitRequest messages.
+*/
+message I2CDeviceInitRequests {
+  repeated I2CDeviceInitRequest list = 1;
+}
+
+/**
+* I2CDeviceInitRequest is a wrapper message for
+* an I2C device initialization request.
+*/
+message I2CDeviceInitRequest {
+  int32  i2c_port_number                                    = 1; /** The desired I2C port to initialize an I2C device on. */
+  I2CBusInitRequest i2c_bus_init_req                        = 2; /** An I2C bus initialization request. */
+  uint32 i2c_device_address                                 = 3; /** The 7-bit I2C address of the device on the bus. */
+  string i2c_device_name                                    = 4; /** The I2C device's name, MUST MATCH the name on the JSON definition file on https://github.com/adafruit/Wippersnapper_Components. */
+  repeated I2CDeviceSensorProperties i2c_device_properties  = 5; /** Properties of each sensor on the I2C device. */
+  bool is_output_device                                     = 6; /** True if the I2C device is an I2C output device, False otherwise (default). */
+  I2COutputAdd i2c_output_add                               = 7; /** The configuration for an I2C output device. */
+}
+
+/**
+* I2CDeviceInitResponse contains the response from a
+* device after processing a I2CDeviceInitRequest message.
+*/
+message I2CDeviceInitResponse {
+  bool is_success             = 1 [deprecated = true]; /** !!DEPRECATED!! True if i2c device initialized successfully, false otherwise. */
+  uint32 i2c_device_address   = 2; /** The 7-bit I2C address of the device on the bus. */
+  BusResponse bus_response    = 3; /** The I2C bus' status. **/
+}
+
+/**
+* I2CDeviceUpdateRequest is a wrapper message which
+* contains a message to update a specific device's properties.
+*/
+message I2CDeviceUpdateRequest {
+  int32  i2c_port_number                                    = 1; /** The desired I2C port. */
+  uint32 i2c_device_address                                 = 2; /** The 7-bit I2C address of the device on the bus. */
+  string i2c_device_name                                    = 3; /** The I2C device's name, MUST MATCH the name on the JSON file. */
+  repeated I2CDeviceSensorProperties i2c_device_properties  = 4; /** Properties for the I2C device's sensors. */
+}
+
+/**
+* I2CDeviceUpdateResponse represents if an I2C device's
+* sensor(s) is/are successfully updated.
+*/
+message I2CDeviceUpdateResponse {
+  uint32 i2c_device_address   = 1; /** The 7-bit I2C address of the device which was updated. */
+  bool is_success             = 2 [deprecated = true]; /** !!DEPRECATED!! True if the update request succeeded, False otherwise. */
+  BusResponse bus_response    = 3; /** The I2C bus' status. **/
+}
+
+/**
+* I2CDeviceDeinitRequest is a wrapper message containing
+* a deinitialization request for a specific i2c device.
+*/
+message I2CDeviceDeinitRequest {
+  int32  i2c_port_number        = 1; /** The desired I2C port to de-initialize an I2C device on. */
+  uint32 i2c_device_address     = 2; /** The 7-bit I2C address of the device on the bus. */
+}
+
+/**
+* I2CDeviceDeinitResponse represents if an I2C device's
+* sensor(s) is/are successfully de-initialized.
+*/
+message I2CDeviceDeinitResponse {
+  bool is_success           = 1 [deprecated = true]; /** True if the deinitialization request succeeded, False otherwise. */
+  uint32 i2c_device_address = 2; /** The 7-bit I2C address of the device which was initialized. */
+  BusResponse bus_response  = 3; /** The I2C bus' status. **/
+}
+
+/** Adafruit Unified Sensor Library Messages. */
+
+/**
+* SensorType allows us determine what types of units the sensor uses, etc.
+*/
+enum SensorType {
+  SENSOR_TYPE_UNSPECIFIED                    = 0;  /** Sensor value type which is not defined by this list, "Raw Value: {value}". */
+  SENSOR_TYPE_ACCELEROMETER                  = 1;  /** Acceleration, in meter per second per second, "{value}m/s/s". */
+  SENSOR_TYPE_MAGNETIC_FIELD                 = 2;  /** Magnetic field strength, in micro-Tesla, "{value}µT". */
+  SENSOR_TYPE_ORIENTATION                    = 3;  /** Orientation angle, in degrees, "{value}°". */
+  SENSOR_TYPE_GYROSCOPE                      = 4;  /** Angular rate, in radians per second, "{value}rad/s". */
+  SENSOR_TYPE_LIGHT                          = 5;  /** Light-level, non-unit-specific (For a unit-specific measurement, see: Lux), , "Raw Value: {value}". */
+  SENSOR_TYPE_PRESSURE                       = 6;  /** Pressure, in hectopascal, , "{value}hPa". */
+  SENSOR_TYPE_PROXIMITY                      = 8;  /** Distance from an object to a sensor, non-unit-specific, "Raw Value: {value}". */
+  SENSOR_TYPE_GRAVITY                        = 9;  /** Metres per second squared, "{value}m/s^2". */
+  SENSOR_TYPE_LINEAR_ACCELERATION            = 10; /** Acceleration not including gravity, in meter per second squared, "{value}m/s^2". */
+  SENSOR_TYPE_ROTATION_VECTOR                = 11; /** An angle in radians, "{value} rad".*/
+  SENSOR_TYPE_RELATIVE_HUMIDITY              = 12; /** in percent (%), "{value}%". */
+  SENSOR_TYPE_AMBIENT_TEMPERATURE            = 13; /** Temperature of the air around a sensor, in degrees Celsius, "{value}°C". */
+  SENSOR_TYPE_OBJECT_TEMPERATURE             = 14; /** Temperature of the object a sensor is touching/pointed at, in degrees Celsius, "{value}°C".*/
+  SENSOR_TYPE_VOLTAGE                        = 15; /** Volts, "{value}V". */
+  SENSOR_TYPE_CURRENT                        = 16; /** Milliamps, "{value}mA". */
+  SENSOR_TYPE_COLOR                          = 17; /** Values are in 0..1.0 RGB channel luminosity and 32-bit RGBA format. "Color: {value}".*/
+  SENSOR_TYPE_RAW                            = 18; /** Sensor reads a value which is not defined by this list, "Raw Value: {value}".*/
+  SENSOR_TYPE_PM10_STD                       = 19; /** Standard Particulate Matter 1.0, in ppm, "{value}ppm". */
+  SENSOR_TYPE_PM25_STD                       = 20; /** Standard Particulate Matter 2.5, in ppm, "{value}ppm". */
+  SENSOR_TYPE_PM100_STD                      = 21; /** Standard Particulate Matter 100, in ppm, "{value}ppm". */
+  SENSOR_TYPE_PM10_ENV                       = 22; /** Environmental Particulate Matter 1.0, in ppm, "{value}ppm". */
+  SENSOR_TYPE_PM25_ENV                       = 23; /** Environmental Particulate Matter 2.5, in ppm, "{value}ppm". */
+  SENSOR_TYPE_PM100_ENV                      = 24; /** Environmental Particulate Matter 100, in ppm, "{value}ppm".*/
+  SENSOR_TYPE_CO2                            = 25; /** Measured CO2, in ppm, "{value}ppm". */
+  SENSOR_TYPE_GAS_RESISTANCE                 = 26; /** Proportional to the amount of VOC particles in the air, in Ohms, "{value}Ω". */
+  SENSOR_TYPE_ALTITUDE                       = 27; /** Values are in meters (m), "${$v} m". */
+  SENSOR_TYPE_LUX                            = 28; /** Light level, in lux, "Lux: {value}". */
+  SENSOR_TYPE_ECO2                           = 29; /** equivalent/estimated CO2 in ppm (estimated from some other measurement), "{value}ppm". */
+  SENSOR_TYPE_UNITLESS_PERCENT               = 30; /** Percentage, unit-less, "{value}%". */
+  SENSOR_TYPE_AMBIENT_TEMPERATURE_FAHRENHEIT = 31; /** Temperature of the air around a sensor, in degrees Fahrenheit, "{value}°F". */
+  SENSOR_TYPE_OBJECT_TEMPERATURE_FAHRENHEIT  = 32; /** Temperature of the object a sensor is touching/pointed at, in degrees Fahrenheit, "{value}°F".*/
+  SENSOR_TYPE_VOC_INDEX                      = 33; /** Values are an index from 1-500 with 100 being normal, "${$v} VOC".*/
+  SENSOR_TYPE_NOX_INDEX                      = 34; /** Values are an index from 1-500 with 100 being normal, "${$v} NOx".*/
+  SENSOR_TYPE_TVOC                           = 35; /** Values are in parts per billion (ppb), "${$v} ppb". */
+}
+
+/**
+* SensorEvent  is used to return the sensor's value and type.
+*/
+message SensorEvent {
+  SensorType type = 1; /** The sensor's type and corresponding SI unit */
+  float value     = 2; /** The sensor's value */
+}
+
+/**
+* Each I2CDeviceEvent represents data from **one** I2C sensor.
+* NOTE: An I2CDeviceEvent can have multiple sensor events if
+* the I2C device contains > 1 sensor.
+*/
+message I2CDeviceEvent {
+  uint32 sensor_address              = 1; /** The 7-bit I2C address of the I2C device. */
+  repeated SensorEvent sensor_event  = 2; /** A, optionally repeated, SensorEvent from a sensor. */
+}
+
+/**
+* I2CDeviceOutputWrite represents a request to write to an I2C output device.
+* NOTE: This message is similar to the I2CDeviceOutputWrite message on
+* the api-v2 branch but NOT identical.
+*/
+message I2CDeviceOutputWrite {
+  uint32 i2c_device_address             = 1; /** The 7-bit I2C address of the device on the bus. */
+  string i2c_device_name                = 2; /** The I2C device's name, MUST MATCH the name on the JSON definition file on https://github.com/adafruit/Wippersnapper_Components. */
+  oneof output_msg {
+    LEDBackpackWrite write_led_backpack = 3; /** Optional - If the I2C device is a LED backpack, fill this field. **/
+    CharLCDWrite write_char_lcd         = 4; /** Optional - If the I2C device is a character LCD, fill this field. **/
+    SSD1306Write write_ssd1306          = 5; /** Optional - If the I2C device is a SSD1306 OLED display, fill this field. **/
+  }
+}
+
+///*** I2C Output Device Messages (from i2c_output.proto in api v2) ***///
+
+/**
+* LEDBackpackAlignment represents all text alignment
+* options for LED backpack displays
+*/
+enum LEDBackpackAlignment {
+  LED_BACKPACK_ALIGNMENT_UNSPECIFIED = 0; /** Unspecified alignment option. **/
+  LED_BACKPACK_ALIGNMENT_LEFT        = 1; /** (Default) Left-aligned. **/
+  LED_BACKPACK_ALIGNMENT_RIGHT       = 2; /** Right-aligned. **/
+}
+
+/**
+* Desired SSD1306 text 'magnification' size.
+*/
+enum SSD1306TextSize {
+  SSD1306_TEXT_SIZE_UNSPECIFIED = 0; /** Unspecified text size. **/
+  SSD1306_TEXT_SIZE_1           = 1; /** Default text size, 6x8px. **/
+  SSD1306_TEXT_SIZE_2           = 2; /** Larger text size option, 12x16px. **/
+}
+
+/**
+* LEDBackpackConfig represents the configuration for a LED backpack display.
+*/
+message LEDBackpackConfig {
+  int32 brightness                = 1; /** Desired brightness of the LED backpack, from 0 (off) to 15 (full brightness). **/
+  LEDBackpackAlignment alignment  = 2; /** Desired text alignment for the LED backpack. **/
+}
+
+/**
+* CharLCDConfig represents the configuration for a character LCD display.
+*/
+message CharLCDConfig {
+  uint32 rows            = 1; /** Number of rows for the character LCD. **/
+  uint32 columns         = 2; /** Number of columns for the character LCD. **/
+}
+
+/**
+* SSD1306Config represents the configuration for a SSD1306 OLED display.
+*/
+message SSD1306Config {
+  uint32 width              = 1; /** Width of the display. **/
+  uint32 height             = 2; /** Height of the display. **/
+  SSD1306TextSize text_size = 3; /** Desired text 'magnification' size. **/
+}
+
+/**
+* I2COutputAdd represents a request from the broker to add an I2C output device to a device.
+*/
+message I2COutputAdd {
+  oneof config {
+    LEDBackpackConfig led_backpack_config = 1; /** Configuration for LED backpack. **/
+    CharLCDConfig char_lcd_config         = 2; /** Configuration for character LCD. **/
+    SSD1306Config ssd1306_config          = 3; /** Configuration for SSD1306 OLED display. **/
+  }
+}
+
+/**
+* LEDBackpackWrite represents a request from the broker to write a message to a LED backpack.
+*/
+message LEDBackpackWrite {
+  string message = 1; /** Message to write to the LED backpack. **/
+}
+
+/**
+* CharLCDWrite represents a request from the broker to write to a character LCD.
+*/
+message CharLCDWrite {
+  string message         = 1; /** Message to write to the character LCD. **/
+  bool enable_backlight  = 2; /** Optional field to enable/disable the backlight. Should be its own feed (0 is off, 1 is on).**/
+}
+
+/**
+* SSD1306Write represents a request from the broker to
+* write to a SSD1306 OLED display.
+*/
+message SSD1306Write {
+  string message = 1; /** Message to write to a SSD1306 OLED display. **/
+}

@@ -1,0 +1,357 @@
+{
+  "name": "Pi Zero 2W + HT16K33 Segment Add/Remove/Re-add Demo",
+  "description": "Exercises the full lifecycle of the HT16K33 segment trio: Add (with write embedded), follow-up Write, Remove, Add again (with a different embedded write), then Remove again. Verifies that DisplayDriverHT16K33.teardown() blanks the segments on each Remove and that a re-Add cleanly re-initialises the I2C device. Two quad 14-seg alphanumerics at 0x76 / 0x75 (LEFT-aligned) plus one 4-digit 7-seg at 0x74 (RIGHT-aligned).",
+  "protoVersion": "v2",
+  "steps": [
+    {
+      "name": "checkin-response",
+      "description": "Respond to device checkin with OK and Pi Zero 2W style board capabilities",
+      "trigger": "checkin.request",
+      "response": {
+        "checkin": {
+          "response": {
+            "response": "R_OK",
+            "totalGpioPins": 28,
+            "totalAnalogPins": 0,
+            "referenceVoltage": 3.3,
+            "componentAdds": {},
+            "sleepEnabled": false
+          }
+        }
+      }
+    },
+    {
+      "name": "add-segment1-alphanum",
+      "description": "First Add of segment1 (quad 14-seg @ 0x76) - embedded write shows 'ADD1'.",
+      "after": "checkin-response",
+      "waitFor": "checkin.complete",
+      "delay": 500,
+      "topic": "display",
+      "send": {
+        "display": {
+          "add": {
+            "type": "DISPLAY_CLASS_LED_BACKPACK",
+            "driver": "HT16K33",
+            "panel": "quadalphanum",
+            "name": "segment1",
+            "i2c": {
+              "addressSpace": {
+                "pinSda": 2,
+                "pinScl": 3
+              },
+              "address": 118
+            },
+            "configLed": {
+              "brightness": 8,
+              "alignment": "LBA_LEFT"
+            },
+            "write": {
+              "name": "segment1",
+              "message": "ADD1"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "add-segment2-alphanum",
+      "description": "First Add of segment2 (quad 14-seg @ 0x75) - embedded write shows 'ADD2'.",
+      "after": "add-segment1-alphanum",
+      "waitFor": "display.addedOrReplaced",
+      "delay": 1500,
+      "topic": "display",
+      "send": {
+        "display": {
+          "add": {
+            "type": "DISPLAY_CLASS_LED_BACKPACK",
+            "driver": "HT16K33",
+            "panel": "quadalphanum",
+            "name": "segment2",
+            "i2c": {
+              "addressSpace": {
+                "pinSda": 2,
+                "pinScl": 3
+              },
+              "address": 117
+            },
+            "configLed": {
+              "brightness": 8,
+              "alignment": "LBA_LEFT"
+            },
+            "write": {
+              "name": "segment2",
+              "message": "ADD2"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "add-segment3-7seg",
+      "description": "First Add of segment3 (4-digit 7-seg @ 0x74) - embedded write shows '0001'.",
+      "after": "add-segment2-alphanum",
+      "waitFor": "display.addedOrReplaced",
+      "delay": 1500,
+      "topic": "display",
+      "send": {
+        "display": {
+          "add": {
+            "type": "DISPLAY_CLASS_LED_BACKPACK",
+            "driver": "HT16K33",
+            "panel": "4digit-7seg",
+            "name": "segment3",
+            "i2c": {
+              "addressSpace": {
+                "pinSda": 2,
+                "pinScl": 3
+              },
+              "address": 116
+            },
+            "configLed": {
+              "brightness": 8,
+              "alignment": "LBA_RIGHT"
+            },
+            "write": {
+              "name": "segment3",
+              "message": "0001"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "write-after-add-segment1",
+      "description": "Follow-up Write to segment1 after the first Add.",
+      "after": "add-segment3-7seg",
+      "waitFor": "display.addedOrReplaced",
+      "delay": 2000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "segment1",
+            "message": "HOLA"
+          }
+        }
+      }
+    },
+    {
+      "name": "write-after-add-segment2",
+      "description": "Follow-up Write to segment2 after the first Add.",
+      "after": "write-after-add-segment1",
+      "delay": 800,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "segment2",
+            "message": "ALOH"
+          }
+        }
+      }
+    },
+    {
+      "name": "write-after-add-segment3",
+      "description": "Follow-up Write to segment3 after the first Add.",
+      "after": "write-after-add-segment2",
+      "delay": 800,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "segment3",
+            "message": "1111"
+          }
+        }
+      }
+    },
+    {
+      "name": "remove-segment1-first",
+      "description": "First Remove of segment1 - HT16K33 teardown should blank the digits.",
+      "after": "write-after-add-segment3",
+      "delay": 3000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "remove": {
+            "name": "segment1"
+          }
+        }
+      }
+    },
+    {
+      "name": "remove-segment2-first",
+      "description": "First Remove of segment2 - HT16K33 teardown should blank the digits.",
+      "after": "remove-segment1-first",
+      "waitFor": "display.removed",
+      "delay": 1500,
+      "topic": "display",
+      "send": {
+        "display": {
+          "remove": {
+            "name": "segment2"
+          }
+        }
+      }
+    },
+    {
+      "name": "remove-segment3-first",
+      "description": "First Remove of segment3 - HT16K33 teardown should blank the digits.",
+      "after": "remove-segment2-first",
+      "waitFor": "display.removed",
+      "delay": 1500,
+      "topic": "display",
+      "send": {
+        "display": {
+          "remove": {
+            "name": "segment3"
+          }
+        }
+      }
+    },
+    {
+      "name": "readd-segment1-alphanum",
+      "description": "Re-Add segment1 after teardown - embedded write shows 'RE-1' so we can tell the new instance accepted the embedded write.",
+      "after": "remove-segment3-first",
+      "waitFor": "display.removed",
+      "delay": 2000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "add": {
+            "type": "DISPLAY_CLASS_LED_BACKPACK",
+            "driver": "HT16K33",
+            "panel": "quadalphanum",
+            "name": "segment1",
+            "i2c": {
+              "addressSpace": {
+                "pinSda": 2,
+                "pinScl": 3
+              },
+              "address": 118
+            },
+            "configLed": {
+              "brightness": 8,
+              "alignment": "LBA_LEFT"
+            },
+            "write": {
+              "name": "segment1",
+              "message": "RE-1"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "readd-segment2-alphanum",
+      "description": "Re-Add segment2 after teardown - embedded write shows 'RE-2'.",
+      "after": "readd-segment1-alphanum",
+      "waitFor": "display.addedOrReplaced",
+      "delay": 1500,
+      "topic": "display",
+      "send": {
+        "display": {
+          "add": {
+            "type": "DISPLAY_CLASS_LED_BACKPACK",
+            "driver": "HT16K33",
+            "panel": "quadalphanum",
+            "name": "segment2",
+            "i2c": {
+              "addressSpace": {
+                "pinSda": 2,
+                "pinScl": 3
+              },
+              "address": 117
+            },
+            "configLed": {
+              "brightness": 8,
+              "alignment": "LBA_LEFT"
+            },
+            "write": {
+              "name": "segment2",
+              "message": "RE-2"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "readd-segment3-7seg",
+      "description": "Re-Add segment3 after teardown - embedded write shows '2222'.",
+      "after": "readd-segment2-alphanum",
+      "waitFor": "display.addedOrReplaced",
+      "delay": 1500,
+      "topic": "display",
+      "send": {
+        "display": {
+          "add": {
+            "type": "DISPLAY_CLASS_LED_BACKPACK",
+            "driver": "HT16K33",
+            "panel": "4digit-7seg",
+            "name": "segment3",
+            "i2c": {
+              "addressSpace": {
+                "pinSda": 2,
+                "pinScl": 3
+              },
+              "address": 116
+            },
+            "configLed": {
+              "brightness": 8,
+              "alignment": "LBA_RIGHT"
+            },
+            "write": {
+              "name": "segment3",
+              "message": "2222"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "remove-segment1-second",
+      "description": "Final Remove of segment1 - second teardown of the lifecycle.",
+      "after": "readd-segment3-7seg",
+      "waitFor": "display.addedOrReplaced",
+      "delay": 4000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "remove": {
+            "name": "segment1"
+          }
+        }
+      }
+    },
+    {
+      "name": "remove-segment2-second",
+      "description": "Final Remove of segment2 - second teardown of the lifecycle.",
+      "after": "remove-segment1-second",
+      "waitFor": "display.removed",
+      "delay": 1500,
+      "topic": "display",
+      "send": {
+        "display": {
+          "remove": {
+            "name": "segment2"
+          }
+        }
+      }
+    },
+    {
+      "name": "remove-segment3-second",
+      "description": "Final Remove of segment3 - second teardown of the lifecycle.",
+      "after": "remove-segment2-second",
+      "waitFor": "display.removed",
+      "delay": 1500,
+      "topic": "display",
+      "send": {
+        "display": {
+          "remove": {
+            "name": "segment3"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -18,6 +18,7 @@ export const useMessageStore = defineStore('message', () => {
     messageObject: ref(null),
     messageType: ref(null),
     messageFields: ref(null),
+    formKey: ref(0),
 
     // caches fields from protobufs, so we can add/remove fields without
     // modifying the core protobuf info
@@ -31,7 +32,14 @@ export const useMessageStore = defineStore('message', () => {
 
         if(!this.messageFields[currentPath]) {
           // look it up and set it
-          const lastPathMessageFields = this.messageFields[scrubBrackets(lastPath)]
+          // scrub brackets only on the last segment of the path to avoid
+          // truncating at an ancestor's array index (e.g. "foo[0].bar" → "foo.bar")
+          const scrubLastSegment = p => {
+            const lastDot = p.lastIndexOf('.')
+            if(lastDot === -1) return scrubBrackets(p)
+            return p.slice(0, lastDot + 1) + scrubBrackets(p.slice(lastDot + 1))
+          }
+          const lastPathMessageFields = this.messageFields[lastPath] || this.messageFields[scrubLastSegment(lastPath)]
           const foundField = lastPathMessageFields.find(({ fieldName, fieldType, options=[] }) => {
             if(fieldType === 'oneof') {
               return some(options, { fieldName: scrubBrackets(pathSegment) })
@@ -97,6 +105,7 @@ export const useMessageStore = defineStore('message', () => {
       this.messageFields = {
         '': cloneDeep(messageType.fields)
       }
+      this.formKey++
 
       this.setDefaults(this.messageType)
 
@@ -145,8 +154,10 @@ export const useMessageStore = defineStore('message', () => {
     setDefault: function(field, path) {
       const isArray = field.rule === 'repeated'
 
-      // nested message, look up the protobuf type and recurse
+      // Skip optional message fields — they'll be added on demand via "+" button.
+      // Only auto-populate repeated message fields (they get the +/- UI).
       if(field.fieldType === 'message') {
+        if(!isArray) return  // skip optional sub-messages for compact view
         this.setDeep(path, field, isArray)
         return
       }
@@ -170,6 +181,104 @@ export const useMessageStore = defineStore('message', () => {
 
         this.setDefault(field, path)
       })
+    },
+
+    // Load a message form pre-populated with data from an existing object (e.g., script step).
+    // Phase 1: select oneofs from the data so messageFields cache is fully populated.
+    // Phase 2: replace messageObject with a clean copy built from the data (no junk defaults).
+    loadFromData: function(messageType, data) {
+      // Initialize form structure
+      this.messageType = messageType
+      this.messageObject = {}
+      this.messageFields = { '': cloneDeep(messageType.fields) }
+      this.formKey++
+
+      // Phase 1: walk data to select oneofs and populate messageFields cache
+      this._selectOneofsFromData(data, '')
+
+      // Phase 2: build a clean messageObject with only oneof selectors + actual data
+      this.messageObject = {}
+      this._buildObjectFromData(data, this.messageObject, '')
+
+      useUIStore().setMode('configureMessage')
+    },
+
+    // Recursively walk data to find and select oneofs. This triggers setOneOf which
+    // populates the messageFields cache (needed for form rendering).
+    _selectOneofsFromData: function(data, path) {
+      if (!data || typeof data !== 'object') return
+
+      const fields = this.getFieldsAtPath(path)
+      if (!fields) return
+
+      for (const key of Object.keys(data)) {
+        const value = data[key]
+
+        const oneofField = fields.find(f =>
+          f.fieldType === 'oneof' && f.options?.some(o => o.fieldName === key)
+        )
+
+        if (oneofField) {
+          const option = oneofField.options.find(o => o.fieldName === key)
+          const oneofPath = compact([path, oneofField.fieldName]).join('.')
+          this.setOneOf(oneofPath, option)
+
+          if (option.fieldType === 'message' && value && typeof value === 'object') {
+            this._selectOneofsFromData(value, compact([path, key]).join('.'))
+          }
+        } else if (value && typeof value === 'object' && !Array.isArray(value)) {
+          // Regular message field - recurse to find nested oneofs
+          this._selectOneofsFromData(value, compact([path, key]).join('.'))
+        }
+      }
+    },
+
+    // Build a clean messageObject from the data, adding oneof selector keys as needed.
+    _buildObjectFromData: function(data, target, path) {
+      if (!data || typeof data !== 'object') return
+
+      const fields = this.getFieldsAtPath(path)
+      if (!fields) return
+
+      for (const key of Object.keys(data)) {
+        const value = data[key]
+
+        // Check if this key belongs to a oneof — if so, set the selector
+        const oneofField = fields.find(f =>
+          f.fieldType === 'oneof' && f.options?.some(o => o.fieldName === key)
+        )
+
+        if (oneofField) {
+          // Set the oneof selector (e.g., payload: "checkin")
+          target[oneofField.fieldName] = key
+
+          if (value && typeof value === 'object' && !Array.isArray(value)) {
+            target[key] = {}
+            this._buildObjectFromData(value, target[key], compact([path, key]).join('.'))
+          } else {
+            target[key] = value
+          }
+        } else {
+          // Regular field — look up field definition for type-aware handling
+          const field = fields.find(f => f.fieldName === key)
+
+          if (field?.fieldType === 'enum' && typeof value === 'string') {
+            // Convert enum string name (e.g., "R_OK") to numeric value (e.g., 1)
+            const enumProto = findProtoFor(field)
+            if (enumProto?.values?.[value] !== undefined) {
+              target[key] = enumProto.values[value]
+            } else {
+              target[key] = value
+            }
+          } else if (value && typeof value === 'object' && !Array.isArray(value)) {
+            // Nested message — recurse to handle any inner enums/oneofs
+            target[key] = {}
+            this._buildObjectFromData(value, target[key], compact([path, key]).join('.'))
+          } else {
+            target[key] = value
+          }
+        }
+      }
     }
   }
 })
@@ -183,7 +292,12 @@ const DEFAULTS_BY_TYPE = {
   bool: false
 }
 
-const defaultValueForField = ({ type, fieldType }) => {
+const defaultValueForField = ({ type, fieldType, options }) => {
+  // prefer nanopb default from .options files when present
+  if(options?.default !== undefined) {
+    return options.default
+  }
+
   const recognizedTypes = Object.keys(DEFAULTS_BY_TYPE)
 
   return (includes(recognizedTypes, type)

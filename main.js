@@ -23,7 +23,32 @@ import { createBroker } from './broker/index.js'
 import { createWebApp } from './api/index.js'
 
 
+const parseActiveScriptArg = (argv) => {
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i]
+    if (arg.startsWith('--active-script=')) {
+      return arg.slice('--active-script='.length)
+    }
+    if (arg === '--active-script') {
+      const nextArg = argv[i + 1]
+      return nextArg && !nextArg.startsWith('--') ? nextArg : null
+    }
+  }
+
+  // Support npm config passthrough form:
+  // npm run start --active-script="My Script"
+  // npm exposes this as process.env.npm_config_active_script.
+  const npmConfigArg = process.env.npm_config_active_script
+  if (npmConfigArg && String(npmConfigArg).trim()) {
+    return String(npmConfigArg).trim()
+  }
+
+  return null
+}
+
 async function main() {
+  const requestedActiveScript = parseActiveScriptArg(process.argv.slice(2))
+
   // ensure protobufs are ready
   if(!fs.existsSync('protobufs/bundle.json')) {
     console.error("No protobuf bundle found!\nDid you run `npm run import-protos`?")
@@ -36,9 +61,9 @@ async function main() {
     return
   }
 
-  const
-    broker = createBroker(),
-    webServer = createWebApp(broker)
+  const broker = await createBroker({ activeScriptName: requestedActiveScript })
+
+  const webServer = createWebApp(broker)
 }
 
 main()

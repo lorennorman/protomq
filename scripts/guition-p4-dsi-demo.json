@@ -1,0 +1,95 @@
+{
+  "name": "Guition ESP32-P4 1024x600 DSI Demo",
+  "description": "Tests JC1060P470 1024x600 MIPI DSI display on Guition ESP32-P4 with C6 coprocessor. Responds to checkin, configures the DSI display, then writes test messages.",
+  "protoVersion": "v2",
+  "steps": [
+    {
+      "name": "checkin-response",
+      "description": "Respond to device checkin with OK and board capabilities",
+      "trigger": "checkin.request",
+      "response": {
+        "checkin": {
+          "response": {
+            "response": "R_OK",
+            "totalGpioPins": 55,
+            "totalAnalogPins": 8,
+            "referenceVoltage": 3.3,
+            "componentAdds": {},
+            "sleepEnabled": false
+          }
+        }
+      }
+    },
+    {
+      "name": "add-display",
+      "description": "Configure the 1024x600 MIPI DSI display (JC1060P470, reset GPIO27, backlight GPIO23). DSI lanes are dedicated pads on P4, not GPIOs.",
+      "after": "checkin-response",
+      "waitFor": "checkin.complete",
+      "delay": 1000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "add": {
+            "type": "DISPLAY_CLASS_TFT",
+            "driver": "JC1060P470",
+            "panel": "guition-p4-jc1060p470",
+            "name": "dsi0",
+            "interfaceType": {
+              "dsi": {
+                "bus": 0,
+                "pinRst": "D27"
+              }
+            },
+            "configDisplay": {
+              "width": 1024,
+              "height": 600,
+              "rotation": 0,
+              "textSize": 3
+            },
+            "write": {
+              "name": "dsi0",
+              "message": "Hello from ProtoMQ!"
+            },
+            "backlight": {
+              "pin": "D23",
+              "mode": "BL_MODE_PWM",
+              "activeLow": false,
+              "brightness": 80
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "write-hello",
+      "description": "Write a test message to the DSI display",
+      "after": "add-display",
+      "delay": 3000,
+      "waitFor": "display.addedOrReplaced",
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "dsi0",
+            "message": "Hello from ProtoMQ!\nGuition ESP32-P4\n1024x600 MIPI DSI\nJC1060P470 Panel"
+          }
+        }
+      }
+    },
+    {
+      "name": "write-update",
+      "description": "Write an updated status message",
+      "after": "write-hello",
+      "delay": 5000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "dsi0",
+            "message": "ESP32-P4 Test OK\nDSI Display ready\nC6 coprocessor active"
+          }
+        }
+      }
+    }
+  ]
+}

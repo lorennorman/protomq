@@ -1,0 +1,175 @@
+{
+  "name": "Pi 4 + UC8179 5.83\" 648x480 Mono EPD Demo",
+  "description": "Drives the Adafruit 5.83\" 648x480 monochrome E-Ink bare display (UC8179 chipset) on the Pi e-Ink Bonnet, on a Pi 4 running the host build. driver=\"UC8179\" maps to the host DisplayDriverUC8179 (adafruit_uc8179.UC8179). Pin map matches the bonnet's BCM-keyed Dxx aliases (CS=CE0/D8, DC=D22, RST=D27, BUSY=D17). seconds_per_frame is pinned to 20s on the host driver; the 25s step delays clear that cooldown.",
+  "protoVersion": "v2",
+  "steps": [
+    {
+      "name": "checkin-response",
+      "description": "Respond to device checkin with OK and Pi-bonnet-shaped capabilities.",
+      "trigger": "checkin.request",
+      "response": {
+        "checkin": {
+          "response": {
+            "response": "R_OK",
+            "totalGpioPins": 28,
+            "totalAnalogPins": 0,
+            "referenceVoltage": 3.3,
+            "componentAdds": {},
+            "sleepEnabled": false
+          }
+        }
+      }
+    },
+    {
+      "name": "add-display",
+      "description": "Add the UC8179-driven 5.83\" 648x480 mono EPD over SPI bus 0 with the bonnet's fixed pin map. Initial blank refresh runs as part of Add.",
+      "after": "checkin-response",
+      "waitFor": "checkin.complete",
+      "delay": 500,
+      "topic": "display",
+      "send": {
+        "display": {
+          "add": {
+            "type": "DISPLAY_CLASS_EPD",
+            "driver": "UC8179",
+            "panel": "5.83-648x480-mono",
+            "name": "epd-bonnet-mono583",
+            "interfaceType": {
+              "spiEpd": {
+                "pinDc": "D22",
+                "pinRst": "D27",
+                "pinBusy": "D17",
+                "spi": {
+                  "bus": 0,
+                  "pinCs": "D8",
+                  "pinMosi": "MOSI",
+                  "pinSck": "SCK"
+                }
+              }
+            },
+            "configEpd": {
+              "mode": "EPD_MODE_MONO",
+              "properties": {
+                "width": 648,
+                "height": 480,
+                "textSize": 3,
+                "statusBar": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "write-hello",
+      "description": "First message after the initial blank refresh.",
+      "after": "add-display",
+      "delay": 25000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "epd-bonnet-mono583",
+            "descriptor": {
+              "spiEpd": {
+                "pinDc": "D22",
+                "pinRst": "D27",
+                "pinBusy": "D17",
+                "spi": {
+                  "bus": 0,
+                  "pinCs": "D8",
+                  "pinMosi": "MOSI",
+                  "pinSck": "SCK"
+                }
+              }
+            },
+            "message": "hello eink\nUC8179 5.83in\n648x480 mono"
+          }
+        }
+      }
+    },
+    {
+      "name": "write-step2",
+      "description": "Second message; 25s gap clears the 20s refresh cooldown.",
+      "after": "write-hello",
+      "delay": 25000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "epd-bonnet-mono583",
+            "descriptor": {
+              "spiEpd": {
+                "pinDc": "D22",
+                "pinRst": "D27",
+                "pinBusy": "D17",
+                "spi": {
+                  "bus": 0,
+                  "pinCs": "D8",
+                  "pinMosi": "MOSI",
+                  "pinSck": "SCK"
+                }
+              }
+            },
+            "message": "step 2 of 3\nrefreshing\nfrom protomq"
+          }
+        }
+      }
+    },
+    {
+      "name": "write-removing",
+      "description": "Final message before the display is removed.",
+      "after": "write-step2",
+      "delay": 25000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "epd-bonnet-mono583",
+            "descriptor": {
+              "spiEpd": {
+                "pinDc": "D22",
+                "pinRst": "D27",
+                "pinBusy": "D17",
+                "spi": {
+                  "bus": 0,
+                  "pinCs": "D8",
+                  "pinMosi": "MOSI",
+                  "pinSck": "SCK"
+                }
+              }
+            },
+            "message": "removing now...\ngoodbye eink"
+          }
+        }
+      }
+    },
+    {
+      "name": "remove-display",
+      "description": "Tear down the display so a future Add can re-init the bus cleanly.",
+      "after": "write-removing",
+      "delay": 25000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "remove": {
+            "name": "epd-bonnet-mono583",
+            "descriptor": {
+              "spiEpd": {
+                "pinDc": "D22",
+                "pinRst": "D27",
+                "pinBusy": "D17",
+                "spi": {
+                  "bus": 0,
+                  "pinCs": "D8",
+                  "pinMosi": "MOSI",
+                  "pinSck": "SCK"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

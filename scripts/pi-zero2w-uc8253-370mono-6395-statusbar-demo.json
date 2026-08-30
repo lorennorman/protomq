@@ -1,0 +1,214 @@
+{
+  "name": "Pi Zero 2W + UC8253 3.7\" 416x240 Mono EPD (PID 6395) Status-Bar Toggle Demo",
+  "description": "Proves DisplayProperties.status_bar on the UC8253 3.7\" mono EPD: first Add sets statusBar=true (top bar with io_username + cloud/wifi/battery icons, body text shifted down), then Remove, then a second Add omits statusBar (defaults false -> no bar, body text uses the full panel height). A plain proto3 bool can't carry an explicit false distinctly from absent, so the host treats a missing field as 'no status bar'. Pin map matches Blinka's BCM-keyed Dxx aliases (CS=CE0/D8, DC=D22, RST=D27, BUSY=D17). 12s step delays clear the EPD refresh cooldown with room to read/capture each frame.",
+  "protoVersion": "v2",
+  "steps": [
+    {
+      "name": "checkin-response",
+      "description": "Respond to device checkin with OK and Pi-bonnet-shaped capabilities.",
+      "trigger": "checkin.request",
+      "response": {
+        "checkin": {
+          "response": {
+            "response": "R_OK",
+            "totalGpioPins": 28,
+            "totalAnalogPins": 0,
+            "referenceVoltage": 3.3,
+            "componentAdds": {},
+            "sleepEnabled": false
+          }
+        }
+      }
+    },
+    {
+      "name": "add-with-statusbar",
+      "description": "Add the UC8253 EPD with statusBar=true. Boot splash -> hold -> status bar painted (username + icons); body label sits below the bar.",
+      "after": "checkin-response",
+      "waitFor": "checkin.complete",
+      "delay": 500,
+      "topic": "display",
+      "send": {
+        "display": {
+          "add": {
+            "type": "DISPLAY_CLASS_EPD",
+            "driver": "UC8253",
+            "panel": "3.7-416x240-mono",
+            "name": "epd-bonnet-mono37",
+            "interfaceType": {
+              "spiEpd": {
+                "pinDc": "D22",
+                "pinRst": "D27",
+                "pinBusy": "D17",
+                "spi": {
+                  "bus": 0,
+                  "pinCs": "D8",
+                  "pinMosi": "MOSI",
+                  "pinSck": "SCK"
+                }
+              }
+            },
+            "configEpd": {
+              "mode": "EPD_MODE_MONO",
+              "properties": {
+                "width": 416,
+                "height": 240,
+                "rotation": 0,
+                "textSize": 3,
+                "statusBar": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "write-with-statusbar",
+      "description": "Body text under the status bar (statusBar=true layout).",
+      "after": "add-with-statusbar",
+      "delay": 12000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "epd-bonnet-mono37",
+            "descriptor": {
+              "spiEpd": {
+                "pinDc": "D22",
+                "pinRst": "D27",
+                "pinBusy": "D17",
+                "spi": {
+                  "bus": 0,
+                  "pinCs": "D8",
+                  "pinMosi": "MOSI",
+                  "pinSck": "SCK"
+                }
+              }
+            },
+            "message": "status bar ON\nbody below bar\nUC8253 3.7in"
+          }
+        }
+      }
+    },
+    {
+      "name": "remove-before-toggle",
+      "description": "Remove the display (blanks the panel) so the next Add re-inits with the opposite status_bar setting.",
+      "after": "write-with-statusbar",
+      "delay": 12000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "remove": {
+            "name": "epd-bonnet-mono37",
+            "descriptor": {
+              "spiEpd": {
+                "pinDc": "D22",
+                "pinRst": "D27",
+                "pinBusy": "D17",
+                "spi": {
+                  "bus": 0,
+                  "pinCs": "D8",
+                  "pinMosi": "MOSI",
+                  "pinSck": "SCK"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "add-without-statusbar",
+      "description": "Re-Add the same EPD with statusBar omitted (defaults false). No status bar is built or drawn; the body label starts at the top and uses the full panel height.",
+      "after": "remove-before-toggle",
+      "delay": 12000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "add": {
+            "type": "DISPLAY_CLASS_EPD",
+            "driver": "UC8253",
+            "panel": "3.7-416x240-mono",
+            "name": "epd-bonnet-mono37",
+            "interfaceType": {
+              "spiEpd": {
+                "pinDc": "D22",
+                "pinRst": "D27",
+                "pinBusy": "D17",
+                "spi": {
+                  "bus": 0,
+                  "pinCs": "D8",
+                  "pinMosi": "MOSI",
+                  "pinSck": "SCK"
+                }
+              }
+            },
+            "configEpd": {
+              "mode": "EPD_MODE_MONO",
+              "properties": {
+                "width": 416,
+                "height": 240,
+                "rotation": 0,
+                "textSize": 3
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "write-without-statusbar",
+      "description": "Body text with no status bar (full-height layout, no username/icons strip).",
+      "after": "add-without-statusbar",
+      "delay": 12000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "write": {
+            "name": "epd-bonnet-mono37",
+            "descriptor": {
+              "spiEpd": {
+                "pinDc": "D22",
+                "pinRst": "D27",
+                "pinBusy": "D17",
+                "spi": {
+                  "bus": 0,
+                  "pinCs": "D8",
+                  "pinMosi": "MOSI",
+                  "pinSck": "SCK"
+                }
+              }
+            },
+            "message": "status bar OFF\nfull height body\nno icons strip"
+          }
+        }
+      }
+    },
+    {
+      "name": "remove-display",
+      "description": "Tear down the display so a future Add can re-init the bus cleanly.",
+      "after": "write-without-statusbar",
+      "delay": 12000,
+      "topic": "display",
+      "send": {
+        "display": {
+          "remove": {
+            "name": "epd-bonnet-mono37",
+            "descriptor": {
+              "spiEpd": {
+                "pinDc": "D22",
+                "pinRst": "D27",
+                "pinBusy": "D17",
+                "spi": {
+                  "bus": 0,
+                  "pinCs": "D8",
+                  "pinMosi": "MOSI",
+                  "pinSck": "SCK"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

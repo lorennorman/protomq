@@ -1,4 +1,5 @@
 import { map } from 'lodash-es'
+import { decodeByTopic } from '../protobufs.js'
 
 // CONSTANTS
 const EVENT_NAMES = [
@@ -19,10 +20,21 @@ const EVENT_NAMES = [
 
 // HELPERS
 const
-  formatPacket = packet => (packet
-    ? { topic: packet.topic, payload: packet.payload?.toString() }
-    : 'packet unavailable'
-  ),
+  // Topic-shape decode covering both V1 (+/wprsnpr/#) and V2 (ws-b2d/ws-d2b).
+  tryProtobufDecode = (topic, payload) => {
+    const decoded = decodeByTopic(topic, payload)
+    if (!decoded) return null
+    return decoded.type.toObject(decoded.message, { enums: String, defaults: false })
+  },
+
+  formatPacket = packet => {
+    if (!packet) return 'packet unavailable'
+    const decoded = tryProtobufDecode(packet.topic, packet.payload)
+    if (decoded) {
+      return `${packet.topic}\n  ${JSON.stringify(decoded)}`
+    }
+    return { topic: packet.topic, payload_str: packet.payload?.toString() }
+  },
   addListeners = (broker, listeners, options={}) => {
     const handledEvents = Object.keys(listeners)
 
@@ -46,11 +58,11 @@ const
     clientError: (client, error) => console.log(`error (${client.id}):`, error),
     connectionError: (client, error) => console.log(`connection error (${client.id}):`, error),
     // keepaliveTimeout: (client) => console.log(`keepalive timeout (${client.id})`),
-    publish: (packet, client) => client?.id && console.log(`publish (${client.id}):`, formatPacket(packet)),
+    publish: (packet, client) => console.log(`publish (${client?.id ?? 'broker'}):`, formatPacket(packet)),
     // ack: (packet, client) => console.log(`ack (${client.id}):`, formatPacket(packet)),
     // ping: (packet, client) => console.log(`ping (${client.id}):`, formatPacket(packet)),
     subscribe: (subscriptions, client) => console.log(`subscriptions (${client.id})`, map(subscriptions, "topic")),
-    unsubscribe: (unsubscriptions, client) => console.log(`unsubscriptions (${client.id}):`, map(unsubscriptions, "topic")),
+    unsubscribe: (unsubscriptions, client) => console.log(`unsubscriptions (${client.id}):`, unsubscriptions),  // aedes passes string[], not {topic}[]
     // connackSent: (packet, client) => console.log(`connack (${client.id}):`, packet),
     closed: () => console.log("Broker closed."),
   },
